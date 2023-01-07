@@ -41,7 +41,11 @@ server.post('/conversation', async (request, reply) => {
     let result;
     let error;
     try {
-        result = await accounts[currentAccountIndex].sendMessage(request.body.message);
+        result = await accounts[currentAccountIndex].sendMessage(request.body.message, {
+            conversationId: request.body.conversationId,
+            parentMessageId: request.body.parentMessageId,
+        });
+        console.log(result);
     } catch (e) {
         error = e;
     }
