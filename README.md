@@ -16,7 +16,7 @@ You can install the package using
 npm i -g @waylaidwanderer/chatgpt-api
 ```
 then run it using
-`chatgpi-api` (or `xvfb-run chatgpt-api` for headless servers).  
+`chatgpt-api` (or `xvfb-run chatgpt-api` for headless servers).  
 This takes an optional `--settings=<path_to_settings.js>` parameter, or looks for `settings.js` in the current directory if not set, with the following contents:
 ```JS
 export default {
