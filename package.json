@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "An API layer for ChatGPT, powered by @transitive-bullshit's chatgpt-api (chatgpt on npm).",
   "main": "index.js",
   "bin": {
@@ -12,7 +12,6 @@
   },
   "author": "waylaidwanderer",
   "license": "MIT",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/waylaidwanderer/node-chatgpt-api.git"

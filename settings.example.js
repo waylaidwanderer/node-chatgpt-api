@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     accounts: [
         {
             email: 'account1@example.com',
@@ -17,4 +17,4 @@ export default {
     ],
     port: 3000,
     nopechaKey: 'nopechaKey',
-}
+};
