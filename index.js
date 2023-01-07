@@ -14,9 +14,15 @@ for (let i = 0; i < settings.accounts.length; i++) {
 
     api.initSession().then(() => {
         console.log(`Session initialized for account ${i}.`);
+        accounts.push(api);
     });
 
-    accounts.push(api);
+    // call `api.refreshSession()` every hour to refresh the session
+    setInterval(() => {
+        api.refreshSession().then(() => {
+            console.log(`Session refreshed for account ${i}.`);
+        });
+    }, 60 * 60 * 1000);
 }
 
 let currentAccountIndex = 0;
@@ -24,6 +30,11 @@ let currentAccountIndex = 0;
 const server = fastify();
 
 server.post('/conversation', async (request, reply) => {
+    if (accounts.length === 0) {
+        reply.code(503).send({ error: 'No sessions available.' });
+        return;
+    }
+
     currentAccountIndex = (currentAccountIndex + 1) % accounts.length;
 
     let result;
@@ -38,7 +49,7 @@ server.post('/conversation', async (request, reply) => {
         reply.send(result);
     } else {
         console.error(error);
-        reply.code(500).send({ error: 'There was an error communicating with ChatGPT.' });
+        reply.code(503).send({ error: 'There was an error communicating with ChatGPT.' });
     }
 });
 
