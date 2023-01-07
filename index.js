@@ -1,6 +1,29 @@
+#!/usr/bin/env node
 import fastify from 'fastify';
 import { ChatGPTAPIBrowser } from 'chatgpt';
-import settings from './settings.js';
+import fs from 'fs';
+
+const arg = process.argv.find((arg) => arg.startsWith('--settings'));
+let path;
+if (arg) {
+    path = arg.split('=')[1];
+} else {
+    path = './settings.js';
+}
+
+let settings;
+if (fs.existsSync(path)) {
+    // get the full path
+    const fullPath = fs.realpathSync(path);
+    settings = (await import(fullPath)).default;
+} else {
+    if (arg) {
+        console.error(`Error: the file specified by the --settings parameter does not exist.`);
+    } else {
+        console.error(`Error: the settings.js file does not exist.`);
+    }
+    process.exit(1);
+}
 
 const accounts = [];
 

@@ -1,8 +1,11 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "An API layer for ChatGPT, powered by @transitive-bullshit's chatgpt-api (chatgpt on npm).",
   "main": "index.js",
+  "bin": {
+    "chatgpt-api": "index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "xvfb-run node index.js"
