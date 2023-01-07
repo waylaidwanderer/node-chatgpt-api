@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     accounts: [
         {
             email: 'account1@example.com',

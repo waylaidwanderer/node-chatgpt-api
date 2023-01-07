@@ -19,7 +19,7 @@ then run it using
 `chatgpt-api` (or `xvfb-run chatgpt-api` for headless servers).  
 This takes an optional `--settings=<path_to_settings.js>` parameter, or looks for `settings.js` in the current directory if not set, with the following contents:
 ```JS
-export default {
+module.exports = {
     accounts: [
         {
             email: 'account1@example.com',
