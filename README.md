@@ -7,6 +7,7 @@
 - npm
 - An account with [ChatGPT](https://chat.openai.com/chat)
 - A valid [NopeCHA](https://nopecha.com/) API key
+- `xvfb` (for headless Chrome)
 
 ### Installation
 1. Clone this repository
@@ -35,7 +36,7 @@ export default {
     nopechaKey: 'nopechaKey', // your NopeCHA API key
 };
 ```
-4. Start the server with `node index.js`
+4. Start the server using `xvfb-run node index.js` (for headless servers) or `node index.js`
 
 ## Usage
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
