@@ -1,39 +1,48 @@
-import * as dotenv from 'dotenv';
 import fastify from 'fastify';
 import { ChatGPTAPIBrowser } from 'chatgpt';
+import settings from './settings.js';
 
-dotenv.config();
+const accounts = [];
 
-const api = new ChatGPTAPIBrowser({
-    email: process.env.OPENAI_EMAIL,
-    password: process.env.OPENAI_PASSWORD,
-});
+for (let i = 0; i < settings.accounts.length; i++) {
+    const account = settings.accounts[i];
+    const api = new ChatGPTAPIBrowser({
+        email: account.email,
+        password: account.password,
+        nopechaKey: settings.nopechaKey,
+    });
 
-let initSessionComplete = false;
+    api.initSession().then(() => {
+        console.log(`Session initialized for account ${i}.`);
+    });
 
-api.initSession().then(() => {
-    initSessionComplete = true;
-    console.log('Session initialized.');
-});
+    accounts.push(api);
+}
+
+let currentAccountIndex = 0;
 
 const server = fastify();
 
 server.post('/conversation', async (request, reply) => {
-    if (!initSessionComplete) {
-        reply.code(503).send({ error: 'Session not initialized.' });
-        return;
+    currentAccountIndex = (currentAccountIndex + 1) % accounts.length;
+
+    let result;
+    let error;
+    try {
+        result = await accounts[currentAccountIndex].sendMessage(request.body.message);
+    } catch (e) {
+        error = e;
     }
 
-    try {
-        const result = await api.sendMessage(request.body.message);
+    if (result !== undefined) {
         reply.send(result);
-    } catch (error) {
+    } else {
         console.error(error);
         reply.code(500).send({ error: 'There was an error communicating with ChatGPT.' });
     }
 });
 
-server.listen({ port: process.env.PORT || 3000 }, (error) => {
+server.listen({ port: settings.port || 3000 }, (error) => {
     if (error) {
         console.error(error);
         process.exit(1);
