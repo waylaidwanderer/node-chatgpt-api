@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const fastify = require('fastify');
-const { ChatGPTAPIBrowser } = require('chatgpt');
+import fastify from 'fastify';
+import { ChatGPTAPIBrowser } from 'chatgpt';
+import fs from 'fs';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -15,7 +15,7 @@ let settings;
 if (fs.existsSync(path)) {
     // get the full path
     const fullPath = fs.realpathSync(path);
-    settings = require(fullPath);
+    settings = (await import(fullPath)).default;
 } else {
     if (arg) {
         console.error(`Error: the file specified by the --settings parameter does not exist.`);
