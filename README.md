@@ -1,4 +1,5 @@
 # ChatGPT API Server
+This is a simple API server wrapper for [ChatGPT](https://chat.openai.com/chat). It supports multiple OpenAI accounts, setting proxies for each account, and load-balancing requests between accounts.
 
 ## Getting Started
 
@@ -15,12 +16,8 @@ You can install the package using
 npm i -g @waylaidwanderer/chatgpt-api
 ```
 then run it using
-`chatgpi-api`. This takes an optional `--settings=<path_to_settings.js>` parameter, or looks for `settings.js` in the current directory if not set.
-
-Alternatively, you can install the package locally and run it using `node index.js`:
-1. Clone this repository
-2. Install dependencies with `npm install`
-3. Create a file `settings2.js` in the root directory with the following contents:
+`chatgpi-api` (or `xvfb-run chatgpt-api` for headless servers).  
+This takes an optional `--settings=<path_to_settings.js>` parameter, or looks for `settings.js` in the current directory if not set, with the following contents:
 ```JS
 export default {
     accounts: [
@@ -44,6 +41,11 @@ export default {
     nopechaKey: 'nopechaKey', // your NopeCHA API key
 };
 ```
+
+Alternatively, you can install the package locally and run it using `node index.js`:
+1. Clone this repository
+2. Install dependencies with `npm install`
+3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
 4. Start the server using `xvfb-run node index.js` (for headless servers) or `node index.js`
 
 ## Usage
