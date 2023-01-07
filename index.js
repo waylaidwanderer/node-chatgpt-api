@@ -9,6 +9,7 @@ for (let i = 0; i < settings.accounts.length; i++) {
     const api = new ChatGPTAPIBrowser({
         email: account.email,
         password: account.password,
+        proxyServer: account.proxy,
         nopechaKey: settings.nopechaKey,
     });
 
