@@ -13,18 +13,27 @@
 2. Install dependencies with `npm install`
 3. Create a file `settings.js` in the root directory with the following contents:
 ```JS
-module.exports = {
-    port: 3000, // the port the server will run on (optional, defaults to 3000)
-    accounts: [ // an array of objects representing your ChatGPT accounts
+export default {
+    accounts: [
         {
-            email: 'your-email@example.com',
-            password: 'your-password',
-            proxy: 'your-proxy-server-url (optional)'
+            email: 'account1@example.com',
+            password: 'password1',
+        },
+        {
+            email: 'account2@example.com',
+            password: 'password2',
+            proxy: 'user:pass@ip:port',
+        },
+        {
+            email: 'account3@example.com',
+            password: 'password3',
+            proxy: 'ip:port',
         },
         // add more accounts as needed...
     ],
-    nopechaKey: 'your-nopecha-key' // your NopeCHA API key
-}
+    port: 3000, // the port the server will run on (optional, defaults to 3000)
+    nopechaKey: 'nopechaKey', // your NopeCHA API key
+};
 ```
 4. Start the server with `node index.js`
 

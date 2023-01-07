@@ -1,6 +1,6 @@
 {
-  "name": "node-chatgpt-api",
-  "version": "1.0.0",
+  "name": "@waylaidwanderer/chatgpt-api",
+  "version": "0.0.1",
   "description": "An API layer for ChatGPT, powered by @transitive-bullshit's chatgpt-api (chatgpt on npm).",
   "main": "index.js",
   "scripts": {
