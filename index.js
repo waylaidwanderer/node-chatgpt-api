@@ -26,6 +26,7 @@ if (fs.existsSync(path)) {
 }
 
 const accounts = [];
+const conversationsMap = {};
 
 for (let i = 0; i < settings.accounts.length; i++) {
     const account = settings.accounts[i];
@@ -59,16 +60,29 @@ server.post('/conversation', async (request, reply) => {
         return;
     }
 
-    currentAccountIndex = (currentAccountIndex + 1) % accounts.length;
+    const conversationId = request.body.conversationId ? request.body.conversationId.toString() : undefined;
+
+    // Conversation IDs are tied to accounts, so we need to make sure that the same account is used for the same conversation.
+    if (conversationId && conversationsMap[conversationId]) {
+        // If the conversation ID is already in the map, use the account that was used for that conversation.
+        currentAccountIndex = conversationsMap[conversationId];
+    } else {
+        // If the conversation ID is not in the map, use the next account.
+        currentAccountIndex = (currentAccountIndex + 1) % accounts.length;
+    }
 
     let result;
     let error;
     try {
+        const parentMessageId = request.body.parentMessageId ? request.body.parentMessageId.toString() : undefined;
         result = await accounts[currentAccountIndex].sendMessage(request.body.message, {
-            conversationId: request.body.conversationId,
-            parentMessageId: request.body.parentMessageId,
+            conversationId,
+            parentMessageId,
         });
-        console.log(result);
+        if (conversationId) {
+            // Save the account index for this conversation.
+            conversationsMap[conversationId] = currentAccountIndex;
+        }
     } catch (e) {
         error = e;
     }
