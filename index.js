@@ -79,6 +79,8 @@ server.post('/conversation', async (request, reply) => {
             conversationId,
             parentMessageId,
         });
+        // ChatGPT ends its response with a newline character, so we need to remove it.
+        result.response = result.response.trim();
         if (conversationId) {
             // Save the account index for this conversation.
             conversationsMap[conversationId] = currentAccountIndex;
