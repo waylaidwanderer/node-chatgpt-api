@@ -31,10 +31,10 @@ const conversationsMap = {};
 for (let i = 0; i < settings.accounts.length; i++) {
     const account = settings.accounts[i];
     const api = new ChatGPTAPIBrowser({
-        email: account.email,
-        password: account.password,
-        proxyServer: account.proxy,
-        nopechaKey: settings.nopechaKey,
+        ...account,
+        nopechaKey: account.nopechaKey || settings.nopechaKey,
+        // For backwards compatibility
+        proxyServer: account.proxyServer || account.proxy || undefined,
     });
 
     api.initSession().then(() => {

@@ -24,21 +24,26 @@ module.exports = {
         {
             email: 'account1@example.com',
             password: 'password1',
+            // Any other options that `ChatGPTAPIBrowser` supports...
         },
         {
             email: 'account2@example.com',
             password: 'password2',
-            proxy: 'user:pass@ip:port',
+            proxyServer: 'user:pass@ip:port',
         },
         {
             email: 'account3@example.com',
             password: 'password3',
-            proxy: 'ip:port',
+            proxyServer: 'ip:port',
+            nopechaKey: 'accountNopechaKey',
         },
-        // add more accounts as needed...
+        // Add more accounts as needed...
     ],
-    port: 3000, // the port the server will run on (optional, defaults to 3000)
-    nopechaKey: 'nopechaKey', // your NopeCHA API key
+    // The port the server will run on (optional, defaults to 3000)
+    port: 3000,
+    // Your NopeCHA API key.
+    // This will be applied to all accounts but can be overridden on a per-account basis.
+    nopechaKey: 'nopechaKey',
 };
 ```
 
