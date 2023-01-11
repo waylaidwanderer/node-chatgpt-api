@@ -1,6 +1,9 @@
 # ChatGPT API Server
 
-[![NPM](https://img.shields.io/npm/v/@waylaidwanderer/chatgpt-api.svg)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api) ![npm](https://img.shields.io/npm/dt/@waylaidwanderer/chatgpt-api) [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE) ![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)
+[![NPM](https://img.shields.io/npm/v/@waylaidwanderer/chatgpt-api.svg)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
+[![npm](https://img.shields.io/npm/dt/@waylaidwanderer/chatgpt-api)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
+[![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
 
 This is a simple API server wrapper for [ChatGPT](https://chat.openai.com/chat). It supports multiple OpenAI accounts, setting proxies for each account, and load-balancing requests between accounts.
 
