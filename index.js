@@ -32,7 +32,8 @@ for (let i = 0; i < settings.accounts.length; i++) {
     const account = settings.accounts[i];
     const api = new ChatGPTAPIBrowser({
         ...account,
-        nopechaKey: account.nopechaKey || settings.nopechaKey,
+        nopechaKey: account.nopechaKey || settings.nopechaKey || undefined,
+        captchaToken: account.twoCaptchaKey || settings.twoCaptchaKey || undefined,
         // For backwards compatibility
         proxyServer: account.proxyServer || account.proxy || undefined,
     });

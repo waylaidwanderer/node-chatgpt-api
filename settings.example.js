@@ -14,6 +14,7 @@ export default {
             email: 'account3@example.com',
             password: 'password3',
             proxyServer: 'ip:port',
+            // Example of overriding the default `nopechaKey` for this account
             nopechaKey: 'accountNopechaKey',
         },
         // Add more accounts as needed...
@@ -22,4 +23,6 @@ export default {
     port: 3000,
     // Your NopeCHA API key. This will be applied to all accounts but can be overridden on a per-account basis.
     nopechaKey: 'nopechaKey',
+    // Your 2Captcha API key. This will be applied to all accounts but can be overridden on a per-account basis.
+    twoCaptchaKey: '2captchaKey',
 }
