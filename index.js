@@ -94,7 +94,7 @@ server.post('/conversation', async (request, reply) => {
         reply.send(result);
     } else {
         console.error(error);
-        reply.code(503).send({ error: 'There was an error communicating with ChatGPT.' });
+        reply.code(503).send({ error: 'There was an error communicating with ChatGPT.', code: error.code });
     }
 });
 
