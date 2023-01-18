@@ -2,6 +2,7 @@
 import fastify from 'fastify';
 import { ChatGPTAPIBrowser } from 'chatgpt';
 import fs from 'fs';
+import { pathToFileURL } from 'url'
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -15,7 +16,7 @@ let settings;
 if (fs.existsSync(path)) {
     // get the full path
     const fullPath = fs.realpathSync(path);
-    settings = (await import(fullPath)).default;
+    settings = (await import(pathToFileURL(fullPath).toString())).default;
 } else {
     if (arg) {
         console.error(`Error: the file specified by the --settings parameter does not exist.`);
