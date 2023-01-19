@@ -92,8 +92,7 @@ If no sessions have finished initializing yet:
 If there was an error sending the message to ChatGPT:
 ```JSON
 {
-    "error": "There was an error communicating with ChatGPT.",
-    "code": "message_length_exceeds_limit" // will change depending on the specific error
+    "error": "There was an error communicating with ChatGPT."
 }
 ```
 
