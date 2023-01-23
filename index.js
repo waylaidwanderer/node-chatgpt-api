@@ -50,6 +50,13 @@ for (let i = 0; i < settings.accounts.length; i++) {
             console.log(`Session refreshed for account ${i}.`);
         });
     }, 60 * 60 * 1000);
+
+    // call `api.resetSession()` every 24 hours to reset the session
+    setInterval(() => {
+        api.resetSession().then(() => {
+            console.log(`Session reset for account ${i}.`);
+        });
+    }, 24 * 60 * 60 * 1000);
 }
 
 let currentAccountIndex = 0;
