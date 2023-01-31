@@ -1,28 +1,15 @@
 export default {
-    accounts: [
-        {
-            email: 'account1@example.com',
-            password: 'password1',
-            // Any other options that `ChatGPTAPIBrowser` supports...
-        },
-        {
-            email: 'account2@example.com',
-            password: 'password2',
-            proxyServer: 'user:pass@ip:port',
-        },
-        {
-            email: 'account3@example.com',
-            password: 'password3',
-            proxyServer: 'ip:port',
-            // Example of overriding the default `nopechaKey` for this account
-            nopechaKey: 'accountNopechaKey',
-        },
-        // Add more accounts as needed...
-    ],
+    // Your OpenAI API key
+    openaiApiKey: '',
+    // Parameters as described in https://platform.openai.com/docs/api-reference/completions
+    // The model is set to text-chat-davinci-002-20230126 by default, but you can override
+    // it and any other parameters here.
+    chatGptClient: {
+        // temperature: 0.7,
+    },
+    // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
+    // This is used for storing conversations, and supports additional drivers.
+    cacheOptions: {},
     // The port the server will run on (optional, defaults to 3000)
     port: 3000,
-    // Your NopeCHA API key. This will be applied to all accounts but can be overridden on a per-account basis.
-    nopechaKey: 'nopechaKey',
-    // Your 2Captcha API key. This will be applied to all accounts but can be overridden on a per-account basis.
-    twoCaptchaKey: '2captchaKey',
 }
