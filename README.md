@@ -30,7 +30,6 @@ By itself, the model does not have any conversational support, so this library u
 ## Usage
 
 ### Module
-
 ```bash
 npm i @waylaidwanderer/chatgpt-api
 ```
@@ -51,7 +50,6 @@ console.log(response3.response); // Les chats sont les meilleurs animaux de comp
 ```
 
 ### API Server
-
 You can install the package using
 ```bash
 npm i -g @waylaidwanderer/chatgpt-api
@@ -108,6 +106,15 @@ If there was an error sending the message to ChatGPT:
     "error": "There was an error communicating with ChatGPT."
 }
 ```
+
+## Caveats
+Since `text-chat-davinci-002-20230126` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it.
+This means it may not behave exactly the same in some ways:
+- conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system
+- ChatGPT's model parameters are unknown, so I set some defaults that I thought would be reasonable, such as `temperature: 0.7`
+- conversations are limited to roughly the last 3000 tokens, so earlier messages may be forgotten during longer conversations
+  - this works in a similar way to ChatGPT, except I'm pretty sure they have some additional way of retrieving context from earlier messages when needed (which can probably be achieved with embeddings, but I consider that out-of-scope for now)
+- I removed "knowledge cutoff" from the ChatGPT preamble ("You are ChatGPT..."), which stops it from refusing to answer questions about events after 2021-09, as it does have some training data from after that date. This means it may answer questions about events after 2021-09, but it's not guaranteed to be accurate.
 
 ## Contributing
 If you'd like to contribute to this project, please create a pull request with a detailed description of your changes.

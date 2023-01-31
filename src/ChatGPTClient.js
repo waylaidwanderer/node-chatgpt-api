@@ -123,7 +123,6 @@ export default class ChatGPTClient {
             + currentDate.getDate();
 
         const promptPrefix = `You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
-Knowledge cutoff: 2021-09
 Current date: ${currentDateString}\n\n`;
         const promptSuffix = "\n"; // Prompt should end with 2 newlines, so we add one here.
 
