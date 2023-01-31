@@ -11,6 +11,8 @@ As far as I'm aware, I was the first one who discovered this, and usage of the m
 
 The previous version of this library that used [transitive-bullshit/chatgpt-api](https://github.com/transitive-bullshit/chatgpt-api) is still available on [the `archive/old-version` branch](https://github.com/waylaidwanderer/node-chatgpt-api/tree/archive/old-version).
 
+By itself, the model does not have any conversational support, so this library uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
+
 ## Features
 - Uses the unofficial official ChatGPT model, `text-chat-davinci-002-20230126`.
 - Includes an API server you can run to use ChatGPT in non-Node.js applications.
@@ -25,9 +27,33 @@ The previous version of this library that used [transitive-bullshit/chatgpt-api]
 - npm
 - [OpenAI API key](https://platform.openai.com/account/api-keys)
 
-### Installation
-You can install the package using
+## Usage
+
+### Module
+
+```bash
+npm i @waylaidwanderer/chatgpt-api
 ```
+
+```JS
+import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
+
+const chatGptClient = new ChatGPTClient('OPENAI_API_KEY');
+
+const response = await chatGptClient.sendMessage('Hello!');
+console.log(response); // { response: 'Hi! How can I help you today?', conversationId: '...', messageId: '...' }
+
+const response2 = await chatGptClient.sendMessage('Write a poem about cats.', { conversationId: response.conversationId, parentMessageId: response.messageId });
+console.log(response2.response); // Cats are the best pets in the world.
+
+const response3 = await chatGptClient.sendMessage('Now write it in French.', { conversationId: response2.conversationId, parentMessageId: response2.messageId });
+console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.
+```
+
+### API Server
+
+You can install the package using
+```bash
 npm i -g @waylaidwanderer/chatgpt-api
 ```
 then run it using
@@ -57,7 +83,6 @@ Alternatively, you can install the package locally and run it using `node index.
 3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
 4. Start the server using `npm start` or `node src/index.js`
 
-## Usage
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
 ```JSON
 {
