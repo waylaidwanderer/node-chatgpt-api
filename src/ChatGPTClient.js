@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 
@@ -49,8 +49,8 @@ export default class ChatGPTClient {
         opts = {},
     ) {
         const {
-            conversationId = uuidv4(),
-            parentMessageId = uuidv4(),
+            conversationId = crypto.randomUUID(),
+            parentMessageId = crypto.randomUUID(),
         } = opts;
 
         let conversation = await this.conversationsCache.get(conversationId);
@@ -61,7 +61,7 @@ export default class ChatGPTClient {
         }
 
         const userMessage = {
-            id: uuidv4(),
+            id: crypto.randomUUID(),
             parentMessageId,
             role: 'User',
             message,
@@ -77,7 +77,7 @@ export default class ChatGPTClient {
         const reply = result.choices[0].text.trim();
 
         const replyMessage = {
-            id: uuidv4(),
+            id: crypto.randomUUID(),
             parentMessageId: userMessage.id,
             role: 'Assistant',
             message: reply,

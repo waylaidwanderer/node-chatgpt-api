@@ -33,7 +33,6 @@
     "fastify": "^4.11.0",
     "gpt-3-encoder": "^1.1.4",
     "keyv": "^4.5.2",
-    "node-fetch": "^3.3.0",
-    "uuid": "^9.0.0"
+    "node-fetch": "^3.3.0"
   }
 }
