@@ -71,7 +71,6 @@ export default class ChatGPTClient {
 
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
         const result = await this.getCompletion(prompt);
-        console.debug(prompt);
         console.debug(JSON.stringify(result));
 
         const reply = result.choices[0].text.trim();

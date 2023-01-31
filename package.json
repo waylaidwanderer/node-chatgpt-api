@@ -1,14 +1,14 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "0.2.11",
-  "description": "An API layer for ChatGPT, powered by @transitive-bullshit's chatgpt-api (chatgpt on npm).",
-  "main": "src/index.js",
+  "version": "1.0.0",
+  "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
+  "main": "index.js",
   "bin": {
-    "chatgpt-api": "src/index.js"
+    "chatgpt-api": "bin/server.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "start": "node bin/server.js"
   },
   "author": "waylaidwanderer",
   "license": "MIT",

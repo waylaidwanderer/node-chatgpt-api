@@ -2,7 +2,7 @@
 import fastify from 'fastify';
 import fs from 'fs';
 import { pathToFileURL } from 'url'
-import ChatGPTClient from './ChatGPTClient.js';
+import ChatGPTClient from '../src/ChatGPTClient.js';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
