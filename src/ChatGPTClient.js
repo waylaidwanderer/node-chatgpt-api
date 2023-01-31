@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 
+const CHATGPT_MODEL = 'text-chat-davinci-002-20230126';
+
 export default class ChatGPTClient {
     constructor(
         apiKey,
@@ -14,7 +16,7 @@ export default class ChatGPTClient {
         this.options = {
             ...options,
             // set some good defaults (check for undefined in some cases because they may be 0)
-            model: options.model || 'text-chat-davinci-002-20230126',
+            model: options.model || CHATGPT_MODEL,
             temperature: typeof options.temperature === 'undefined' ? 0.7 : options.temperature,
             presence_penalty: typeof options.presence_penalty === 'undefined' ? 0.6 : options.presence_penalty,
             stop: options.stop || ['<|im_end|>'],
@@ -107,8 +109,6 @@ export default class ChatGPTClient {
             currentMessageId = message.parentMessageId;
         }
 
-        const conversation = orderedMessages.map(message => message.message).join('<|im_end|>\n');
-
         /*
         You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
         Knowledge cutoff: 2021-09
@@ -119,18 +119,56 @@ export default class ChatGPTClient {
         // I decided to just put back the current date.
 
         const currentDate = new Date();
-        const currentDateString = currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1).toString().padStart(2, '0') + "-" + currentDate.getDate();
-        const prompt = `Current date: ${currentDateString}
+        const currentDateString = currentDate.getFullYear()
+            + "-"
+            + (currentDate.getMonth() + 1).toString().padStart(2, '0')
+            + "-"
+            + currentDate.getDate();
 
-${conversation}<|im_end|>` + "\n\n"; // Prompt should end with 2 newlines.
+        const promptPrefix = `You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
+Knowledge cutoff: 2021-09
+Current date: ${currentDateString}\n\n`;
+        const promptSuffix = "\n"; // Prompt should end with 2 newlines, so we add one here.
 
+        let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
+        let promptBody = '';
+        // I decided to limit conversations to 3097 tokens, leaving 1000 tokens for the response.
+        const maxTokenCount = 3097;
+        // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
+        while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
+            const message = orderedMessages.pop();
+            const messageString = `${message.message}<|im_end|>\n`;
+            const newPromptBody = `${messageString}${promptBody}`;
 
-        const encodedPrompt = gptEncode(prompt);
-        const numTokens = encodedPrompt.length;
-        // Use up to 4097 tokens (prompt + response), but leave at least 1000 tokens for the response.
-        // TODO: further improvements (handling conversations that are too long, etc.)
+            // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
+            // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
+            // resist doing it the "proper" way.
+            const newTokenCount = this.getTokenCount(`${promptPrefix}${newPromptBody}${promptSuffix}`);
+            // Always add the first (technically last) message, even if it puts us over the token limit.
+            // TODO: throw an error if the first message is over 3000 tokens
+            if (promptBody && newTokenCount > maxTokenCount) {
+                // This message would put us over the token limit, so don't add it.
+                break;
+            }
+            promptBody = newPromptBody;
+            currentTokenCount = newTokenCount;
+        }
+
+        const prompt = `${promptPrefix}${promptBody}${promptSuffix}`;
+
+        const numTokens = this.getTokenCount(prompt);
+        // Use up to 4097 tokens (prompt + response), but try to leave 1000 tokens for the response.
         this.options.max_tokens = Math.min(4097 - numTokens, 1000);
 
         return prompt;
+    }
+
+    getTokenCount(text) {
+        if (this.options.model === CHATGPT_MODEL) {
+            // With this model, "<|im_end|>" is 1 token, but tokenizers aren't aware of it yet.
+            // Replace it with "<|endoftext|>" (which it does know about) so that the tokenizer can count it as 1 token.
+            text = text.replace(/<\|im_end\|>/g, '<|endoftext|>');
+        }
+        return gptEncode(text).length;
     }
 }
