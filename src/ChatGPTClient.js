@@ -87,10 +87,9 @@ export default class ChatGPTClient {
         await this.conversationsCache.set(conversationId, conversation);
 
         return {
+            response: replyMessage.message,
             conversationId,
             messageId: replyMessage.id,
-            parentMessageId: replyMessage.parentMessageId,
-            message: replyMessage.message,
         };
     }
 
