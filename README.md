@@ -155,6 +155,8 @@ If installed locally:
 npm run cli
 ```
 
+ChatGPT's responses are automatically copied to your clipboard, so you can paste them into other applications.
+
 ## Caveats
 Since `text-chat-davinci-002-20230126` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it.
 This means it may not behave exactly the same in some ways:
