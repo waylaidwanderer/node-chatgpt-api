@@ -132,7 +132,7 @@ export default class ChatGPTClient {
                 + "-"
                 + (currentDate.getMonth() + 1).toString().padStart(2, '0')
                 + "-"
-                + currentDate.getDate();
+                + currentDate.getDate().toString().padStart(2, '0');
 
             promptPrefix = `You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
 Current date: ${currentDateString}\n\n`;
