@@ -49,11 +49,16 @@ async function conversation(conversationId = null, parentMessageId = null) {
     const spinner = ora('ChatGPT is typing...');
     spinner.prefixText = '\n';
     spinner.start();
-    const response = await chatGptClient.sendMessage(message, { conversationId, parentMessageId });
-    spinner.stop();
-    conversationId = response.conversationId;
-    parentMessageId = response.messageId;
-    console.log(boxen(response.response, { title: 'ChatGPT', padding: 0.7, margin: 1, dimBorder: true }));
-    await clipboard.write(response.response);
+    try {
+        const response = await chatGptClient.sendMessage(message, { conversationId, parentMessageId });
+        spinner.stop();
+        conversationId = response.conversationId;
+        parentMessageId = response.messageId;
+        console.log(boxen(response.response, { title: 'ChatGPT', padding: 0.7, margin: 1, dimBorder: true }));
+        await clipboard.write(response.response);
+    } catch (error) {
+        spinner.stop();
+        console.log(boxen(error?.json?.error?.message || error.body, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+    }
     return conversation(conversationId, parentMessageId);
 }
