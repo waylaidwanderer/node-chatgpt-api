@@ -75,7 +75,7 @@ module.exports = {
 };
 ```
 
-Alternatively, you can install the package locally and run it using `node index.js`:
+Alternatively, you can install and run the package locally:
 1. Clone this repository
 2. Install dependencies with `npm install`
 3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
