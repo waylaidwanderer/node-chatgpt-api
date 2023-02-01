@@ -47,7 +47,7 @@ const clientOptions = {
     temperature: 0.7,
   },
   // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
-  promptPrefix: 'You are not ChatGPT...\n\n',
+  // promptPrefix: 'You are not ChatGPT...\n\n',
   // (Optional) Set to true to enable `console.debug()` logging
   debug: false,
 };
@@ -91,7 +91,7 @@ module.exports = {
       temperature: 0.7,
     },
     // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
-    promptPrefix: 'You are not ChatGPT...\n\n',
+    // promptPrefix: 'You are not ChatGPT...\n\n',
     // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
   },
