@@ -17,8 +17,11 @@ By itself, the model does not have any conversational support, so this library u
 - Uses the official ChatGPT raw model, `text-chat-davinci-002-20230126`.
 - Includes an API server you can run to use ChatGPT in non-Node.js applications.
 - Includes a `ChatGPTClient` class that you can use in your own Node.js applications.
+- Includes a CLI interface where you can chat with ChatGPT.
 - Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
   - Conversations are stored in memory by default, but you can optionally [install a storage adapter](https://www.npmjs.com/package/keyv#usage) to persist conversations to a database.
+
+![cli](./demos/cli.svg)
 
 ## Getting Started
 
@@ -107,7 +110,7 @@ Alternatively, you can install and run the package locally:
 1. Clone this repository
 2. Install dependencies with `npm install`
 3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
-4. Start the server using `npm start` or `node bin/server.js`
+4. Start the server using `npm start` or `npm run server`
 
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
 ```JSON
@@ -133,6 +136,19 @@ If there was an error sending the message to ChatGPT:
 {
     "error": "There was an error communicating with ChatGPT."
 }
+```
+
+### CLI
+Install the package using the same instructions as the API server.
+
+If installed globally:
+```bash
+chatgpt-cli
+```
+
+If installed locally:
+```bash
+npm run cli
 ```
 
 ## Caveats
