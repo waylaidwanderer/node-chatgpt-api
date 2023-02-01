@@ -79,7 +79,7 @@ Alternatively, you can install the package locally and run it using `node index.
 1. Clone this repository
 2. Install dependencies with `npm install`
 3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
-4. Start the server using `npm start` or `node src/index.js`
+4. Start the server using `npm start` or `node bin/server.js`
 
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
 ```JSON
