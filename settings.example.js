@@ -16,7 +16,7 @@ export default {
         debug: false,
     },
     // Options for the Keyv cache, see https://www.npmjs.com/package/keyv.
-    // This is used for storing conversations, and supports additional drivers
+    // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
     cacheOptions: {},
     // The port the server will run on (optional, defaults to 3000)
     port: 3000,
