@@ -2,14 +2,10 @@
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
-import * as readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
 import boxen from 'boxen';
 import ora from 'ora';
-import terminalKit from 'terminal-kit';
 import clipboard from 'clipboardy';
-
-const { terminal } = terminalKit;
+import inquirer from 'inquirer';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -40,10 +36,13 @@ console.log(boxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double
 await conversation();
 
 async function conversation(conversationId = null, parentMessageId = null) {
-    terminal.bold.blue('Write a message:\n');
-    const rl = readline.createInterface({ input, output });
-    const message = (await rl.question('')).trim();
-    rl.close();
+    const { message } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'message',
+            message: 'Write a message:',
+        },
+    ]);
     if (message === '!exit') {
         return true;
     }
