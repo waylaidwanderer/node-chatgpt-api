@@ -1,14 +1,17 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
   "main": "index.js",
   "bin": {
-    "chatgpt-api": "bin/server.js"
+    "chatgpt-api": "bin/server.js",
+    "chatgpt-cli": "bin/cli.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/server.js"
+    "start": "node bin/server.js",
+    "server": "node bin/server.js",
+    "cli": "node bin/cli.js"
   },
   "author": "waylaidwanderer",
   "license": "MIT",
@@ -29,10 +32,14 @@
     "api-wrapper"
   ],
   "dependencies": {
+    "boxen": "^7.0.1",
+    "clipboardy": "^3.0.0",
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "gpt-3-encoder": "^1.1.4",
     "keyv": "^4.5.2",
-    "node-fetch": "^3.3.0"
+    "node-fetch": "^3.3.0",
+    "ora": "^6.1.2",
+    "terminal-kit": "^3.0.0"
   }
 }
