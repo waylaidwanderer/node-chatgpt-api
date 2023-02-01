@@ -1,4 +1,6 @@
-![cli](./demos/cli.svg)
+<p align="center">
+  <img alt="CLI demo" src="./demos/cli.svg">
+</p>
 
 # ChatGPT API
 
