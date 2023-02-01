@@ -48,10 +48,8 @@ export default class ChatGPTClient {
         message,
         opts = {},
     ) {
-        const {
-            conversationId = crypto.randomUUID(),
-            parentMessageId = crypto.randomUUID(),
-        } = opts;
+        const conversationId = opts.conversationId || crypto.randomUUID();
+        const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
         let conversation = await this.conversationsCache.get(conversationId);
         if (!conversation) {
