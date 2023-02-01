@@ -24,7 +24,7 @@ export default class ChatGPTClient {
             stop: modelOptions.stop || ['<|im_end|>'],
         };
 
-        cacheOptions.namespace = 'chatgpt';
+        cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
         this.conversationsCache = new Keyv(cacheOptions);
     }
 
