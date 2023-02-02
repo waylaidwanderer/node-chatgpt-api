@@ -52,11 +52,11 @@ async function conversation(conversationId = null, parentMessageId = null) {
     spinner.start();
     try {
         const response = await chatGptClient.sendMessage(message, { conversationId, parentMessageId });
+        clipboard.write(response.response).then(() => {}).catch(() => {});
         spinner.stop();
         conversationId = response.conversationId;
         parentMessageId = response.messageId;
         console.log(boxen(response.response, { title: chatGPTLabel, padding: 0.7, margin: 1, dimBorder: true }));
-        await clipboard.write(response.response);
     } catch (error) {
         spinner.stop();
         console.log(boxen(error?.json?.error?.message || error.body, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
