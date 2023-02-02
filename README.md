@@ -26,6 +26,9 @@ By itself, the model does not have any conversational support, so this library u
 - Includes a CLI interface where you can chat with ChatGPT.
 - Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
   - Conversations are stored in memory by default, but you can optionally [install a storage adapter](https://www.npmjs.com/package/keyv#usage) to persist conversations to a database.
+- Supports configurable prompt prefixes, and custom names for the user and ChatGPT.
+  - In essence, this allows you to turn ChatGPT into a different character.
+  - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
 
 ## Getting Started
 
