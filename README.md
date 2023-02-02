@@ -2,6 +2,10 @@
   <img alt="CLI demo" src="./demos/cli.svg">
 </p>
 
+# Update (2023-02-02)
+
+Trying to use `text-chat-davinci-002-20230126` with the OpenAI API now returns a 404 error. Someone has already found the new model name, but they are refusing to share it. I will update this repository once I find the new model. If you have any leads, please open an issue or a pull request.
+
 # ChatGPT API
 
 >  A ChatGPT implementation using the official ChatGPT model via OpenAI's API.
