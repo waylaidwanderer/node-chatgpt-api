@@ -138,7 +138,7 @@ export default class ChatGPTClient {
         const userLabel = this.options.userLabel || 'User';
         const chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
-        const promptSuffix = `${chatGptLabel}:\n`; // Prompt should end with 2 newlines, so we add one here.
+        const promptSuffix = `${chatGptLabel}:\n`; // Prompt ChatGPT to respond.
 
         let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         let promptBody = '';

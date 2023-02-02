@@ -22,4 +22,7 @@ export default {
     cacheOptions: {},
     // The port the server will run on (optional, defaults to 3000)
     port: 3000,
+    // If set, ChatGPTClient will use `keyv-file` to store conversations to this JSON file instead of in memory.
+    // `cacheOptions.store` will override this if set
+    storageFilePath: './cache.json',
 }

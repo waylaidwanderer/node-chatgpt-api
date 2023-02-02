@@ -204,3 +204,4 @@ dist
 settings.js
 test.js
 *.cast
+cache.json

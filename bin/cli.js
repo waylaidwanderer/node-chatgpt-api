@@ -6,6 +6,7 @@ import boxen from 'boxen';
 import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
+import { KeyvFile } from 'keyv-file';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -27,6 +28,20 @@ if (fs.existsSync(path)) {
         console.error(`Error: the settings.js file does not exist.`);
     }
     process.exit(1);
+}
+
+if (settings.storageFilePath && !settings.cacheOptions.store) {
+    // make the directory and file if they don't exist
+    const dir = settings.storageFilePath.split('/').slice(0, -1).join('/');
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    if (!fs.existsSync(settings.storageFilePath)) {
+        fs.writeFileSync(settings.storageFilePath, '');
+    }
+
+    settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
+    // TODO: actually do something with this
 }
 
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
