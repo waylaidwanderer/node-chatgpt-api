@@ -64,6 +64,8 @@ const clientOptions = {
 const cacheOptions = {
   // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
   // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
+  // For example, to use a JSON file (`npm i keyv-file`) as a database:
+  // store: new KeyvFile({ filename: 'cache.json' }),
 };
 
 const chatGptClient = new ChatGPTClient('OPENAI_API_KEY', clientOptions, cacheOptions);
