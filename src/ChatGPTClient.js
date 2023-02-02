@@ -136,9 +136,9 @@ export default class ChatGPTClient {
         }
 
         const userLabel = this.options.userLabel || 'User';
-        const chatGPTLabel = this.options.chatGPTLabel || 'ChatGPT';
+        const chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
-        const promptSuffix = `${chatGPTLabel}:\n`; // Prompt should end with 2 newlines, so we add one here.
+        const promptSuffix = `${chatGptLabel}:\n`; // Prompt should end with 2 newlines, so we add one here.
 
         let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         let promptBody = '';
@@ -147,7 +147,7 @@ export default class ChatGPTClient {
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
-            const roleLabel = message.role === 'User' ? userLabel : chatGPTLabel;
+            const roleLabel = message.role === 'User' ? userLabel : chatGptLabel;
             const messageString = `${roleLabel}:\n${message.message}<|im_sep|>\n`;
             const newPromptBody = `${messageString}${promptBody}`;
 

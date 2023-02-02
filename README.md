@@ -59,7 +59,7 @@ const clientOptions = {
   // (Optional) Set a custom name for the user
   // userLabel: 'User',
   // (Optional) Set a custom name for ChatGPT
-  // chatGPTLabel: 'ChatGPT',
+  // chatGptLabel: 'ChatGPT',
   // (Optional) Set to true to enable `console.debug()` logging
   debug: false,
 };
@@ -107,7 +107,7 @@ module.exports = {
     // (Optional) Set a custom name for the user
     // userLabel: 'User',
     // (Optional) Set a custom name for ChatGPT
-    // chatGPTLabel: 'ChatGPT',
+    // chatGptLabel: 'ChatGPT',
     // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
   },

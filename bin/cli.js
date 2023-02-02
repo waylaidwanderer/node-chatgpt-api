@@ -46,8 +46,8 @@ async function conversation(conversationId = null, parentMessageId = null) {
     if (message === '!exit') {
         return true;
     }
-    const chatGPTLabel = settings.chatGptClient?.chatGPTLabel || 'ChatGPT';
-    const spinner = ora(`${chatGPTLabel} is typing...`);
+    const chatGptLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
+    const spinner = ora(`${chatGptLabel} is typing...`);
     spinner.prefixText = '\n';
     spinner.start();
     try {
@@ -56,7 +56,7 @@ async function conversation(conversationId = null, parentMessageId = null) {
         spinner.stop();
         conversationId = response.conversationId;
         parentMessageId = response.messageId;
-        console.log(boxen(response.response, { title: chatGPTLabel, padding: 0.7, margin: 1, dimBorder: true }));
+        console.log(boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true }));
     } catch (error) {
         spinner.stop();
         console.log(boxen(error?.json?.error?.message || error.body, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
