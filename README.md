@@ -53,6 +53,10 @@ const clientOptions = {
   },
   // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
   // promptPrefix: 'You are not ChatGPT...\n\n',
+  // (Optional) Set a custom name for the user
+  // userLabel: 'User',
+  // (Optional) Set a custom name for ChatGPT
+  // chatGPTLabel: 'ChatGPT',
   // (Optional) Set to true to enable `console.debug()` logging
   debug: false,
 };
@@ -95,6 +99,10 @@ module.exports = {
     },
     // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
     // promptPrefix: 'You are not ChatGPT...\n\n',
+    // (Optional) Set a custom name for the user
+    // userLabel: 'User',
+    // (Optional) Set a custom name for ChatGPT
+    // chatGPTLabel: 'ChatGPT',
     // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
   },

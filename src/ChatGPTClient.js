@@ -124,7 +124,7 @@ export default class ChatGPTClient {
             promptPrefix = this.options.promptPrefix;
             // If the prompt prefix doesn't end with the separator token, add it.
             if (!promptPrefix.endsWith('<|im_sep|>\n\n')) {
-                promptPrefix = `${promptPrefix}<|im_sep|>\n\n`;
+                promptPrefix = `${promptPrefix.trim()}<|im_sep|>\n\n`;
             }
         } else {
             const currentDateString = new Date().toLocaleDateString(
@@ -134,7 +134,11 @@ export default class ChatGPTClient {
 
             promptPrefix = `Respond conversationally.\nCurrent date: ${currentDateString}<|im_end|>\n\n`
         }
-        const promptSuffix = "ChatGPT:\n"; // Prompt should end with 2 newlines, so we add one here.
+
+        const userLabel = this.options.userLabel || 'User';
+        const chatGPTLabel = this.options.chatGPTLabel || 'ChatGPT';
+
+        const promptSuffix = `${chatGPTLabel}:\n`; // Prompt should end with 2 newlines, so we add one here.
 
         let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         let promptBody = '';
@@ -143,7 +147,8 @@ export default class ChatGPTClient {
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
-            const messageString = `${message.role}:\n${message.message}<|im_sep|>\n`;
+            const roleLabel = message.role === 'User' ? userLabel : chatGPTLabel;
+            const messageString = `${roleLabel}:\n${message.message}<|im_sep|>\n`;
             const newPromptBody = `${messageString}${promptBody}`;
 
             // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
