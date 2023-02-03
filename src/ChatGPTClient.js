@@ -83,6 +83,7 @@ export default class ChatGPTClient {
         if (!conversation) {
             conversation = {
                 messages: [],
+                createdAt: Date.now(),
             };
         }
 
