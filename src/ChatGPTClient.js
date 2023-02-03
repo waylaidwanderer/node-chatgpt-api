@@ -19,8 +19,8 @@ export default class ChatGPTClient {
             ...modelOptions,
             // set some good defaults (check for undefined in some cases because they may be 0)
             model: modelOptions.model || CHATGPT_MODEL,
-            temperature: typeof modelOptions.temperature === 'undefined' ? 1 : modelOptions.temperature,
-            top_p: typeof modelOptions.top_p === 'undefined' ? 0.7 : modelOptions.top_p,
+            temperature: typeof modelOptions.temperature === 'undefined' ? 0.9 : modelOptions.temperature,
+            top_p: typeof modelOptions.top_p === 'undefined' ? 1 : modelOptions.top_p,
             presence_penalty: typeof modelOptions.presence_penalty === 'undefined' ? 0.6 : modelOptions.presence_penalty,
             stop: modelOptions.stop,
         };
@@ -149,7 +149,7 @@ export default class ChatGPTClient {
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
 
-            promptPrefix = `Respond conversationally.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
+            promptPrefix = `You are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
         }
 
         const userLabel = this.options.userLabel || 'User';
