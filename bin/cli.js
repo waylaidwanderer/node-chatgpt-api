@@ -44,13 +44,74 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     // TODO: actually do something with this
 }
 
+let conversationId = null;
+let parentMessageId = null;
+
+const availableCommands = [
+    {
+        name: 'Exit',
+        value: 'exit',
+    },
+    {
+        name: 'View chat commands',
+        value: 'commands',
+    },
+    {
+        name: 'Delete conversation',
+        value: 'delete',
+    },
+    {
+        name: 'List conversations',
+        value: 'list',
+    },
+    {
+        name: 'Resume conversation',
+        value: 'resume',
+    },
+    {
+        name: 'Copy conversation to clipboard',
+        value: 'copy',
+    },
+];
+
+let conversationId = null;
+let parentMessageId = null;
+
+const availableCommands = [
+    {
+        name: 'Exit',
+        value: 'exit',
+    },
+    {
+        name: 'View chat commands',
+        value: 'commands',
+    },
+    {
+        name: 'Delete conversation',
+        value: 'delete',
+    },
+    {
+        name: 'List conversations',
+        value: 'list',
+    },
+    {
+        name: 'Resume conversation',
+        value: 'resume',
+    },
+    {
+        name: 'Copy conversation to clipboard',
+        value: 'copy',
+    },
+];
+
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
 
 console.log(boxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
+console.log('Type "!" to access the command menu.');
 
 await conversation();
 
-async function conversation(conversationId = null, parentMessageId = null) {
+async function conversation() {
     let { message } = await inquirer.prompt([
         {
             type: 'input',
@@ -60,10 +121,13 @@ async function conversation(conversationId = null, parentMessageId = null) {
     ]);
     message = message.trim();
     if (!message) {
-        return conversation(conversationId, parentMessageId);
+        return conversation();
     }
     if (message === '!exit') {
         return true;
+    }
+    if (message === '!') {
+        return commandMenu();
     }
     const chatGptLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
     const spinner = ora(`${chatGptLabel} is typing...`);
@@ -78,7 +142,29 @@ async function conversation(conversationId = null, parentMessageId = null) {
         console.log(boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true }));
     } catch (error) {
         spinner.stop();
-        console.log(boxen(error?.json?.error?.message || error.body, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+        displayError(error?.json?.error?.message || error.body);
     }
-    return conversation(conversationId, parentMessageId);
+    return conversation();
+}
+
+async function commandMenu() {
+    const { command } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'command',
+            message: 'Select an option:',
+            choices: availableCommands,
+        },
+    ]);
+    switch (command) {
+        case 'exit':
+            return true;
+        default:
+            displayError('Not implemented yet.');
+            return conversation();
+    }
+}
+
+function displayError(message) {
+    console.log(boxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
 }
