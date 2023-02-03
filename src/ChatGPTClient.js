@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 
-const CHATGPT_MODEL = 'text-chat-davinci-002-20230126';
+const CHATGPT_MODEL = 'text-chat-davinci-002-20221122';
 
 export default class ChatGPTClient {
     constructor(

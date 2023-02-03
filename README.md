@@ -4,9 +4,11 @@
 
 # Update (2023-02-02)
 
-Trying to use `text-chat-davinci-002-20230126` with the OpenAI API now returns a 404 error. Someone has already found the new model name, but they are unwilling to share at this time. I will update this repository once I find the new model. If you have any leads, please open an issue or a pull request.
+~~Trying to use `text-chat-davinci-002-20230126` with the OpenAI API now returns a 404 error. Someone has already found the new model name, but they are unwilling to share at this time. I will update this repository once I find the new model. If you have any leads, please open an issue or a pull request.~~
 
-In the meantime, I've added support for models like `text-davinci-003`, which you can use as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002-20230126` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**
+~~In the meantime, I've added support for models like `text-davinci-003`, which you can use as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**~~
+
+Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-chat-davinci-002-20221122`. I've updated the library to use this model.
 
 # ChatGPT API
 
@@ -17,7 +19,7 @@ In the meantime, I've added support for models like `text-davinci-003`, which yo
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
 
-This is an implementation of [ChatGPT](https://chat.openai.com/chat) using the official ChatGPT raw model, `text-chat-davinci-002-20230126`. This model name was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
+This is an implementation of [ChatGPT](https://chat.openai.com/chat) using the official ChatGPT raw model, `text-chat-davinci-002`. This model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
 
 As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT).
 
@@ -26,7 +28,7 @@ The previous version of this library that used [transitive-bullshit/chatgpt-api]
 By itself, the model does not have any conversational support, so this library uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
 
 ## Features
-- Uses the official ChatGPT raw model, `text-chat-davinci-002-20230126`.
+- Uses the official ChatGPT raw model, `text-chat-davinci-002-20221122`.
 - Includes an API server you can run to use ChatGPT in non-Node.js applications.
 - Includes a `ChatGPTClient` class that you can use in your own Node.js applications.
 - Includes a CLI interface where you can chat with ChatGPT.
@@ -57,9 +59,9 @@ import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
 const clientOptions = {
   // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
   modelOptions: {
-    // The model is set to text-chat-davinci-002-20230126 by default, but you can override
+    // The model is set to text-chat-davinci-002-20221122 by default, but you can override
     // it and any other parameters here
-    model: 'text-chat-davinci-002-20230126',
+    model: 'text-chat-davinci-002-20221122',
   },
   // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
   // promptPrefix: 'You are not ChatGPT...\n\n',
@@ -105,9 +107,9 @@ module.exports = {
   chatGptClient: {
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
     modelOptions: {
-      // The model is set to text-chat-davinci-002-20230126 by default, but you can override
+      // The model is set to text-chat-davinci-002-20221122 by default, but you can override
       // it and any other parameters here
-      model: 'text-chat-davinci-002-20230126',
+      model: 'text-chat-davinci-002-20221122',
     },
     // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
     // promptPrefix: 'You are not ChatGPT...\n\n',
@@ -177,7 +179,7 @@ npm run cli
 ChatGPT's responses are automatically copied to your clipboard, so you can paste them into other applications.
 
 ## Caveats
-Since `text-chat-davinci-002-20230126` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.  
+Since `text-chat-davinci-002-20221122` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.  
 This means my implementation or the raw model may not behave exactly the same in some ways:
 - Conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system.
 - ChatGPT's model parameters (temperature, frequency penalty, etc.) are unknown, so I set some defaults that I thought would be reasonable.
