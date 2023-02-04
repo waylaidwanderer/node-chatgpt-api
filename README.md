@@ -103,7 +103,7 @@ This takes an optional `--settings=<path_to_settings.js>` parameter, or looks fo
 ```JS
 module.exports = {
   // Your OpenAI API key
-  openaiApiKey: '',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
   chatGptClient: {
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
     modelOptions: {
@@ -123,11 +123,14 @@ module.exports = {
   // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
   // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
   cacheOptions: {},
-  // The port the server will run on (optional, defaults to 3000)
-  port: 3000,
+  // Options for the API server
+  apiOptions: {
+    port: process.env.API_PORT || 3000,
+    host: process.env.API_HOST || 'localhost',
+  },
   // If set, ChatGPTClient will use `keyv-file` to store conversations to this JSON file instead of in memory.
-  // `cacheOptions.store` will override this if set
-  storageFilePath: './cache.json',
+  // However, `cacheOptions.store` will override this if set
+  storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
 };
 ```
 
