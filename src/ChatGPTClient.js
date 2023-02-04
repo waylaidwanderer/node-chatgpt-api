@@ -19,11 +19,14 @@ export default class ChatGPTClient {
             ...modelOptions,
             // set some good defaults (check for undefined in some cases because they may be 0)
             model: modelOptions.model || CHATGPT_MODEL,
-            temperature: typeof modelOptions.temperature === 'undefined' ? 0.9 : modelOptions.temperature,
+            temperature: typeof modelOptions.temperature === 'undefined' ? 0.8 : modelOptions.temperature,
             top_p: typeof modelOptions.top_p === 'undefined' ? 1 : modelOptions.top_p,
             presence_penalty: typeof modelOptions.presence_penalty === 'undefined' ? 0.6 : modelOptions.presence_penalty,
             stop: modelOptions.stop,
         };
+
+        this.userLabel = this.options.userLabel || 'User';
+        this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
         if (this.modelOptions.model.startsWith('text-chat')) {
             this.endToken = '<|im_end|>';
@@ -39,6 +42,9 @@ export default class ChatGPTClient {
             } else {
                 this.modelOptions.stop = [this.endToken];
             }
+            this.modelOptions.stop.push(`\n\n${this.userLabel}:`);
+            this.modelOptions.stop.push(`\n\nInstructions:`);
+            // I chose not to do one for `chatGptLabel` because I've never seen it happen, plus there's a max of 4 stops
         }
 
         cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
@@ -100,6 +106,7 @@ export default class ChatGPTClient {
         const result = await this.getCompletion(prompt);
         if (this.options.debug) {
             console.debug(JSON.stringify(result));
+            console.debug();
         }
 
         const reply = result.choices[0].text.trim();
@@ -138,24 +145,22 @@ export default class ChatGPTClient {
 
         let promptPrefix;
         if (this.options.promptPrefix) {
-            promptPrefix = this.options.promptPrefix;
+            promptPrefix = this.options.promptPrefix.trim();
             // If the prompt prefix doesn't end with the separator token, add it.
             if (!promptPrefix.endsWith(`${this.separatorToken}\n\n`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.separatorToken}\n\n`;
             }
+            promptPrefix = `\nInstructions:\n${promptPrefix}`;
         } else {
             const currentDateString = new Date().toLocaleDateString(
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
 
-            promptPrefix = `You are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
+            promptPrefix = `\nInstructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.separatorToken}\n\n`
         }
 
-        const userLabel = this.options.userLabel || 'User';
-        const chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
-
-        const promptSuffix = `${chatGptLabel}:\n`; // Prompt ChatGPT to respond.
+        const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
 
         let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         let promptBody = '';
@@ -164,9 +169,18 @@ export default class ChatGPTClient {
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
-            const roleLabel = message.role === 'User' ? userLabel : chatGptLabel;
+            const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
             const messageString = `${roleLabel}:\n${message.message}${this.separatorToken}\n`;
-            const newPromptBody = `${messageString}${promptBody}`;
+            let newPromptBody;
+            if (promptBody) {
+                newPromptBody = `${messageString}${promptBody}`;
+            } else {
+                // Always insert prompt prefix before the last user message.
+                // This makes the AI obey the prompt instructions better, which is important for custom instructions.
+                // After a bunch of testing, it doesn't seem to cause the AI any confusion, even if you ask it things
+                // like "what's the last thing I wrote?".
+                newPromptBody = `${promptPrefix}${messageString}${promptBody}`;
+            }
 
             // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
             // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
@@ -182,7 +196,7 @@ export default class ChatGPTClient {
             currentTokenCount = newTokenCount;
         }
 
-        const prompt = `${promptPrefix}${promptBody}${promptSuffix}`;
+        const prompt = `${promptBody}${promptSuffix}`;
 
         const numTokens = this.getTokenCount(prompt);
         // Use up to 4097 tokens (prompt + response), but try to leave 1000 tokens for the response.

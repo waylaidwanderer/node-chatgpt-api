@@ -63,8 +63,8 @@ const clientOptions = {
     // it and any other parameters here
     model: 'text-chat-davinci-002-20221122',
   },
-  // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
-  // promptPrefix: 'You are not ChatGPT...\n\n',
+  // (Optional) Set custom instructions instead of "You are ChatGPT...".
+  // promptPrefix: 'You are Bob, a cowboy in Western times...',
   // (Optional) Set a custom name for the user
   // userLabel: 'User',
   // (Optional) Set a custom name for ChatGPT
@@ -111,8 +111,8 @@ module.exports = {
       // it and any other parameters here
       model: 'text-chat-davinci-002-20221122',
     },
-    // (Optional) Set a custom prompt prefix. As per my testing it should work with two newlines
-    // promptPrefix: 'You are not ChatGPT...\n\n',
+    // (Optional) Set custom instructions instead of "You are ChatGPT...".
+    // promptPrefix: 'You are Bob, a cowboy in Western times...',
     // (Optional) Set a custom name for the user
     // userLabel: 'User',
     // (Optional) Set a custom name for ChatGPT
