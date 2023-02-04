@@ -68,7 +68,7 @@ server.post('/conversation', async (request, reply) => {
     }
 });
 
-server.listen({ port: settings.port || 3000 }, (error) => {
+server.listen({ port: settings.port || 3000, host: '0.0.0.0'}, (error) => {
     if (error) {
         console.error(error);
         process.exit(1);
