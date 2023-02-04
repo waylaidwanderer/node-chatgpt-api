@@ -55,7 +55,9 @@ server.post('/conversation', async (request, reply) => {
             conversationId,
             parentMessageId,
         });
-        console.log(result);
+        if (settings.apiOptions?.debug) {
+            console.debug(result);
+        }
     } catch (e) {
         error = e;
     }
@@ -69,8 +71,8 @@ server.post('/conversation', async (request, reply) => {
 });
 
 server.listen({
-    port: settings.apiOptions.port || settings.port || 3000,
-    host: settings.apiOptions.host || 'localhost'
+    port: settings.apiOptions?.port || settings.port || 3000,
+    host: settings.apiOptions?.host || 'localhost'
 }, (error) => {
     if (error) {
         console.error(error);

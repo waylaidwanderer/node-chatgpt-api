@@ -29,7 +29,7 @@ By itself, the model does not have any conversational support, so this library u
 
 ## Features
 - Uses the official ChatGPT raw model, `text-chat-davinci-002-20221122`.
-- Includes an API server you can run to use ChatGPT in non-Node.js applications.
+- Includes an API server (with Docker support) you can run to use ChatGPT in non-Node.js applications.
 - Includes a `ChatGPTClient` class that you can use in your own Node.js applications.
 - Includes a CLI interface where you can chat with ChatGPT.
 - Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
@@ -44,6 +44,7 @@ By itself, the model does not have any conversational support, so this library u
 ### Prerequisites
 - Node.js
 - npm
+- Docker (optional, for API server)
 - [OpenAI API key](https://platform.openai.com/account/api-keys)
 
 ## Usage
@@ -127,6 +128,8 @@ module.exports = {
   apiOptions: {
     port: process.env.API_PORT || 3000,
     host: process.env.API_HOST || 'localhost',
+    // (Optional) Set to true to enable `console.debug()` logging
+    debug: false,
   },
   // If set, ChatGPTClient will use `keyv-file` to store conversations to this JSON file instead of in memory.
   // However, `cacheOptions.store` will override this if set
@@ -134,11 +137,14 @@ module.exports = {
 };
 ```
 
-Alternatively, you can install and run the package locally:
-1. Clone this repository
-2. Install dependencies with `npm install`
+Alternatively, you can install and run the package directly.
+
+1. Clone this repository: `git clone https://github.com/waylaidwanderer/node-chatgpt-api`
+2. Install dependencies with `npm install` (if not using Docker)
 3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
-4. Start the server using `npm start` or `npm run server`
+4. Start the server:
+    - using `npm start` or `npm run server` (if not using Docker)
+    - using `docker-compose up` (requires Docker)
 
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
 ```JSON

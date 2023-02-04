@@ -24,6 +24,8 @@ export default {
     apiOptions: {
         port: process.env.API_PORT || 3000,
         host: process.env.API_HOST || 'localhost',
+        // (Optional) Set to true to enable `console.debug()` logging
+        debug: false,
     },
     // If set, ChatGPTClient will use `keyv-file` to store conversations to this JSON file instead of in memory.
     // However, `cacheOptions.store` will override this if set
