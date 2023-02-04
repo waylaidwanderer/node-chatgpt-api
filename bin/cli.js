@@ -41,7 +41,6 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     }
 
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
-    // TODO: actually do something with this
 }
 
 let conversationId = null;
@@ -49,28 +48,28 @@ let parentMessageId = null;
 
 const availableCommands = [
     {
-        name: 'Exit',
-        value: 'exit',
-    },
-    {
         name: 'View chat commands',
         value: 'commands',
     },
     {
-        name: 'Delete conversation',
-        value: 'delete',
+        name: 'Resume last conversation',
+        value: 'resume',
+    },
+    {
+        name: 'Start new conversation',
+        value: 'new',
+    },
+    {
+        name: 'Copy conversation to clipboard',
+        value: 'copy',
     },
     {
         name: 'List conversations',
         value: 'list',
     },
     {
-        name: 'Resume conversation',
-        value: 'resume',
-    },
-    {
-        name: 'Copy conversation to clipboard',
-        value: 'copy',
+        name: 'Exit ChatGPT CLI',
+        value: 'exit',
     },
 ];
 
@@ -79,28 +78,28 @@ let parentMessageId = null;
 
 const availableCommands = [
     {
-        name: 'Exit',
-        value: 'exit',
-    },
-    {
         name: 'View chat commands',
         value: 'commands',
     },
     {
-        name: 'Delete conversation',
-        value: 'delete',
+        name: 'Resume last conversation',
+        value: 'resume',
+    },
+    {
+        name: 'Start new conversation',
+        value: 'new',
+    },
+    {
+        name: 'Copy conversation to clipboard',
+        value: 'copy',
     },
     {
         name: 'List conversations',
         value: 'list',
     },
     {
-        name: 'Resume conversation',
-        value: 'resume',
-    },
-    {
-        name: 'Copy conversation to clipboard',
-        value: 'copy',
+        name: 'Exit ChatGPT CLI',
+        value: 'exit',
     },
 ];
 
@@ -139,10 +138,14 @@ async function conversation() {
         spinner.stop();
         conversationId = response.conversationId;
         parentMessageId = response.messageId;
+        await chatGptClient.conversationsCache.set('lastConversation', {
+            conversationId,
+            parentMessageId,
+        });
         console.log(boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true }));
     } catch (error) {
         spinner.stop();
-        displayError(error?.json?.error?.message || error.body);
+        logError(error?.json?.error?.message || error.body);
     }
     return conversation();
 }
@@ -159,12 +162,28 @@ async function commandMenu() {
     switch (command) {
         case 'exit':
             return true;
+        case 'resume':
+            ({ conversationId, parentMessageId } = (await chatGptClient.conversationsCache.get('lastConversation')) || {});
+            if (conversationId) {
+                logSuccess(`Resumed conversation ${conversationId}.`);
+            } else {
+                logWarning('No conversation to resume.');
+            }
+            return conversation();
         default:
-            displayError('Not implemented yet.');
+            logError('Not implemented yet.');
             return conversation();
     }
 }
 
-function displayError(message) {
+function logError(message) {
     console.log(boxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+}
+
+function logSuccess(message) {
+    console.log(boxen(message, { title: 'Success', padding: 0.7, margin: 1, borderColor: 'green' }));
+}
+
+function logWarning(message) {
+    console.log(boxen(message, { title: 'Warning', padding: 0.7, margin: 1, borderColor: 'yellow' }));
 }
