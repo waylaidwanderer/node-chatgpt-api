@@ -128,19 +128,7 @@ export default class ChatGPTClient {
     }
 
     async buildPrompt(messages, parentMessageId) {
-        // Iterate through messages, building an array based on the parentMessageId.
-        // Each message has an id and a parentMessageId. The parentMessageId is the id of the message that this message is a reply to.
-        // The array will contain the messages in the order they should be displayed, starting with the root message.
-        const orderedMessages = [];
-        let currentMessageId = parentMessageId;
-        while (currentMessageId) {
-            const message = messages.find((m) => m.id === currentMessageId);
-            if (!message) {
-                break;
-            }
-            orderedMessages.unshift(message);
-            currentMessageId = message.parentMessageId;
-        }
+        const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
         let promptPrefix;
         if (this.options.promptPrefix) {
@@ -212,5 +200,27 @@ export default class ChatGPTClient {
             text = text.replace(/<\|im_sep\|>/g, '<|endoftext|>');
         }
         return gptEncode(text).length;
+    }
+
+    /**
+     * Iterate through messages, building an array based on the parentMessageId.
+     * Each message has an id and a parentMessageId. The parentMessageId is the id of the message that this message is a reply to.
+     * @param messages
+     * @param parentMessageId
+     * @returns {*[]} An array containing the messages in the order they should be displayed, starting with the root message.
+     */
+    static getMessagesForConversation(messages, parentMessageId) {
+        const orderedMessages = [];
+        let currentMessageId = parentMessageId;
+        while (currentMessageId) {
+            const message = messages.find((m) => m.id === currentMessageId);
+            if (!message) {
+                break;
+            }
+            orderedMessages.unshift(message);
+            currentMessageId = message.parentMessageId;
+        }
+
+        return orderedMessages;
     }
 }

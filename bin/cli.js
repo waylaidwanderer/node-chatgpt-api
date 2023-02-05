@@ -56,40 +56,6 @@ const availableCommands = [
         value: 'resume',
     },
     {
-        name: 'Copy conversation to clipboard',
-        value: 'copy',
-    },
-    {
-        name: 'Start new conversation',
-        value: 'new',
-    },
-    {
-        name: 'List conversations',
-        value: 'list',
-    },
-    {
-        name: 'Delete all conversations',
-        value: 'delete-all',
-    },
-    {
-        name: 'Exit ChatGPT CLI',
-        value: 'exit',
-    },
-];
-
-let conversationId = null;
-let parentMessageId = null;
-
-const availableCommands = [
-    {
-        name: 'View chat commands',
-        value: 'commands',
-    },
-    {
-        name: 'Resume last conversation',
-        value: 'resume',
-    },
-    {
         name: 'Start new conversation',
         value: 'new',
     },
@@ -181,6 +147,21 @@ async function deleteAllConversations() {
     return conversation();
 }
 
+async function copyConversation() {
+    const { messages } = await chatGptClient.conversationsCache.get(conversationId);
+    // get the last message ID
+    const lastMessageId = messages[messages.length - 1].id;
+    const orderedMessages = ChatGPTClient.getMessagesForConversation(messages, lastMessageId);
+    const conversationString = orderedMessages.map((message) => `#### ${message.role}:\n${message.message}`).join('\n\n');
+    try {
+        await clipboard.write(`${conversationString}\n\n----\nMade with ChatGPT CLI: <https://github.com/waylaidwanderer/node-chatgpt-api>`);
+        logSuccess('Copied conversation to clipboard.');
+    } catch (error) {
+        logError(error?.message || error);
+    }
+    return conversation();
+}
+
 async function commandMenu() {
     const { command } = await inquirer.prompt([
         {
@@ -199,8 +180,10 @@ async function commandMenu() {
             return newConversation();
         case 'delete-all':
             return deleteAllConversations();
+        case 'copy':
+            return copyConversation();
         default:
-            logError('Not implemented yet.');
+            logWarning('Not implemented yet.');
             return conversation();
     }
 }
