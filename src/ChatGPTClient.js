@@ -43,8 +43,7 @@ export default class ChatGPTClient {
                 this.modelOptions.stop = [this.endToken];
             }
             this.modelOptions.stop.push(`\n${this.userLabel}:`);
-            this.modelOptions.stop.push(`\n\nInstructions:`);
-            // I chose not to do one for `chatGptLabel` because I've never seen it happen, plus there's a max of 4 stops
+            // I chose not to do one for `chatGptLabel` because I've never seen it happen
         }
 
         cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
@@ -150,14 +149,14 @@ export default class ChatGPTClient {
             if (!promptPrefix.endsWith(`${this.separatorToken}\n\n`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.separatorToken}\n\n`;
             }
-            promptPrefix = `\nInstructions:\n${promptPrefix}`;
+            promptPrefix = `\n${this.separatorToken}Instructions:\n${promptPrefix}`;
         } else {
             const currentDateString = new Date().toLocaleDateString(
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
 
-            promptPrefix = `\nInstructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.separatorToken}\n\n`
+            promptPrefix = `\n${this.separatorToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.separatorToken}\n\n`
         }
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
