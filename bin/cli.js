@@ -56,16 +56,20 @@ const availableCommands = [
         value: 'resume',
     },
     {
-        name: 'Start new conversation',
-        value: 'new',
-    },
-    {
         name: 'Copy conversation to clipboard',
         value: 'copy',
     },
     {
+        name: 'Start new conversation',
+        value: 'new',
+    },
+    {
         name: 'List conversations',
         value: 'list',
+    },
+    {
+        name: 'Delete all conversations',
+        value: 'delete-all',
     },
     {
         name: 'Exit ChatGPT CLI',
@@ -96,6 +100,10 @@ const availableCommands = [
     {
         name: 'List conversations',
         value: 'list',
+    },
+    {
+        name: 'Delete all conversations',
+        value: 'delete-all',
     },
     {
         name: 'Exit ChatGPT CLI',
@@ -150,6 +158,29 @@ async function conversation() {
     return conversation();
 }
 
+async function resumeConversation() {
+    ({ conversationId, parentMessageId } = (await chatGptClient.conversationsCache.get('lastConversation')) || {});
+    if (conversationId) {
+        logSuccess(`Resumed conversation ${conversationId}.`);
+    } else {
+        logWarning('No conversation to resume.');
+    }
+    return conversation();
+}
+
+async function newConversation() {
+    conversationId = null;
+    parentMessageId = null;
+    logSuccess('Started new conversation.');
+    return conversation();
+}
+
+async function deleteAllConversations() {
+    await chatGptClient.conversationsCache.clear();
+    logSuccess('Deleted all conversations.');
+    return conversation();
+}
+
 async function commandMenu() {
     const { command } = await inquirer.prompt([
         {
@@ -163,13 +194,11 @@ async function commandMenu() {
         case 'exit':
             return true;
         case 'resume':
-            ({ conversationId, parentMessageId } = (await chatGptClient.conversationsCache.get('lastConversation')) || {});
-            if (conversationId) {
-                logSuccess(`Resumed conversation ${conversationId}.`);
-            } else {
-                logWarning('No conversation to resume.');
-            }
-            return conversation();
+            return resumeConversation();
+        case 'new':
+            return newConversation();
+        case 'delete-all':
+            return deleteAllConversations();
         default:
             logError('Not implemented yet.');
             return conversation();
