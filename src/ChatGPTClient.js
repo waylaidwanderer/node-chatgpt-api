@@ -42,7 +42,7 @@ export default class ChatGPTClient {
             } else {
                 this.modelOptions.stop = [this.endToken];
             }
-            this.modelOptions.stop.push(`\n\n${this.userLabel}:`);
+            this.modelOptions.stop.push(`\n${this.userLabel}:`);
             this.modelOptions.stop.push(`\n\nInstructions:`);
             // I chose not to do one for `chatGptLabel` because I've never seen it happen, plus there's a max of 4 stops
         }
