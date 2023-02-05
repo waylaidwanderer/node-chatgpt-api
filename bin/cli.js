@@ -80,11 +80,11 @@ const availableCommands = [
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
 
 console.log(boxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
-console.log('Type "!" to access the command menu.');
 
 await conversation();
 
 async function conversation() {
+    console.log('Type "!" to access the command menu.');
     let { message } = await inquirer.prompt([
         {
             type: 'input',
