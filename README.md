@@ -114,6 +114,7 @@ console.log(response3.response); // Les chats sont les meilleurs animaux de comp
 ### API Server
 
 <h4 id="api-server-setup">Setup</h4>
+
 You can install the package using
 ```bash
 npm i -g @waylaidwanderer/chatgpt-api
@@ -176,7 +177,7 @@ To start a conversation with ChatGPT, send a POST request to the server's `/conv
 }
 ```
 The server will return a JSON object containing ChatGPT's response:
-```JSON
+```JS
 // HTTP/1.1 200 OK
 {
     "response": "I'm doing well, thank you! How are you?",
@@ -188,14 +189,14 @@ The server will return a JSON object containing ChatGPT's response:
 If the request is unsuccessful, the server will return a JSON object with an error message.
 
 If the request object is missing a required property (e.g. `message`):
-```JSON
+```JS
 // HTTP/1.1 400 Bad Request
 {
     "error": "The message parameter is required."
 }
 ```
 If there was an error sending the message to ChatGPT:
-```JSON
+```JS
 // HTTP/1.1 503 Service Unavailable
 {
     "error": "There was an error communicating with ChatGPT."
@@ -227,7 +228,7 @@ Successful output:
 { data: ' today', event: '', id: '', retry: undefined }
 { data: '?', event: '', id: '', retry: undefined }
 { data: '[DONE]', event: '', id: '', retry: undefined }
-Hello! How can I help you today?
+// Hello! How can I help you today?
 ```
 
 Error output:
