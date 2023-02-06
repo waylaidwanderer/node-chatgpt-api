@@ -78,7 +78,7 @@ inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
 
-console.log(boxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
+console.log(tryBoxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
 
 await conversation();
 
@@ -144,7 +144,7 @@ async function onMessage(message) {
             parentMessageId,
             onProgress: (token) => {
                 reply += token;
-                const output = boxen(`${reply}█`, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+                const output = tryBoxen(`${reply}█`, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
@@ -156,7 +156,7 @@ async function onMessage(message) {
             conversationId,
             parentMessageId,
         });
-        const output = boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+        const output = tryBoxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
         console.log(output);
     } catch (error) {
         spinner.stop();
@@ -225,17 +225,26 @@ async function copyConversation() {
 }
 
 function logError(message) {
-    try {
-        console.log(boxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
-    } catch (error) {
-        console.error(message);
-    }
+    console.log(tryBoxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
 }
 
 function logSuccess(message) {
-    console.log(boxen(message, { title: 'Success', padding: 0.7, margin: 1, borderColor: 'green' }));
+    console.log(tryBoxen(message, { title: 'Success', padding: 0.7, margin: 1, borderColor: 'green' }));
 }
 
 function logWarning(message) {
-    console.log(boxen(message, { title: 'Warning', padding: 0.7, margin: 1, borderColor: 'yellow' }));
+    console.log(tryBoxen(message, { title: 'Warning', padding: 0.7, margin: 1, borderColor: 'yellow' }));
+}
+
+/**
+ * Boxen can throw an error if the input is malformed, so this function wraps it in a try/catch.
+ * @param {string} input
+ * @param {*} options
+ */
+function tryBoxen(input, options) {
+    try {
+        return boxen(input, options);
+    } catch {
+        return input;
+    }
 }
