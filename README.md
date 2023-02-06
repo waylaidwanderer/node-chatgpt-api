@@ -177,6 +177,7 @@ To start a conversation with ChatGPT, send a POST request to the server's `/conv
 ```
 The server will return a JSON object containing ChatGPT's response:
 ```JSON
+// HTTP/1.1 200 OK
 {
     "response": "I'm doing well, thank you! How are you?",
     "conversationId": "your-conversation-id",
@@ -184,10 +185,18 @@ The server will return a JSON object containing ChatGPT's response:
 }
 ```
 
-If the request is unsuccessful, the server will return a JSON object with an error message and a status code of 503.
+If the request is unsuccessful, the server will return a JSON object with an error message.
 
+If the request object is missing a required property (e.g. `message`):
+```JSON
+// HTTP/1.1 400 Bad Request
+{
+    "error": "The message parameter is required."
+}
+```
 If there was an error sending the message to ChatGPT:
 ```JSON
+// HTTP/1.1 503 Service Unavailable
 {
     "error": "There was an error communicating with ChatGPT."
 }

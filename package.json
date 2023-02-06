@@ -32,6 +32,7 @@
     "api-wrapper"
   ],
   "dependencies": {
+    "@fastify/cors": "^8.2.0",
     "@fortaine/fetch-event-source": "^3.0.6",
     "boxen": "^7.0.1",
     "clipboardy": "^3.0.0",
