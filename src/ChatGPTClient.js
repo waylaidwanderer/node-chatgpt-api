@@ -71,10 +71,11 @@ export default class ChatGPTClient {
             body: JSON.stringify(modelOptions),
         };
         if (modelOptions.stream) {
-            let done = false;
             return new Promise((resolve, reject) => {
+                const controller = new AbortController();
                 fetchEventSource(url, {
                     ...opts,
+                    signal: controller.signal,
                     onopen(response) {
                         if (response.status === 200) {
                             return;
@@ -85,9 +86,6 @@ export default class ChatGPTClient {
                         throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
                     },
                     onclose() {
-                        if (done) {
-                            return;
-                        }
                         throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
                     },
                     onerror(err) {
@@ -101,7 +99,8 @@ export default class ChatGPTClient {
                             console.debug(message);
                         }
                         if (message.data === '[DONE]') {
-                            done = true;
+                            onProgress('[DONE]');
+                            controller.abort();
                             resolve();
                             return;
                         }
@@ -154,6 +153,9 @@ export default class ChatGPTClient {
         let reply = '';
         if (typeof opts.onProgress === 'function') {
             await this.getCompletion(prompt, (message) => {
+                if (message === '[DONE]') {
+                    return;
+                }
                 const token = message.choices[0].text;
                 if (this.options.debug) {
                     console.debug(token);

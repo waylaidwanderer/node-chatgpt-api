@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
+import { FastifySSEPlugin } from "fastify-sse-v2";
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
@@ -44,29 +45,61 @@ const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptC
 
 const server = fastify();
 
+server.register(FastifySSEPlugin);
+
 server.post('/conversation', async (request, reply) => {
-    const conversationId = request.body.conversationId ? request.body.conversationId.toString() : undefined;
+    const body = request.body || {};
+
+    const conversationId = body.conversationId ? body.conversationId.toString() : undefined;
+
+    let onProgress;
+    if (body.stream === true) {
+        onProgress = (token) => {
+            if (settings.apiOptions?.debug) {
+                console.debug(token);
+            }
+            reply.sse({ id: '', data: token });
+        };
+    } else {
+        onProgress = null;
+    }
 
     let result;
     let error;
     try {
-        const parentMessageId = request.body.parentMessageId ? request.body.parentMessageId.toString() : undefined;
-        result = await chatGptClient.sendMessage(request.body.message, {
+        const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
+        result = await chatGptClient.sendMessage(body.message, {
             conversationId,
             parentMessageId,
+            onProgress,
         });
-        if (settings.apiOptions?.debug) {
-            console.debug(result);
-        }
     } catch (e) {
         error = e;
     }
 
     if (result !== undefined) {
-        reply.send(result);
+        if (body.stream === true) {
+            reply.sse({ id: '', data: '[DONE]' });
+        } else {
+            reply.send(result);
+        }
+        if (settings.apiOptions?.debug) {
+            console.debug(result);
+        }
     } else {
         console.error(error);
-        reply.code(503).send({ error: 'There was an error communicating with ChatGPT.' });
+        if (body.stream === true) {
+            reply.sse({
+                id: '',
+                event: 'error',
+                data: JSON.stringify({
+                    code: 503,
+                    error: 'There was an error communicating with ChatGPT.',
+                }),
+            });
+        } else {
+            reply.code(503).send({ error: 'There was an error communicating with ChatGPT.' });
+        }
     }
 });
 
