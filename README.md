@@ -27,6 +27,18 @@ The previous version of this library that used [transitive-bullshit/chatgpt-api]
 
 By itself, the model does not have any conversational support, so this library uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
 
+# Table of Contents
+   * [Features](#features)
+   * [Getting Started](#getting-started)
+      * [Prerequisites](#prerequisites)
+      * [Usage](#usage)
+         * [Module](#module)
+         * [API Server](#api-server)
+         * [CLI](#cli)
+   * [Caveats](#caveats)
+   * [Contributing](#contributing)
+   * [License](#license)
+
 ## Features
 - Uses the official ChatGPT raw model, `text-chat-davinci-002-20221122`.
 - Includes an API server (with Docker support) you can run to use ChatGPT in non-Node.js applications.
