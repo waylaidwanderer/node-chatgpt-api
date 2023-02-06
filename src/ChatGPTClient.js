@@ -129,6 +129,10 @@ export default class ChatGPTClient {
         message,
         opts = {},
     ) {
+        if (this.modelOptions.stream && typeof opts.onProgress !== 'function') {
+            throw new Error('onProgress must be a function when using stream mode.');
+        }
+
         const conversationId = opts.conversationId || crypto.randomUUID();
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
@@ -150,13 +154,31 @@ export default class ChatGPTClient {
         conversation.messages.push(userMessage);
 
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
-        const result = await this.getCompletion(prompt, opts.onProgress || null);
+
+        let reply = '';
+        if (this.modelOptions.stream) {
+            await this.getCompletion(prompt, (message) => {
+                const token = message.choices[0].text;
+                if (this.options.debug) {
+                    console.debug(token);
+                }
+                opts.onProgress(token);
+                reply += token;
+            });
+        } else {
+            const result = await this.getCompletion(prompt, null);
+            if (this.options.debug) {
+                console.debug(JSON.stringify(result));
+            }
+            reply = result.choices[0].text;
+        }
+
+        // avoids some rendering issues when using the CLI app
         if (this.options.debug) {
-            console.debug(JSON.stringify(result));
             console.debug();
         }
 
-        const reply = result.choices[0].text.trim();
+        reply = reply.trim();
 
         const replyMessage = {
             id: crypto.randomUUID(),
