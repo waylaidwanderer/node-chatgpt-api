@@ -48,32 +48,24 @@ let parentMessageId = null;
 
 const availableCommands = [
     {
-        name: 'View chat commands',
-        value: 'commands',
-    },
-    {
         name: 'Resume last conversation',
-        value: 'resume',
+        value: '!resume',
     },
     {
         name: 'Start new conversation',
-        value: 'new',
+        value: '!new',
     },
     {
         name: 'Copy conversation to clipboard',
-        value: 'copy',
-    },
-    {
-        name: 'List conversations',
-        value: 'list',
+        value: '!copy',
     },
     {
         name: 'Delete all conversations',
-        value: 'delete-all',
+        value: '!delete-all',
     },
     {
         name: 'Exit ChatGPT CLI',
-        value: 'exit',
+        value: '!exit',
     },
 ];
 
@@ -172,15 +164,15 @@ async function commandMenu() {
         },
     ]);
     switch (command) {
-        case 'exit':
+        case '!exit':
             return true;
-        case 'resume':
+        case '!resume':
             return resumeConversation();
-        case 'new':
+        case '!new':
             return newConversation();
-        case 'delete-all':
+        case '!delete-all':
             return deleteAllConversations();
-        case 'copy':
+        case '!copy':
             return copyConversation();
         default:
             logWarning('Not implemented yet.');
