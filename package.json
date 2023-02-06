@@ -38,6 +38,7 @@
     "fastify": "^4.11.0",
     "gpt-3-encoder": "^1.1.4",
     "inquirer": "^9.1.4",
+    "inquirer-autocomplete-prompt": "^3.0.0",
     "keyv": "^4.5.2",
     "keyv-file": "^0.2.0",
     "node-fetch": "^3.3.0",
