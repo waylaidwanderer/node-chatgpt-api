@@ -53,8 +53,8 @@ export default class ChatGPTClient {
 
     async getCompletion(prompt, onProgress) {
         const modelOptions = { ...this.modelOptions };
-        if (modelOptions.stream && typeof onProgress !== 'function') {
-            throw new Error('onProgress must be a function when using stream mode.');
+        if (typeof onProgress === 'function') {
+            modelOptions.stream = true;
         }
         modelOptions.prompt = prompt;
         const debug = this.options.debug;
@@ -129,8 +129,10 @@ export default class ChatGPTClient {
         message,
         opts = {},
     ) {
-        if (this.modelOptions.stream && typeof opts.onProgress !== 'function') {
-            throw new Error('onProgress must be a function when using stream mode.');
+        const modelOptions = { ...this.modelOptions };
+
+        if (typeof opts.onProgress === 'function') {
+            modelOptions.stream = true;
         }
 
         const conversationId = opts.conversationId || crypto.randomUUID();
