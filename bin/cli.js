@@ -91,15 +91,25 @@ async function conversation() {
             message: 'Write a message:',
             searchText: '​',
             emptyText: '​',
-            source: (answers, input) => {
-                return Promise.resolve(
-                    input ? availableCommands.filter((command) => command.value.startsWith(input)) : []
-                );
-            }
+            suggestOnly: true,
+            validate: (choice, answers) => {
+                return true;
+            },
+            source: () => Promise.resolve([]),
         },
     ]);
     // hiding the ugly autocomplete hint
     prompt.ui.activePrompt.firstRender = false;
+    // The below is a hack to allow selecting items from the autocomplete menu while also being able to submit messages.
+    // This basically simulates a hybrid between having `suggestOnly: false` and `suggestOnly: true`.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    prompt.ui.activePrompt.opt.source = (answers, input) => {
+        if (!input) {
+            return [];
+        }
+        prompt.ui.activePrompt.opt.suggestOnly = !input.startsWith('!');
+        return availableCommands.filter((command) => command.value.startsWith(input));
+    };
     let { message } = await prompt;
     message = message.trim();
     if (!message) {
