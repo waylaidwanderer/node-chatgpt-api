@@ -71,7 +71,6 @@ const availableCommands = [
 ];
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
-console.log(inquirer.prompt.prompts['autocomplete']);
 
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
 
@@ -81,15 +80,13 @@ await conversation();
 
 async function conversation() {
     console.log('Type "!" to access the command menu.');
-    let { message } = await inquirer.prompt([
+    const prompt = inquirer.prompt([
         {
             type: 'autocomplete',
             name: 'message',
             message: 'Write a message:',
-            suggestOnly: true,
             searchText: '​',
             emptyText: '​',
-            firstRender: false,
             source: (answers, input) => {
                 return Promise.resolve(
                     input ? availableCommands.filter((command) => command.value.startsWith(input)) : []
@@ -97,6 +94,9 @@ async function conversation() {
             }
         },
     ]);
+    // hiding the ugly autocomplete hint
+    prompt.ui.activePrompt.firstRender = false;
+    let { message } = await prompt;
     message = message.trim();
     if (!message) {
         return conversation();
@@ -165,6 +165,10 @@ async function deleteAllConversations() {
 }
 
 async function copyConversation() {
+    if (!conversationId) {
+        logWarning('No conversation to copy.');
+        return conversation();
+    }
     const { messages } = await chatGptClient.conversationsCache.get(conversationId);
     // get the last message ID
     const lastMessageId = messages[messages.length - 1].id;
