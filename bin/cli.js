@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import { pathToFileURL } from 'url'
+import { KeyvFile } from 'keyv-file';
 import ChatGPTClient from '../src/ChatGPTClient.js';
 import boxen from 'boxen';
 import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
-import { KeyvFile } from 'keyv-file';
+import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -48,26 +49,29 @@ let parentMessageId = null;
 
 const availableCommands = [
     {
-        name: 'Resume last conversation',
+        name: '!resume - Resume last conversation',
         value: '!resume',
     },
     {
-        name: 'Start new conversation',
+        name: '!new - Start new conversation',
         value: '!new',
     },
     {
-        name: 'Copy conversation to clipboard',
+        name: '!copy - Copy conversation to clipboard',
         value: '!copy',
     },
     {
-        name: 'Delete all conversations',
+        name: '!delete-all - Delete all conversations',
         value: '!delete-all',
     },
     {
-        name: 'Exit ChatGPT CLI',
+        name: '!exit - Exit ChatGPT CLI',
         value: '!exit',
     },
 ];
+
+inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
+console.log(inquirer.prompt.prompts['autocomplete']);
 
 const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
 
@@ -79,21 +83,42 @@ async function conversation() {
     console.log('Type "!" to access the command menu.');
     let { message } = await inquirer.prompt([
         {
-            type: 'input',
+            type: 'autocomplete',
             name: 'message',
             message: 'Write a message:',
+            suggestOnly: true,
+            searchText: '​',
+            emptyText: '​',
+            firstRender: false,
+            source: (answers, input) => {
+                return Promise.resolve(
+                    input ? availableCommands.filter((command) => command.value.startsWith(input)) : []
+                );
+            }
         },
     ]);
     message = message.trim();
     if (!message) {
         return conversation();
     }
-    if (message === '!exit') {
-        return true;
+    if (message.startsWith('!')) {
+        switch (message) {
+            case '!resume':
+                return resumeConversation();
+            case '!new':
+                return newConversation();
+            case '!copy':
+                return copyConversation();
+            case '!delete-all':
+                return deleteAllConversations();
+            case '!exit':
+                return true;
+        }
     }
-    if (message === '!') {
-        return commandMenu();
-    }
+    return onMessage(message);
+}
+
+async function onMessage(message) {
     const chatGptLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
     const spinner = ora(`${chatGptLabel} is typing...`);
     spinner.prefixText = '\n';
@@ -152,32 +177,6 @@ async function copyConversation() {
         logError(error?.message || error);
     }
     return conversation();
-}
-
-async function commandMenu() {
-    const { command } = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'command',
-            message: 'Select an option:',
-            choices: availableCommands,
-        },
-    ]);
-    switch (command) {
-        case '!exit':
-            return true;
-        case '!resume':
-            return resumeConversation();
-        case '!new':
-            return newConversation();
-        case '!delete-all':
-            return deleteAllConversations();
-        case '!copy':
-            return copyConversation();
-        default:
-            logWarning('Not implemented yet.');
-            return conversation();
-    }
 }
 
 function logError(message) {
