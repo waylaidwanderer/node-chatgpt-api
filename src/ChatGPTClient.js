@@ -68,7 +68,7 @@ export default class ChatGPTClient {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${this.apiKey}`,
             },
-            body: JSON.stringify(this.modelOptions),
+            body: JSON.stringify(modelOptions),
         };
         if (modelOptions.stream) {
             let done = false;
@@ -129,12 +129,6 @@ export default class ChatGPTClient {
         message,
         opts = {},
     ) {
-        const modelOptions = { ...this.modelOptions };
-
-        if (typeof opts.onProgress === 'function') {
-            modelOptions.stream = true;
-        }
-
         const conversationId = opts.conversationId || crypto.randomUUID();
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
@@ -158,7 +152,7 @@ export default class ChatGPTClient {
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
 
         let reply = '';
-        if (this.modelOptions.stream) {
+        if (typeof opts.onProgress === 'function') {
             await this.getCompletion(prompt, (message) => {
                 const token = message.choices[0].text;
                 if (this.options.debug) {

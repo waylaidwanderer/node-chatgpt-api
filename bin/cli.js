@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs';
-import { pathToFileURL } from 'url'
+import { pathToFileURL } from 'url';
 import { KeyvFile } from 'keyv-file';
 import ChatGPTClient from '../src/ChatGPTClient.js';
 import boxen from 'boxen';
@@ -133,11 +133,21 @@ async function conversation() {
 
 async function onMessage(message) {
     const chatGptLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
-    const spinner = ora(`${chatGptLabel} is typing...`);
-    spinner.prefixText = '\n';
+    let reply = '';
+    const spinnerPrefix = `${chatGptLabel} is typing...`;
+    const spinner = ora(spinnerPrefix);
+    spinner.prefixText = '\n   ';
     spinner.start();
     try {
-        const response = await chatGptClient.sendMessage(message, { conversationId, parentMessageId });
+        const response = await chatGptClient.sendMessage(message, {
+            conversationId,
+            parentMessageId,
+            onProgress: (token) => {
+                reply += token;
+                const output = boxen(`${reply}█`, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+                spinner.text = `${spinnerPrefix}\n${output}`;
+            },
+        });
         clipboard.write(response.response).then(() => {}).catch(() => {});
         spinner.stop();
         conversationId = response.conversationId;
@@ -146,10 +156,11 @@ async function onMessage(message) {
             conversationId,
             parentMessageId,
         });
-        console.log(boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true }));
+        const output = boxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+        console.log(output);
     } catch (error) {
         spinner.stop();
-        logError(error?.json?.error?.message || error.body);
+        logError(error?.json?.error?.message || error.body || error || 'Unknown error');
     }
     return conversation();
 }
@@ -214,7 +225,11 @@ async function copyConversation() {
 }
 
 function logError(message) {
-    console.log(boxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+    try {
+        console.log(boxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+    } catch (error) {
+        console.error(message);
+    }
 }
 
 function logSuccess(message) {
