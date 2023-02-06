@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
+import { fetchEventSource } from '@fortaine/fetch-event-source';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-20221122';
 
@@ -50,19 +51,65 @@ export default class ChatGPTClient {
         this.conversationsCache = new Keyv(cacheOptions);
     }
 
-    async getCompletion(prompt) {
-        this.modelOptions.prompt = prompt;
-        if (this.options.debug) {
-            console.debug(this.modelOptions);
+    async getCompletion(prompt, onProgress) {
+        const modelOptions = { ...this.modelOptions };
+        if (typeof onProgress === 'function') {
+            modelOptions.stream = true;
         }
-        const response = await fetch('https://api.openai.com/v1/completions', {
+        modelOptions.prompt = prompt;
+        const debug = this.options.debug;
+        if (debug) {
+            console.debug(modelOptions);
+        }
+        const url = 'https://api.openai.com/v1/completions';
+        const opts = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${this.apiKey}`,
             },
-            body: JSON.stringify(this.modelOptions),
-        });
+            body: JSON.stringify(modelOptions),
+        };
+        if (modelOptions.stream) {
+            return new Promise((resolve, reject) => {
+                const controller = new AbortController();
+                fetchEventSource(url, {
+                    ...opts,
+                    signal: controller.signal,
+                    onopen(response) {
+                        if (response.status === 200) {
+                            return;
+                        }
+                        if (debug) {
+                            console.debug(response);
+                        }
+                        throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
+                    },
+                    onclose() {
+                        throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
+                    },
+                    onerror(err) {
+                        if (debug) {
+                            console.debug(err);
+                        }
+                        reject(err);
+                    },
+                    onmessage(message) {
+                        if (debug) {
+                            console.debug(message);
+                        }
+                        if (message.data === '[DONE]') {
+                            onProgress('[DONE]');
+                            controller.abort();
+                            resolve();
+                            return;
+                        }
+                        onProgress(JSON.parse(message.data));
+                    },
+                });
+            });
+        }
+        const response = await fetch(url, opts);
         if (response.status !== 200) {
             const body = await response.text();
             const error = new Error(`Failed to send message. HTTP ${response.status} - ${body}`);
@@ -102,13 +149,34 @@ export default class ChatGPTClient {
         conversation.messages.push(userMessage);
 
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
-        const result = await this.getCompletion(prompt);
+
+        let reply = '';
+        if (typeof opts.onProgress === 'function') {
+            await this.getCompletion(prompt, (message) => {
+                if (message === '[DONE]') {
+                    return;
+                }
+                const token = message.choices[0].text;
+                if (this.options.debug) {
+                    console.debug(token);
+                }
+                opts.onProgress(token);
+                reply += token;
+            });
+        } else {
+            const result = await this.getCompletion(prompt, null);
+            if (this.options.debug) {
+                console.debug(JSON.stringify(result));
+            }
+            reply = result.choices[0].text;
+        }
+
+        // avoids some rendering issues when using the CLI app
         if (this.options.debug) {
-            console.debug(JSON.stringify(result));
             console.debug();
         }
 
-        const reply = result.choices[0].text.trim();
+        reply = reply.trim();
 
         const replyMessage = {
             id: crypto.randomUUID(),

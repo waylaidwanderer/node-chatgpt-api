@@ -32,10 +32,12 @@
     "api-wrapper"
   ],
   "dependencies": {
+    "@fortaine/fetch-event-source": "^3.0.6",
     "boxen": "^7.0.1",
     "clipboardy": "^3.0.0",
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
+    "fastify-sse-v2": "^3.0.0",
     "gpt-3-encoder": "^1.1.4",
     "inquirer": "^9.1.4",
     "inquirer-autocomplete-prompt": "^3.0.0",
