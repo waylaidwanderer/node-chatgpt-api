@@ -92,9 +92,6 @@ async function conversation() {
             searchText: '​',
             emptyText: '​',
             suggestOnly: true,
-            validate: (choice, answers) => {
-                return true;
-            },
             source: () => Promise.resolve([]),
         },
     ]);
