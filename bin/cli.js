@@ -49,6 +49,10 @@ let parentMessageId = null;
 
 const availableCommands = [
     {
+        name: '!editor - Open the editor (for multi-line messages)',
+        value: '!editor',
+    },
+    {
         name: '!resume - Resume last conversation',
         value: '!resume',
     },
@@ -103,6 +107,8 @@ async function conversation() {
     }
     if (message.startsWith('!')) {
         switch (message) {
+            case '!editor':
+                return useEditor();
             case '!resume':
                 return resumeConversation();
             case '!new':
@@ -139,6 +145,23 @@ async function onMessage(message) {
         logError(error?.json?.error?.message || error.body);
     }
     return conversation();
+}
+
+async function useEditor() {
+    let { message } = await inquirer.prompt([
+        {
+            type: 'editor',
+            name: 'message',
+            message: 'Write a message:',
+            waitUserInput: false,
+        },
+    ]);
+    message = message.trim();
+    if (!message) {
+        return conversation();
+    }
+    console.log(message);
+    return onMessage(message);
 }
 
 async function resumeConversation() {
