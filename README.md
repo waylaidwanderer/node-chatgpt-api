@@ -2,13 +2,24 @@
   <img alt="CLI demo" src="./demos/cli.svg">
 </p>
 
-# Update (2023-02-02)
+## Updates
+<details open>
+<summary><h4>2023-02-07</h4></summary>
+
+Trying to use `text-chat-davinci-002-20221122` with the OpenAI API now returns a 404 error.
+You may use the `text-davinci-003` model instead as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**
+
+Please hold for further updates as we investigate further workarounds.
+</details>
+<details>
+<summary><strong>2023-02-02</strong></summary>
 
 ~~Trying to use `text-chat-davinci-002-20230126` with the OpenAI API now returns a 404 error. Someone has already found the new model name, but they are unwilling to share at this time. I will update this repository once I find the new model. If you have any leads, please open an issue or a pull request.~~
 
 ~~In the meantime, I've added support for models like `text-davinci-003`, which you can use as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**~~
 
 Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-chat-davinci-002-20221122`. I've updated the library to use this model.
+</details>
 
 # ChatGPT API
 
