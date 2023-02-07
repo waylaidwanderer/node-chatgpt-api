@@ -71,42 +71,47 @@ export default class ChatGPTClient {
             body: JSON.stringify(modelOptions),
         };
         if (modelOptions.stream) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 const controller = new AbortController();
-                fetchEventSource(url, {
-                    ...opts,
-                    signal: controller.signal,
-                    onopen(response) {
-                        if (response.status === 200) {
-                            return;
-                        }
-                        if (debug) {
-                            console.debug(response);
-                        }
-                        throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
-                    },
-                    onclose() {
-                        throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
-                    },
-                    onerror(err) {
-                        if (debug) {
-                            console.debug(err);
-                        }
-                        reject(err);
-                    },
-                    onmessage(message) {
-                        if (debug) {
-                            console.debug(message);
-                        }
-                        if (message.data === '[DONE]') {
-                            onProgress('[DONE]');
-                            controller.abort();
-                            resolve();
-                            return;
-                        }
-                        onProgress(JSON.parse(message.data));
-                    },
-                });
+                try {
+                    await fetchEventSource(url, {
+                        ...opts,
+                        signal: controller.signal,
+                        onopen(response) {
+                            if (response.status === 200) {
+                                return;
+                            }
+                            if (debug) {
+                                console.debug(response);
+                            }
+                            throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
+                        },
+                        onclose() {
+                            throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
+                        },
+                        onerror(err) {
+                            if (debug) {
+                                console.debug(err);
+                            }
+                            // rethrow to stop the operation
+                            throw err;
+                        },
+                        onmessage(message) {
+                            if (debug) {
+                                console.debug(message);
+                            }
+                            if (message.data === '[DONE]') {
+                                onProgress('[DONE]');
+                                controller.abort();
+                                resolve();
+                                return;
+                            }
+                            onProgress(JSON.parse(message.data));
+                        },
+                    });
+                } catch (err) {
+                    reject(err);
+                }
             });
         }
         const response = await fetch(url, opts);
