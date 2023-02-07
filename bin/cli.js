@@ -148,6 +148,7 @@ async function onMessage(message) {
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
+        // TODO: for streamed responses, add reply to existing conversation even if error
         clipboard.write(response.response).then(() => {}).catch(() => {});
         spinner.stop();
         conversationId = response.conversationId;
