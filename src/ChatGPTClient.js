@@ -77,14 +77,23 @@ export default class ChatGPTClient {
                     await fetchEventSource(url, {
                         ...opts,
                         signal: controller.signal,
-                        onopen(response) {
+                        async onopen(response) {
                             if (response.status === 200) {
                                 return;
                             }
                             if (debug) {
                                 console.debug(response);
                             }
-                            throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
+                            let error;
+                            try {
+                                const body = await response.text();
+                                error = new Error(`Failed to send message. HTTP ${response.status} - ${body}`);
+                                error.status = response.status;
+                                error.json = JSON.parse(body);
+                            } catch {
+                                error = error || new Error(`Failed to send message. HTTP ${response.status}`);
+                            }
+                            throw error;
                         },
                         onclose() {
                             throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
