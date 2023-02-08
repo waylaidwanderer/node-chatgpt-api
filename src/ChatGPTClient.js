@@ -2,7 +2,7 @@ import './fetch-polyfill.js';
 import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
-import { fetchEventSource } from '@fortaine/fetch-event-source';
+import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-20221122';
 

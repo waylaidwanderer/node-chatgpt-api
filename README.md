@@ -65,7 +65,7 @@ By itself, the model does not have any conversational support, so this library u
 ## Getting Started
 
 ### Prerequisites
-- Node.js
+- Node.js >= 16.15.0
 - npm
 - Docker (optional, for API server)
 - [OpenAI API key](https://platform.openai.com/account/api-keys)
