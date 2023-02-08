@@ -6,10 +6,12 @@
 <details open>
 <summary><h4>2023-02-07</h4></summary>
 
-Trying to use `text-chat-davinci-002-20221122` with the OpenAI API now returns a 404 error.
-You may use the `text-davinci-003` model instead as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**
+The roller coaster has reached the next stop. `text-chat-davinci-002-20221122` is back up again.
 
-Please hold for further updates as we investigate further workarounds.
+~~Trying to use `text-chat-davinci-002-20221122` with the OpenAI API now returns a 404 error.
+You may use the `text-davinci-003` model instead as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**~~
+
+~~Please hold for further updates as we investigate further workarounds.~~
 </details>
 <details>
 <summary><strong>2023-02-02</strong></summary>
