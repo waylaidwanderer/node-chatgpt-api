@@ -4,6 +4,15 @@
 
 ## Updates
 <details open>
+<summary><h4>2023-02-08</h4></summary>
+
+Even though `text-chat-davinci-002-20221122` is back up again, it seems like it's constantly overloaded and returns a 429 error. It's likely that OpenAI only dedicated a small amount of resources to this model to prevent it being widely used by the public. Additionally, I've heard that newer versions are now access-locked to OpenAI employees and partners, so it's unlikely that we'll be able to find any workarounds until the model is officially released.
+
+You may use the `text-davinci-003` model instead as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still pretty good in most cases. **Please note that using `text-davinci-003` will cost you credits ($).**
+
+I will be re-adding support for the browser-based ChatGPT for the API server and CLI. Please star and watch this repository for updates.
+</details>
+<details>
 <summary><h4>2023-02-07</h4></summary>
 
 The roller coaster has reached the next stop. `text-chat-davinci-002-20221122` is back up again.
@@ -32,7 +41,7 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
 
-This is an implementation of [ChatGPT](https://chat.openai.com/chat) using the official ChatGPT raw model, `text-chat-davinci-002`. This model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
+This is an implementation of [ChatGPT](https://chat.openai.com/chat) using the official ChatGPT raw model, `text-chat-davinci-002`. The model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
 
 As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT).
 
