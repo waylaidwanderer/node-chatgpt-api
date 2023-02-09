@@ -181,7 +181,10 @@ export default class BingAIClient {
                             return;
                         }
                         this.cleanupWebSocketConnection(ws);
-                        resolve(message);
+                        resolve({
+                            message,
+                            conversationExpiryTime: event?.item?.conversationExpiryTime,
+                        });
                         return;
                     default:
                         return;
@@ -195,11 +198,15 @@ export default class BingAIClient {
         }
         ws.send(`${messageJson}`);
 
-        const reply = await messagePromise;
+        const {
+            message: reply,
+            conversationExpiryTime,
+        } = await messagePromise;
         return {
             conversationSignature,
             conversationId,
             clientId,
+            conversationExpiryTime,
             reply: reply.text,
             details: reply,
             invocationId: invocationId + 1,
