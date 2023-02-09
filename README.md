@@ -248,12 +248,16 @@ Alternatively, you can install and run the package directly.
     - using `docker-compose up` (requires Docker)
 
 #### Usage
-To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format:
+To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format.
+Optional parameters are only necessary for conversations that span multiple requests:
 ```JSON
 {
     "message": "Hello, how are you today?",
     "conversationId": "your-conversation-id (optional)",
-    "parentMessageId": "your-parent-message-id (optional)"
+    "parentMessageId": "your-parent-message-id (optional, for `ChatGPTClient` only)",
+    "conversationSignature": "your-conversation-signature (optional, for `BingAIClient` only)",
+    "clientId": "your-client-id (optional, for `BingAIClient` only)",
+    "invocationId": "your-invocation-id (optional, for `BingAIClient` only)",
 }
 ```
 The server will return a JSON object containing ChatGPT's response:
@@ -262,7 +266,11 @@ The server will return a JSON object containing ChatGPT's response:
 {
     "response": "I'm doing well, thank you! How are you?",
     "conversationId": "your-conversation-id",
-    "messageId": "response-message-id"
+    "messageId": "response-message-id (for `ChatGPTClient` only)",
+    "conversationSignature": "your-conversation-signature (for `BingAIClient` only)",
+    "clientId": "your-client-id (for `BingAIClient` only)",
+    "invocationId": "your-invocation-id (for `BingAIClient` only - pass this new value back into subsequent requests as-is)",
+    "details": "additional details about the AI's response (for `BingAIClient` only)"
 }
 ```
 

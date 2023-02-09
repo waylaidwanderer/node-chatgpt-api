@@ -212,7 +212,7 @@ export default class BingAIClient {
             clientId,
             invocationId: invocationId + 1,
             conversationExpiryTime,
-            reply: reply.text,
+            response: reply.text,
             details: reply,
         };
     }
