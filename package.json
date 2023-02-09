@@ -21,15 +21,21 @@
     "url": "git+https://github.com/waylaidwanderer/node-chatgpt-api.git"
   },
   "keywords": [
+    "api",
+    "cli",
+    "bing",
+    "api-server",
+    "openai",
+    "api-rest",
+    "gpt",
+    "bing-api",
+    "bing-search",
+    "gpt-3",
+    "openai-api",
+    "gpt-4",
     "chatgpt",
     "chatgpt-api",
-    "openai",
-    "openai-api",
-    "gpt",
-    "gpt3",
-    "gpt-3",
-    "api",
-    "api-wrapper"
+    "bing-chat"
   ],
   "dependencies": {
     "@fastify/cors": "^8.2.0",
