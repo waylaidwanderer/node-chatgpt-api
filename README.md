@@ -4,7 +4,13 @@
 
 ## Updates
 <details open>
-<summary><h4>2023-02-08</h4></summary>
+<summary><strong>2023-02-09</strong></summary>
+
+Experience the power of Bing's GPT-4 version of ChatGPT with [`BingAIClient`](src/BingAIClient.js) (experimental).
+**The API server and CLI still need to be updated to support this**, but you can [use the client](#module) directly right now.
+</details>
+<details>
+<summary><strong>2023-02-08</strong></summary>
 
 Even though `text-chat-davinci-002-20221122` is back up again, it seems like it's constantly overloaded and returns a 429 error. It's likely that OpenAI only dedicated a small amount of resources to this model to prevent it being widely used by the public. Additionally, I've heard that newer versions are now access-locked to OpenAI employees and partners, so it's unlikely that we'll be able to find any workarounds until the model is officially released.
 
@@ -13,7 +19,7 @@ You may use the `text-davinci-003` model instead as a drop-in replacement. Keep 
 I will be re-adding support for the browser-based ChatGPT for the API server and CLI. Please star and watch this repository for updates.
 </details>
 <details>
-<summary><h4>2023-02-07</h4></summary>
+<summary><strong>2023-02-07</strong></summary>
 
 The roller coaster has reached the next stop. `text-chat-davinci-002-20221122` is back up again.
 
@@ -34,20 +40,26 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
 
 # ChatGPT API
 
->  A ChatGPT implementation using the official ChatGPT model via OpenAI's API.
+>  A ChatGPT implementation with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT model via OpenAI's API. Available as a Node.js module, REST API server, and CLI app.
 
 [![NPM](https://img.shields.io/npm/v/@waylaidwanderer/chatgpt-api.svg)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
 [![npm](https://img.shields.io/npm/dt/@waylaidwanderer/chatgpt-api)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
 
-This is an implementation of [ChatGPT](https://chat.openai.com/chat) using the official ChatGPT raw model, `text-chat-davinci-002`. The model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
+This is an implementation of [ChatGPT](https://chat.openai.com/chat), with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT raw model, `text-chat-davinci-002`.
+
+#### About Bing's GPT-4 version of ChatGPT
+An experimental client for Bing's GPT-4 version of ChatGPT is available in [`BingAIClient`](src/BingAIClient.js). It works much like ChatGPT, but it's powered by GPT-4 instead of GPT-3. For more information on its capabilities and limitations, see [this Reddit comment](https://www.reddit.com/r/ChatGPT/comments/10xjda1/comment/j7snwxx/?utm_source=reddit&utm_medium=web2x&context=3).
+
+#### About `text-chat-davinci-002`
+The model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
 
 As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT).
 
 The previous version of this library that used [transitive-bullshit/chatgpt-api](https://github.com/transitive-bullshit/chatgpt-api) is still available on [the `archive/old-version` branch](https://github.com/waylaidwanderer/node-chatgpt-api/tree/archive/old-version).
 
-By itself, the model does not have any conversational support, so this library uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
+By itself, the model does not have any conversational support, so `ChatGPTClient` uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
 
 # Table of Contents
    * [Features](#features)
@@ -88,8 +100,41 @@ By itself, the model does not have any conversational support, so this library u
 npm i @waylaidwanderer/chatgpt-api
 ```
 
+<details open>
+<summary><strong>BingAIClient</strong></summary>
+
 ```JS
-import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
+import { BingAIClient } from '@waylaidwanderer/chatgpt-api';
+
+const bingAIClient = new BingAIClient({
+  userToken: '', // "_U" cookie from bing.com
+  debug: false,
+});
+
+let response = await bingAIClient.sendMessage('Write a short poem about cats', {
+  onProgress: (token) => {
+    process.stdout.write(token);
+  },
+});
+console.log(response);
+
+response = await bingAIClient.sendMessage('Now write it in French', {
+  conversationSignature: response.conversationSignature,
+  conversationId: response.conversationId,
+  clientId: response.clientId,
+  invocationId: response.invocationId,
+  onProgress: (token) => {
+    process.stdout.write(token);
+  },
+});
+console.log(response);
+```
+</details>
+<details>
+<summary><strong>ChatGPTClient</strong></summary>
+
+```JS
+import { ChatGPTClient } from '@waylaidwanderer/chatgpt-api';
 
 const clientOptions = {
   // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
@@ -132,6 +177,7 @@ const response3 = await chatGptClient.sendMessage('Now write it in French.', {
 });
 console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.
 ```
+</details>
 
 ### API Server
 

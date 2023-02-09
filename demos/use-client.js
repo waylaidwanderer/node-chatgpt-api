@@ -1,5 +1,5 @@
 // import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
-import ChatGPTClient from '../src/ChatGPTClient.js';
+import { ChatGPTClient } from '../index.js';
 
 const clientOptions = {
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions

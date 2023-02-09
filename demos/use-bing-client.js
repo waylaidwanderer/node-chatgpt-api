@@ -1,4 +1,4 @@
-import BingAIClient from '../src/BingAIClient.js';
+import { BingAIClient } from '../index.js';
 
 const bingAIClient = new BingAIClient({
     userToken: '', // "_U" cookie from bing.com
@@ -12,7 +12,6 @@ let response = await bingAIClient.sendMessage('Write a short poem about cats', {
 });
 console.log(response);
 
-// TODO: why isn't this working properly
 response = await bingAIClient.sendMessage('Now write it in French', {
     conversationSignature: response.conversationSignature,
     conversationId: response.conversationId,
