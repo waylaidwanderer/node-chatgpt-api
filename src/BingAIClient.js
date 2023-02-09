@@ -102,8 +102,12 @@ export default class BingAIClient {
             conversationId,
             clientId,
             invocationId = 0,
-            onProgress = () => {},
+            onProgress,
         } = opts;
+
+        if (typeof onProgress !== 'function') {
+            onProgress = () => {};
+        }
 
         if (!conversationSignature || !conversationId || !clientId) {
             ({
@@ -206,10 +210,10 @@ export default class BingAIClient {
             conversationSignature,
             conversationId,
             clientId,
+            invocationId: invocationId + 1,
             conversationExpiryTime,
             reply: reply.text,
             details: reply,
-            invocationId: invocationId + 1,
         };
     }
 }

@@ -5,6 +5,7 @@ import { FastifySSEPlugin } from "fastify-sse-v2";
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
+import BingAIClient from '../src/BingAIClient.js';
 import { KeyvFile } from 'keyv-file';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
@@ -42,7 +43,24 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
-const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
+const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+
+let client;
+switch (clientToUse) {
+    case 'bing':
+        client = new BingAIClient({
+            userToken: settings.bingAiClient.userToken,
+            debug: settings.bingAiClient.debug,
+        });
+        break;
+    default:
+        client = new ChatGPTClient(
+            settings.openaiApiKey,
+            settings.chatGptClient,
+            settings.cacheOptions,
+        );
+        break;
+}
 
 const server = fastify();
 
@@ -53,8 +71,6 @@ await server.register(cors, {
 
 server.post('/conversation', async (request, reply) => {
     const body = request.body || {};
-
-    const conversationId = body.conversationId ? body.conversationId.toString() : undefined;
 
     let onProgress;
     if (body.stream === true) {
@@ -81,9 +97,12 @@ server.post('/conversation', async (request, reply) => {
             throw invalidError;
         }
         const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
-        result = await chatGptClient.sendMessage(body.message, {
-            conversationId,
+        result = await client.sendMessage(body.message, {
+            conversationId: body.conversationId ? body.conversationId.toString() : undefined,
             parentMessageId,
+            conversationSignature: body.conversationSignature,
+            clientId: body.clientId,
+            invocationId: body.invocationId,
             onProgress,
         });
     } catch (e) {
@@ -106,7 +125,7 @@ server.post('/conversation', async (request, reply) => {
         } else if (settings.apiOptions?.debug) {
             console.debug(error);
         }
-        const message = error?.data?.message || 'There was an error communicating with ChatGPT.';
+        const message = error?.data?.message || `There was an error communicating with ${clientToUse === 'bing' ? 'Bing' : 'ChatGPT'}.`;
         if (body.stream === true) {
             reply.sse({
                 id: '',
