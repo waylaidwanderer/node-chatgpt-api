@@ -126,7 +126,7 @@ export default class BingAIClient {
                         'responsible_ai_policy_235',
                         'enablemm',
                     ],
-                    isStartOfSession: Boolean(conversationSignature),
+                    isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
                         inputMethod: 'Keyboard',
@@ -188,7 +188,11 @@ export default class BingAIClient {
             });
         });
 
-        ws.send(JSON.stringify(obj) + "");
+        const messageJson = JSON.stringify(obj);
+        if (this.debug) {
+            console.debug(messageJson);
+        }
+        ws.send(`${messageJson}`);
 
         const reply = await messagePromise;
         return {
