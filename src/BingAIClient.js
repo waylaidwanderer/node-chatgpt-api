@@ -149,38 +149,39 @@ export default class BingAIClient {
             let replySoFar = '';
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
-                const messages = objects.map((object) => {
+                const events = objects.map((object) => {
                     try {
                         return JSON.parse(object);
                     } catch (error) {
                         return object;
                     }
                 }).filter(message => message);
-                if (messages.length === 0) {
+                if (events.length === 0) {
                     return;
                 }
-                const message = messages[0];
-                switch (message.type) {
+                const event = events[0];
+                switch (event.type) {
                     case 1:
-                        if (message?.arguments[0]?.messages[0]?.author !== 'bot') {
+                        const messages = event?.arguments?.[0]?.messages;
+                        if (messages[0]?.author !== 'bot') {
                             return;
                         }
-                        const updatedText = message?.arguments[0]?.messages[0]?.text;
-                        if (!updatedText) {
-                            return;
-                        }
-                        if (updatedText === replySoFar) {
-                            // We can skip checking for type 2 messages since those take time to generate suggestions
-                            // for new user messages which is a waste of time.
-                            // This should work fine instead.
-                            this.cleanupWebSocketConnection(ws);
-                            resolve(updatedText);
+                        const updatedText = messages[0]?.text;
+                        if (!updatedText || updatedText === replySoFar) {
                             return;
                         }
                         // get the difference between the current text and the previous text
                         const difference = updatedText.substring(replySoFar.length);
                         onProgress(difference);
                         replySoFar = updatedText;
+                        return;
+                    case 2:
+                        const message = event?.item?.messages?.[1];
+                        if (message?.author !== 'bot') {
+                            return;
+                        }
+                        this.cleanupWebSocketConnection(ws);
+                        resolve(message);
                         return;
                     default:
                         return;
@@ -199,7 +200,8 @@ export default class BingAIClient {
             conversationSignature,
             conversationId,
             clientId,
-            reply,
+            reply: reply.text,
+            details: reply,
             invocationId: invocationId + 1,
         };
     }
