@@ -7,7 +7,7 @@
 <summary><strong>2023-02-09</strong></summary>
 
 Experience the power of Bing's GPT-4 version of ChatGPT with [`BingAIClient`](src/BingAIClient.js) (experimental).
-**The API server and CLI still need to be updated to support this**, but you can [use the client](#module) directly right now.
+**The ~~API server and~~ CLI still need to be updated to support this**, but you can [use the client](#module) directly right now.
 *Please note that if your account is still wait-listed, you will not be able to use this client.*
 </details>
 <details>
