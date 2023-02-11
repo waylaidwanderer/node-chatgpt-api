@@ -6,7 +6,7 @@ export default {
         modelOptions: {
             // The model is set to text-chat-davinci-002-20221122 by default, but you can override
             // it and any other parameters here
-            model: 'text-chat-davinci-002-20221122',
+            model: process.env.OPENAI_MODEL || 'text-chat-davinci-002-20221122',
         },
         // (Optional) Set custom instructions instead of "You are ChatGPT...".
         // promptPrefix: 'You are Bob, a cowboy in Western times...',
