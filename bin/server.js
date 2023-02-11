@@ -70,7 +70,7 @@ const server = fastify();
 
 await server.register(FastifySSEPlugin);
 
-server.register(fastifyStatic, {
+await server.register(fastifyStatic, {
     root: fs.realpathSync('.'),
     prefix: '/'
 })
@@ -94,7 +94,7 @@ server.post('/api/chat', async (request, reply) => {
         if (!hash) {
         throw new Error('Not Authorized')
         }
-        console.log('hash and salt: ', hash, process.env.CHAT_SALT);
+        console.log('hash and salt: ', hash);
         const bytes  = CryptoJS.AES.decrypt(hash, process.env.CHAT_SALT);
         console.log('request decrypt: ', bytes);
         const { id, openId, left, date } = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
