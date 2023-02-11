@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="terminal" baseProfile="full" viewBox="0 0 703 404" width="703" version="1.1">
+< svg  xmlns = "http://www.w3.org/2000/svg"  xmlns:xlink = "http://www.w3.org/1999/xlink"  id = "terminal"  baseProfile = "completo"  viewBox = "0 0 703 404"  ancho = "703"  versión = "1.1" >
     <defs>
         <termtosvg:template_settings xmlns:termtosvg="https://github.com/nbedos/termtosvg">
             <termtosvg:screen_geometry columns="82" rows="19"/>
@@ -240,7 +240,8 @@
                 animation-name:roll;
                 animation-timing-function: steps(1,end);
                 animation-fill-mode: forwards;
-            }
+           traducir
+}
         ]]></style>
         <style type="text/css" id="user-style">
             /* The colors defined below are the default 16 colors used for rendering text of the terminal. Adjust
