@@ -39,9 +39,11 @@
   ],
   "dependencies": {
     "@fastify/cors": "^8.2.0",
+    "@fastify/static": "^6.9.0",
     "@waylaidwanderer/fetch-event-source": "^3.0.1",
     "boxen": "^7.0.1",
     "clipboardy": "^3.0.0",
+    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "fastify-sse-v2": "^3.0.0",
