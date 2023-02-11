@@ -12,7 +12,7 @@ FROM node:lts-alpine
 # RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
 # && apk add --update --no-cache nodejs npm
 
-# # 指定工作目录
+# 指定工作目录
 WORKDIR /var/chatgpt-api
 
 # 拷贝包管理文件
@@ -28,7 +28,7 @@ RUN npm install
 # 将当前目录（dockerfile所在目录）下所有文件都拷贝到工作目录下（.dockerignore中文件除外）
 COPY . /var/chatgpt-api
 
-EXPOSE 8160
+EXPOSE 8081
 
 # 执行启动命令
 # 写多行独立的CMD命令是错误写法！只有最后一行CMD命令会被执行，之前的都会被忽略，导致业务报错。
