@@ -111,7 +111,12 @@ server.post('/conversation', async (request, reply) => {
 
     if (result !== undefined) {
         if (body.stream === true) {
-            reply.sse({ id: '', data: '[DONE]' });
+            // reply.sse({ id: '', data: '[DONE]' });
+            console.log('stream done result: ', result);
+            reply.sse({ id: '', data: '[DONE]' + JSON.stringify({
+                messageId: result?.messageId,
+                conversationId: result?.conversationId
+            }) });
         } else {
             reply.send(result);
         }
