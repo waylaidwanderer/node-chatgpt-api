@@ -59,11 +59,9 @@ This is an implementation of [ChatGPT](https://chat.openai.com/chat), with suppo
 An experimental client for Bing's GPT-4 version of ChatGPT is available in [`BingAIClient`](src/BingAIClient.js). It works much like ChatGPT, but it's powered by GPT-4 instead of GPT-3. For more information on its capabilities and limitations, see [this Reddit comment](https://www.reddit.com/r/ChatGPT/comments/10xjda1/comment/j7snwxx/?utm_source=reddit&utm_medium=web2x&context=3).
 
 #### About `text-chat-davinci-002`
-The model name `text-chat-davinci-002-20230126` was briefly leaked while I was  inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). **Usage of this model currently does not cost any credits.**
+The model name `text-chat-davinci-002-20230126` was briefly leaked while I was inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). Since then, that model and others have been disabled, but I'm keeping this repo updated with the newer versions of `text-chat-davinci-002` as we find them. **Usage of this model currently does not cost any credits.**
 
-As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT).
-
-The previous version of this library that used [transitive-bullshit/chatgpt-api](https://github.com/transitive-bullshit/chatgpt-api) is still available on [the `archive/old-version` branch](https://github.com/waylaidwanderer/node-chatgpt-api/tree/archive/old-version).
+As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) and [transitive-bullshit/chatgpt-api](https://github.com/transitive-bullshit/chatgpt-api) as we collaborated and shared knowledge.
 
 By itself, the model does not have any conversational support, so `ChatGPTClient` uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
 
@@ -81,7 +79,7 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
 
 ## Features
 - Experimental support for Bing's version of ChatGPT, powered by GPT-4.
-- Support for the official ChatGPT raw model, `text-chat-davinci-002-20221122`, via OpenAI's API.
+- Support for the official ChatGPT raw model, `text-chat-davinci-002`, via OpenAI's API.
 - Includes an API server (with Docker support) you can run to use ChatGPT in non-Node.js applications.
 - Includes a `ChatGPTClient` and `BingAIClient` class that you can use in your own Node.js applications.
 - Includes a CLI interface where you can chat with ChatGPT.
@@ -355,7 +353,7 @@ npm run cli
 ChatGPT's responses are automatically copied to your clipboard, so you can paste them into other applications.
 
 ## Caveats
-Since `text-chat-davinci-002-20221122` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.
+Since `text-chat-davinci-002` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.
 This means my implementation or the raw model may not behave exactly the same in some ways:
 - Conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system.
 - ChatGPT's model parameters (temperature, frequency penalty, etc.) are unknown, so I set some defaults that I thought would be reasonable.
