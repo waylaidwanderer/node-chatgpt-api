@@ -106,7 +106,7 @@ server.post('/api/chat', async (request, reply) => {
         // TODO: Throttle by openId
         // return chatGptHandler(req, res);
     } catch (error) {
-        res.status(400).send(error?.message || 'Auth Failed')
+        reply.code(400).send(error?.message || 'Auth Failed')
     }
     const body = request.body || {};
 
@@ -184,10 +184,13 @@ server.post('/api/chat', async (request, reply) => {
     }
 });
 
+const port = settings.apiOptions?.port || settings.port || 3000
+
 server.listen({
-    port: settings.apiOptions?.port || settings.port || 3000,
+    port,
     host: settings.apiOptions?.host || 'localhost'
 }, (error) => {
+    console.log('server started: ', port)
     if (error) {
         console.error(error);
         process.exit(1);
