@@ -4,6 +4,11 @@
 
 ## Updates
 <details open>
+<summary><strong>2023-02-10</strong></summary>
+
+I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the raw model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.
+</details>
+<details>
 <summary><strong>2023-02-09</strong></summary>
 
 Experience the power of Bing's GPT-4 version of ChatGPT with [`BingAIClient`](src/BingAIClient.js) (experimental).
