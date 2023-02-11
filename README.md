@@ -6,7 +6,9 @@
 <details open>
 <summary><strong>2023-02-10</strong></summary>
 
-I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the raw model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.
+~~I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the raw model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.~~
+
+Bad timing; `text-chat-davinci-002-sh-alpha-aoruigiofdj83` was removed shortly after, possibly due to a new model somewhere out there?
 </details>
 <details>
 <summary><strong>2023-02-09</strong></summary>
