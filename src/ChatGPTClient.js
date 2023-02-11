@@ -61,7 +61,7 @@ export default class ChatGPTClient {
         if (debug) {
             console.debug(modelOptions);
         }
-        const url = 'https://api.openai.com/v1/completions';
+        const url = this.options.reverseProxyUrl || 'https://api.openai.com/v1/completions';
         const opts = {
             method: 'POST',
             headers: {
