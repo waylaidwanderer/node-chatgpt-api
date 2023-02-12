@@ -4,6 +4,13 @@
 
 ## Updates
 <details open>
+<summary><strong>2023-02-11</strong></summary>
+
+With the help of @PawanOsman, we've figured out a way to continue using the ChatGPT raw models directly. In an attempt to prevent the models from being disabled again, we've decided to provide a reverse proxy (i.e. a private API server) with a completions endpoint that's compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy URL endpoint instead of the default OpenAI API endpoint. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information.
+
+Please note that if you choose to go this route, you are exposing your API key or session token to a third-party server. If you are concerned about this, you may choose to use the official OpenAI API instead, with the `text-davinci-003` model.
+</details>
+<details>
 <summary><strong>2023-02-10</strong></summary>
 
 ~~I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the raw model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.~~
@@ -75,6 +82,7 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
          * [Module](#module)
          * [API Server](#api-server)
          * [CLI](#cli)
+      * [Using a Reverse Proxy](#using-a-reverse-proxy)
    * [Caveats](#caveats)
    * [Contributing](#contributing)
    * [License](#license)
@@ -359,6 +367,29 @@ npm run cli
 ```
 
 ChatGPT's responses are automatically copied to your clipboard, so you can paste them into other applications.
+
+## Using a Reverse Proxy
+As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a private API instead of the official ChatGPT API.
+For now, this is the only way to use the ChatGPT raw models directly.
+
+Depending on whose private API you use, there are some things you have to do differently to make it work with `ChatGPTClient`, and some things may not work as expected. Instructions and any caveats are provided below.
+
+<details open>
+<summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon)</summary>
+
+#### Instructions
+1. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js` or `ChatGPTClient`'s options.
+2. Set the OpenAI API key to your ChatGPT session's access token instead of your actual OpenAI API key.
+    * You can find your ChatGPT session's access token by logging in to [ChatGPT](https://chat.openai.com/) and then going to https://chat.openai.com/api/auth/session (look for the `accessToken` property).
+    * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
+3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or any other ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+    * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
+
+#### Caveats
+- Custom stop sequences (`stop`) are not supported. You must handle that yourself or modify your `promptPrefix` to work around it.
+- Frequency and presence penalties don't appear to do anything.
+- Temperature doesn't work as expected. Setting it to 0-1 appears to have an effect, but setting it above 1 doesn't seem to do anything.
+</details>
 
 ## Caveats
 Since `text-chat-davinci-002` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.

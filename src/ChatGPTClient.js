@@ -74,6 +74,7 @@ export default class ChatGPTClient {
             return new Promise(async (resolve, reject) => {
                 const controller = new AbortController();
                 try {
+                    let done = false;
                     await fetchEventSource(url, {
                         ...opts,
                         signal: controller.signal,
@@ -96,7 +97,15 @@ export default class ChatGPTClient {
                             throw error;
                         },
                         onclose() {
-                            throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
+                            if (debug) {
+                                console.debug('Server closed the connection unexpectedly, returning...');
+                            }
+                            // workaround for private API not sending [DONE] event
+                            if (!done) {
+                                onProgress('[DONE]');
+                                controller.abort();
+                                resolve();
+                            }
                         },
                         onerror(err) {
                             if (debug) {
@@ -113,6 +122,7 @@ export default class ChatGPTClient {
                                 onProgress('[DONE]');
                                 controller.abort();
                                 resolve();
+                                done = true;
                                 return;
                             }
                             onProgress(JSON.parse(message.data));
@@ -174,6 +184,9 @@ export default class ChatGPTClient {
                 if (this.options.debug) {
                     console.debug(token);
                 }
+                if (token === this.endToken) {
+                    return;
+                }
                 opts.onProgress(token);
                 reply += token;
             });
@@ -182,7 +195,7 @@ export default class ChatGPTClient {
             if (this.options.debug) {
                 console.debug(JSON.stringify(result));
             }
-            reply = result.choices[0].text;
+            reply = result.choices[0].text.replace(this.endToken, '');
         }
 
         // avoids some rendering issues when using the CLI app
