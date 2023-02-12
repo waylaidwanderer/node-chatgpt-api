@@ -254,7 +254,7 @@ export default class ChatGPTClient {
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
             const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
-            const messageString = `${roleLabel}:\n${message.message}${this.separatorToken}\n`;
+            const messageString = `${roleLabel}:\n${message.message}${this.endToken}\n`;
             let newPromptBody;
             if (promptBody) {
                 newPromptBody = `${messageString}${promptBody}`;
