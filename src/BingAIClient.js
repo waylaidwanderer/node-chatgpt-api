@@ -156,7 +156,7 @@ export default class BingAIClient {
             type: 4,
         };
 
-        const messagePromise = new Promise((resolve) => {
+        const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
@@ -187,7 +187,16 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2:
-                        const message = event?.item?.messages?.[1];
+                        if (event.result?.value?.includes('Error')) {
+                            this.cleanupWebSocketConnection(ws);
+                            if (this.debug) {
+                                console.debug(event.result.value, event.result.message);
+                                console.debug(event.result.exception);
+                            }
+                            reject(`${event.result.value}: ${event.result.message}`);
+                            return;
+                        }
+                        const message = event.item?.messages?.[1];
                         if (message?.author !== 'bot') {
                             return;
                         }
