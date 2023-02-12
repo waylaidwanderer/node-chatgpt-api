@@ -29,7 +29,9 @@ export default class ChatGPTClient {
         this.userLabel = this.options.userLabel || 'User';
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
-        if (this.modelOptions.model.startsWith('text-chat')) {
+        const isChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
+
+        if (isChatGptModel) {
             this.endToken = '<|im_end|>';
             this.separatorToken = '<|im_sep|>';
         } else {
@@ -38,7 +40,7 @@ export default class ChatGPTClient {
         }
 
         if (!this.modelOptions.stop) {
-            if (this.modelOptions.model.startsWith('text-chat')) {
+            if (isChatGptModel) {
                 this.modelOptions.stop = [this.endToken, this.separatorToken];
             } else {
                 this.modelOptions.stop = [this.endToken];
