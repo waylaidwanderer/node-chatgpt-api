@@ -8,6 +8,7 @@ import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
 import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
+import BingAIClient from '../src/BingAIClient.js';
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -46,6 +47,7 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
 
 let conversationId = null;
 let parentMessageId = null;
+let conversationData = {};
 
 const availableCommands = [
     {
@@ -76,7 +78,24 @@ const availableCommands = [
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
-const chatGptClient = new ChatGPTClient(settings.openaiApiKey, settings.chatGptClient, settings.cacheOptions);
+const clientToUse = settings.cliOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+
+let client;
+switch (clientToUse) {
+    case 'bing':
+        client = new BingAIClient({
+            userToken: settings.bingAiClient.userToken,
+            debug: settings.bingAiClient.debug,
+        });
+        break;
+    default:
+        client = new ChatGPTClient(
+            settings.openaiApiKey,
+            settings.chatGptClient,
+            settings.cacheOptions,
+        );
+        break;
+}
 
 console.log(tryBoxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
 
@@ -132,32 +151,49 @@ async function conversation() {
 }
 
 async function onMessage(message) {
-    const chatGptLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
+    let aiLabel;
+    switch (clientToUse) {
+        case 'bing':
+            aiLabel = 'Bing';
+            break;
+        default:
+            aiLabel = settings.chatGptClient?.chatGptLabel || 'ChatGPT';
+            break;
+    }
     let reply = '';
-    const spinnerPrefix = `${chatGptLabel} is typing...`;
+    const spinnerPrefix = `${aiLabel} is typing...`;
     const spinner = ora(spinnerPrefix);
     spinner.prefixText = '\n   ';
     spinner.start();
     try {
-        const response = await chatGptClient.sendMessage(message, {
-            conversationId,
-            parentMessageId,
+        const response = await client.sendMessage(message, {
+            ...conversationData,
             onProgress: (token) => {
                 reply += token;
-                const output = tryBoxen(`${reply}█`, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+                const output = tryBoxen(`${reply}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
-        // TODO: for streamed responses, add reply to existing conversation even if error
         clipboard.write(response.response).then(() => {}).catch(() => {});
         spinner.stop();
-        conversationId = response.conversationId;
-        parentMessageId = response.messageId;
-        await chatGptClient.conversationsCache.set('lastConversation', {
-            conversationId,
-            parentMessageId,
-        });
-        const output = tryBoxen(response.response, { title: chatGptLabel, padding: 0.7, margin: 1, dimBorder: true });
+        if (clientToUse === 'chatgpt') {
+            conversationData = {
+                conversationId: response.conversationId,
+                parentMessageId: response.messageId,
+            };
+            await client.conversationsCache.set('lastConversation', {
+                conversationId,
+                parentMessageId,
+            });
+        } else {
+            conversationData = {
+                conversationId: response.conversationId,
+                conversationSignature: response.conversationSignature,
+                clientId: response.clientId,
+                invocationId: response.invocationId,
+            };
+        }
+        const output = tryBoxen(response.response, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
         console.log(output);
     } catch (error) {
         spinner.stop();
@@ -184,7 +220,11 @@ async function useEditor() {
 }
 
 async function resumeConversation() {
-    ({ conversationId, parentMessageId } = (await chatGptClient.conversationsCache.get('lastConversation')) || {});
+    if (clientToUse !== 'chatgpt') {
+        logWarning('Resuming conversations is only supported for ChatGPT client.');
+        return conversation();
+    }
+    ({ conversationId, parentMessageId } = (await client.conversationsCache.get('lastConversation')) || {});
     if (conversationId) {
         logSuccess(`Resumed conversation ${conversationId}.`);
     } else {
@@ -201,17 +241,25 @@ async function newConversation() {
 }
 
 async function deleteAllConversations() {
-    await chatGptClient.conversationsCache.clear();
+    if (clientToUse !== 'chatgpt') {
+        logWarning('Deleting all conversations is only supported for ChatGPT client.');
+        return conversation();
+    }
+    await client.conversationsCache.clear();
     logSuccess('Deleted all conversations.');
     return conversation();
 }
 
 async function copyConversation() {
+    if (clientToUse !== 'chatgpt') {
+        logWarning('Copying conversations is only supported for ChatGPT client.');
+        return conversation();
+    }
     if (!conversationId) {
         logWarning('No conversation to copy.');
         return conversation();
     }
-    const { messages } = await chatGptClient.conversationsCache.get(conversationId);
+    const { messages } = await client.conversationsCache.get(conversationId);
     // get the last message ID
     const lastMessageId = messages[messages.length - 1].id;
     const orderedMessages = ChatGPTClient.getMessagesForConversation(messages, lastMessageId);
