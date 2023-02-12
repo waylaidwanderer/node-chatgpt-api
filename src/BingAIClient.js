@@ -34,7 +34,7 @@ export default class BingAIClient {
             },
         });
 
-        return await response.json();
+        return response.json();
     }
 
     async createWebSocketConnection() {
@@ -110,11 +110,18 @@ export default class BingAIClient {
         }
 
         if (!conversationSignature || !conversationId || !clientId) {
+            const createNewConversationResponse = await this.createNewConversation();
+            if (this.debug) {
+                console.debug(createNewConversationResponse);
+            }
+            if (createNewConversationResponse.result?.value === 'UnauthorizedRequest') {
+                throw new Error(`UnauthorizedRequest: ${createNewConversationResponse.result.message}`);
+            }
             ({
                 conversationSignature,
                 conversationId,
                 clientId,
-            } = await this.createNewConversation());
+            } = createNewConversationResponse);
         }
 
         const ws = await this.createWebSocketConnection();
