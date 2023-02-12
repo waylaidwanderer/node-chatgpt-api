@@ -372,7 +372,7 @@ ChatGPT's responses are automatically copied to your clipboard, so you can paste
 As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a private API instead of the official ChatGPT API.
 For now, this is the only way to use the ChatGPT raw models directly.
 
-Depending on whose private API you use, there are some things you have to do differently to make it work with `ChatGPTClient`, and some things may not work as expected. Instructions and any caveats are provided below.
+Depending on whose private API you use, there are some things you have to do differently to make it work with `ChatGPTClient`, and some things may not work as expected. Instructions are provided below.
 
 <details open>
 <summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon)</summary>
@@ -384,11 +384,6 @@ Depending on whose private API you use, there are some things you have to do dif
     * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
 3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or any other ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
-
-#### Caveats
-- Custom stop sequences (`stop`) are not supported. You must handle that yourself or modify your `promptPrefix` to work around it.
-- Frequency and presence penalties don't appear to do anything.
-- Temperature doesn't work as expected. Setting it to 0-1 appears to have an effect, but setting it above 1 doesn't seem to do anything.
 </details>
 
 ## Caveats
