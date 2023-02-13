@@ -8,6 +8,7 @@ export default {
             // it and any other parameters here
             model: process.env.OPENAI_MODEL || 'text-chat-davinci-002-20221122',
         },
+        reverseProxyUrl: process.env.proxy || 'https://chatgpt.pawan.krd/api/completions',
         // (Optional) Set custom instructions instead of "You are ChatGPT...".
         // promptPrefix: 'You are Bob, a cowboy in Western times...',
         // (Optional) Set a custom name for the user
