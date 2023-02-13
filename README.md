@@ -95,7 +95,7 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
 - Includes a CLI interface where you can chat with ChatGPT.
 - (`ChatGPTClient`) Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
   - Conversations are stored in memory by default, but you can optionally [install a storage adapter](https://www.npmjs.com/package/keyv#usage) to persist conversations to a database.
-  - The `keyv-file` adapter is also included in this package, and can be used to store conversations in a JSON file if you're using the API server or CLI (see `settings.example.js`).
+  - The `keyv-file` adapter is also included in this package, and can be used to store conversations in a JSON file if you're using the API server or CLI (see `settings.js`).
 - (`ChatGPTClient`) Supports configurable prompt prefixes, and custom names for the user and ChatGPT.
   - In essence, this allows you to turn ChatGPT into a different character.
   - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
@@ -264,7 +264,7 @@ Alternatively, you can install and run the package directly.
 
 1. Clone this repository: `git clone https://github.com/waylaidwanderer/node-chatgpt-api`
 2. Install dependencies with `npm install` (if not using Docker)
-3. Rename `settings.example.js` to `settings.js` in the root directory and change the settings where required.
+3. Rename `settings.js` to `settings.js` in the root directory and change the settings where required.
 4. Start the server:
     - using `npm start` or `npm run server` (if not using Docker)
     - using `docker-compose up` (requires Docker)
