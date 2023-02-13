@@ -6,10 +6,15 @@
 <details open>
 <summary><strong>2023-02-11</strong></summary>
 
-With the help of @PawanOsman, we've figured out a way to continue using the ChatGPT raw models directly. In an attempt to prevent the models from being disabled again, we've decided to provide a reverse proxy (i.e. a private API server) with a completions endpoint that's compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy URL endpoint instead of the default OpenAI API endpoint. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information.
+With the help of @PawanOsman, **we've figured out a way to continue using the ChatGPT raw models**. To hopefully prevent losing access again, we've decided to provide reverse proxy servers compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy server instead of the OpenAI API server. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information on available proxy servers and how they work.
 
-Please note that if you choose to go this route, you are exposing your API key or session token to a third-party server. If you are concerned about this, you may choose to use the official OpenAI API instead, with the `text-davinci-003` model.
+Please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using the official OpenAI API instead with the `text-davinci-003` model.
 </details>
+
+<details>
+<summary><strong>Previous Updates</strong></summary>
+
+<br/>
 <details>
 <summary><strong>2023-02-10</strong></summary>
 
@@ -51,6 +56,7 @@ You may use the `text-davinci-003` model instead as a drop-in replacement. Keep 
 ~~In the meantime, I've added support for models like `text-davinci-003`, which you can use as a drop-in replacement. Keep in mind that `text-davinci-003` is not as good as `text-chat-davinci-002` (which is trained via RHLF and fine-tuned to be a conversational AI), though results are still very good. **Please note that using `text-davinci-003` will cost you credits ($).**~~
 
 Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-chat-davinci-002-20221122`. I've updated the library to use this model.
+</details>
 </details>
 
 # ChatGPT API
@@ -154,7 +160,7 @@ import { ChatGPTClient } from '@waylaidwanderer/chatgpt-api';
 const clientOptions = {
   // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
   // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
-  // reverseProxyUrl: 'https://chatgpt.pawan.krd/api/completions',
+  // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
   // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
   modelOptions: {
     // You can override the model name and any other parameters here.
@@ -214,7 +220,7 @@ module.exports = {
     chatGptClient: {
         // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
         // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
-        // reverseProxyUrl: 'https://chatgpt.pawan.krd/api/completions',
+        // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
         // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
         modelOptions: {
             // You can override the model name and any other parameters here.
@@ -374,21 +380,44 @@ npm run cli
 ChatGPT's responses are automatically copied to your clipboard, so you can paste them into other applications.
 
 ## Using a Reverse Proxy
-As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a private API instead of the official ChatGPT API.
-For now, this is the only way to use the ChatGPT raw models directly.
+As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a reverse proxy server instead of the official ChatGPT API.
+For now, **this is the only way to use the ChatGPT raw models**.
 
-Depending on whose private API you use, there are some things you have to do differently to make it work with `ChatGPTClient`, and some things may not work as expected. Instructions are provided below.
+How does it work? Simple answer: `ChatGPTClient` > reverse proxy > OpenAI server. The reverse proxy server does some magic under the hood to access the raw model directly via OpenAI's server and then returns the response to `ChatGPTClient`.
+
+Instructions are provided below.
+
+<details open>
+<summary><strong>https://chatgpt.hato.ai/completions</strong> (mine)</summary>
+
+#### Instructions
+1. Set `reverseProxyUrl` to `https://chatgpt.hato.ai/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
+2. Set the OpenAI API key (e.g. `settings.openaiApiKey`) to your ChatGPT session's access token instead of your actual OpenAI API key.
+    * You can find your ChatGPT session's access token by logging in to [ChatGPT](https://chat.openai.com/) and then going to https://chat.openai.com/api/auth/session (look for the `accessToken` property).
+    * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
+3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+    * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
+
+#### Notes
+- Since this is my server, I can guarantee that no logging or tracking is done. I can see general usage stats, but I cannot see any of your completions. Whether you trust me on this or not is up to you.
+- Non-streaming responses over 60s are not supported. Use `stream: true` (API) or `onProgress` (client) as a workaround.
+- Rate limit of 10 requests per second.
+</details>
 
 <details open>
 <summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon)</summary>
 
 #### Instructions
-1. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js` or `ChatGPTClient`'s options.
-2. Set the OpenAI API key to your ChatGPT session's access token instead of your actual OpenAI API key.
+1. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
+2. Set the OpenAI API key (e.g. `settings.openaiApiKey`) to your ChatGPT session's access token instead of your actual OpenAI API key.
     * You can find your ChatGPT session's access token by logging in to [ChatGPT](https://chat.openai.com/) and then going to https://chat.openai.com/api/auth/session (look for the `accessToken` property).
     * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
-3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or any other ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
+
+#### Notes
+- Non-streaming responses over 60s are not supported. Use `stream: true` (API) or `onProgress` (client) as a workaround.
+- Rate limit of 30 requests per 15 seconds.
 </details>
 
 ## Caveats
