@@ -1,5 +1,5 @@
 // Run the server first with `npm run server`
-import { fetchEventSource } from '@fortaine/fetch-event-source';
+import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 
 const opts = {
     method: 'POST',
