@@ -391,11 +391,12 @@ Instructions are provided below.
 <summary><strong>https://chatgpt.hato.ai/completions</strong> (mine)</summary>
 
 #### Instructions
-1. Set `reverseProxyUrl` to `https://chatgpt.hato.ai/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
-2. Set the OpenAI API key (e.g. `settings.openaiApiKey`) to your ChatGPT session's access token instead of your actual OpenAI API key.
-    * You can find your ChatGPT session's access token by logging in to [ChatGPT](https://chat.openai.com/) and then going to https://chat.openai.com/api/auth/session (look for the `accessToken` property).
-    * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
-3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+1. Get your ChatGPT access token from https://chat.openai.com/api/auth/session (look for the `accessToken` property).
+    * **This is NOT the same thing as the _session token_.**
+    * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
+2. Set `reverseProxyUrl` to `https://chatgpt.hato.ai/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
+3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
+4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 
 #### Notes
@@ -408,11 +409,12 @@ Instructions are provided below.
 <summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon)</summary>
 
 #### Instructions
-1. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
-2. Set the OpenAI API key (e.g. `settings.openaiApiKey`) to your ChatGPT session's access token instead of your actual OpenAI API key.
-    * You can find your ChatGPT session's access token by logging in to [ChatGPT](https://chat.openai.com/) and then going to https://chat.openai.com/api/auth/session (look for the `accessToken` property).
-    * **Fetching or refreshing your ChatGPT session's access token is not currently supported by this library.**
-3. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+1. Get your ChatGPT access token from https://chat.openai.com/api/auth/session (look for the `accessToken` property).
+    * **This is NOT the same thing as the _session token_.**
+    * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
+2. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
+3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
+4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 
 #### Notes
