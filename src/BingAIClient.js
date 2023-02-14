@@ -34,7 +34,7 @@ export default class BingAIClient {
             },
         });
 
-        return await response.json();
+        return response.json();
     }
 
     async createWebSocketConnection() {
@@ -110,11 +110,18 @@ export default class BingAIClient {
         }
 
         if (!conversationSignature || !conversationId || !clientId) {
+            const createNewConversationResponse = await this.createNewConversation();
+            if (this.debug) {
+                console.debug(createNewConversationResponse);
+            }
+            if (createNewConversationResponse.result?.value === 'UnauthorizedRequest') {
+                throw new Error(`UnauthorizedRequest: ${createNewConversationResponse.result.message}`);
+            }
             ({
                 conversationSignature,
                 conversationId,
                 clientId,
-            } = await this.createNewConversation());
+            } = createNewConversationResponse);
         }
 
         const ws = await this.createWebSocketConnection();
@@ -149,7 +156,7 @@ export default class BingAIClient {
             type: 4,
         };
 
-        const messagePromise = new Promise((resolve) => {
+        const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
@@ -180,7 +187,16 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2:
-                        const message = event?.item?.messages?.[1];
+                        if (event.result?.value?.includes('Error')) {
+                            this.cleanupWebSocketConnection(ws);
+                            if (this.debug) {
+                                console.debug(event.result.value, event.result.message);
+                                console.debug(event.result.exception);
+                            }
+                            reject(`${event.result.value}: ${event.result.message}`);
+                            return;
+                        }
+                        const message = event.item?.messages?.[1];
                         if (message?.author !== 'bot') {
                             return;
                         }

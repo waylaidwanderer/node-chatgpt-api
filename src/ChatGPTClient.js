@@ -60,10 +60,13 @@ export default class ChatGPTClient {
         }
         modelOptions.prompt = prompt;
         const debug = this.options.debug;
-        if (debug) {
-            console.debug(modelOptions);
-        }
         const url = this.options.reverseProxyUrl || 'https://api.openai.com/v1/completions';
+        if (debug) {
+            console.debug();
+            console.debug(url);
+            console.debug(modelOptions);
+            console.debug();
+        }
         const opts = {
             method: 'POST',
             headers: {
@@ -119,6 +122,9 @@ export default class ChatGPTClient {
                         onmessage(message) {
                             if (debug) {
                                 console.debug(message);
+                            }
+                            if (!message.data) {
+                                return;
                             }
                             if (message.data === '[DONE]') {
                                 onProgress('[DONE]');
@@ -254,7 +260,7 @@ export default class ChatGPTClient {
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
             const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
-            const messageString = `${roleLabel}:\n${message.message}${this.separatorToken}\n`;
+            const messageString = `${roleLabel}:\n${message.message}${this.endToken}\n`;
             let newPromptBody;
             if (promptBody) {
                 newPromptBody = `${messageString}${promptBody}`;
