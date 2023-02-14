@@ -172,7 +172,8 @@ async function onMessage(message) {
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
-        clipboard.write(response.response).then(() => {}).catch(() => {});
+        const responseText = clientToUse === 'chatgpt' ? response.response : (response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response);
+        clipboard.write(responseText).then(() => {}).catch(() => {});
         spinner.stop();
         if (clientToUse === 'chatgpt') {
             conversationData = {
@@ -188,7 +189,7 @@ async function onMessage(message) {
                 invocationId: response.invocationId,
             };
         }
-        const output = tryBoxen(response.response, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
+        const output = tryBoxen(responseText, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
         console.log(output);
     } catch (error) {
         spinner.stop();
