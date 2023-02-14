@@ -419,7 +419,7 @@ Instructions are provided below.
 
 #### Notes
 - Non-streaming responses over 60s are not supported. Use `stream: true` (API) or `onProgress` (client) as a workaround.
-- Rate limit of 30 requests per 15 seconds.
+- Rate limit of 50 requests per 15 seconds.
 </details>
 
 ## Caveats
