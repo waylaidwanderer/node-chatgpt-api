@@ -69,7 +69,7 @@ await server.register(cors, {
     origin: '*',
 });
 
-server.post('/conversation', async (request, reply) => {
+server.post('/robot', async (request, reply) => {
     const body = request.body || {};
 
     let onProgress;
