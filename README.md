@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="CLI demo" src="./demos/cli.svg?v=1">
+  <img alt="CLI demo" src="./demos/cli.gif">
 </p>
 
 ## Updates
