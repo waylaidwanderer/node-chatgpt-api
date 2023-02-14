@@ -45,8 +45,6 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
-let conversationId = null;
-let parentMessageId = null;
 let conversationData = {};
 
 const availableCommands = [
@@ -181,10 +179,7 @@ async function onMessage(message) {
                 conversationId: response.conversationId,
                 parentMessageId: response.messageId,
             };
-            await client.conversationsCache.set('lastConversation', {
-                conversationId,
-                parentMessageId,
-            });
+            await client.conversationsCache.set('lastConversation', conversationData);
         } else {
             conversationData = {
                 conversationId: response.conversationId,
@@ -224,9 +219,9 @@ async function resumeConversation() {
         logWarning('Resuming conversations is only supported for ChatGPT client.');
         return conversation();
     }
-    ({ conversationId, parentMessageId } = (await client.conversationsCache.get('lastConversation')) || {});
-    if (conversationId) {
-        logSuccess(`Resumed conversation ${conversationId}.`);
+    conversationData = (await client.conversationsCache.get('lastConversation')) || {};
+    if (conversationData.conversationId) {
+        logSuccess(`Resumed conversation ${conversationData.conversationId}.`);
     } else {
         logWarning('No conversation to resume.');
     }
@@ -234,8 +229,7 @@ async function resumeConversation() {
 }
 
 async function newConversation() {
-    conversationId = null;
-    parentMessageId = null;
+    conversationData = {};
     logSuccess('Started new conversation.');
     return conversation();
 }
@@ -255,11 +249,11 @@ async function copyConversation() {
         logWarning('Copying conversations is only supported for ChatGPT client.');
         return conversation();
     }
-    if (!conversationId) {
+    if (!conversationData.conversationId) {
         logWarning('No conversation to copy.');
         return conversation();
     }
-    const { messages } = await client.conversationsCache.get(conversationId);
+    const { messages } = await client.conversationsCache.get(conversationData.conversationId);
     // get the last message ID
     const lastMessageId = messages[messages.length - 1].id;
     const orderedMessages = ChatGPTClient.getMessagesForConversation(messages, lastMessageId);
