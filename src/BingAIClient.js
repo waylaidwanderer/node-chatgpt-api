@@ -191,10 +191,11 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2:
-                        if (event.item?.result?.value?.includes('Error')) {
+                        if (event.item?.result?.error) {
                             this.cleanupWebSocketConnection(ws);
                             if (this.debug) {
                                 console.debug(event.item.result.value, event.item.result.message);
+                                console.debug(event.item.result.error);
                                 console.debug(event.item.result.exception);
                             }
                             reject(`${event.item.result.value}: ${event.item.result.message}`);
