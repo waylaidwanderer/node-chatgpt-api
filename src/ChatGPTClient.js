@@ -177,7 +177,6 @@ export default class ChatGPTClient {
             role: 'User',
             message,
         };
-
         conversation.messages.push(userMessage);
 
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);

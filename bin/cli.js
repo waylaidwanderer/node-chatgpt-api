@@ -186,7 +186,8 @@ async function onMessage(message) {
                 conversationId: response.conversationId,
                 conversationSignature: response.conversationSignature,
                 clientId: response.clientId,
-                invocationId: response.invocationId,
+                // invocationId: response.invocationId,
+                parentMessageId: response.messageId,
             };
         }
         await client.conversationsCache.set('lastConversation', conversationData);
