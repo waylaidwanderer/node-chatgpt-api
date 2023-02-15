@@ -139,7 +139,7 @@ export default class BingAIClient {
                     ],
                     isStartOfSession: invocationId === 0,
                     message: {
-                        author: 'user',
+                        author: 'system',
                         inputMethod: 'Keyboard',
                         text: message,
                         messageType: 'Chat',
@@ -187,13 +187,13 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2:
-                        if (event.result?.value?.includes('Error')) {
+                        if (event.item?.result?.value?.includes('Error')) {
                             this.cleanupWebSocketConnection(ws);
                             if (this.debug) {
-                                console.debug(event.result.value, event.result.message);
-                                console.debug(event.result.exception);
+                                console.debug(event.item.result.value, event.item.result.message);
+                                console.debug(event.item.result.exception);
                             }
-                            reject(`${event.result.value}: ${event.result.message}`);
+                            reject(`${event.item.result.value}: ${event.item.result.message}`);
                             return;
                         }
                         const message = event.item?.messages?.[1];
