@@ -27,6 +27,8 @@ export default {
     bingAiClient: {
         // The "_U" cookie value from bing.com
         userToken: '',
+        // If the above doesn't work, provide all your cookies as a string instead
+        cookies: '',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },

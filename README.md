@@ -128,7 +128,10 @@ npm i @waylaidwanderer/chatgpt-api
 import { BingAIClient } from '@waylaidwanderer/chatgpt-api';
 
 const bingAIClient = new BingAIClient({
-  userToken: '', // "_U" cookie from bing.com
+  // "_U" cookie from bing.com
+  userToken: '',
+  // If the above doesn't work, provide all your cookies as a string instead
+  cookies: '',
   debug: false,
 });
 
@@ -243,6 +246,8 @@ module.exports = {
     bingAiClient: {
         // The "_U" cookie value from bing.com
         userToken: '',
+        // If the above doesn't work, provide all your cookies as a string instead
+        cookies: '',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },

@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 
 export default class BingAIClient {
     constructor(opts) {
-        this.userToken = opts.userToken;
+        this.opts = opts;
         this.debug = opts.debug;
    }
 
@@ -28,7 +28,7 @@ export default class BingAIClient {
                 "sec-fetch-site": "same-origin",
                 "x-ms-client-request-id": crypto.randomUUID(),
                 "x-ms-useragent": "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32",
-                "cookie": `_U=${this.userToken}`,
+                "cookie": this.opts.cookies || `_U=${this.opts.userToken}`,
                 "Referer": "https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx",
                 "Referrer-Policy": "origin-when-cross-origin"
             },

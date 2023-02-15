@@ -1,7 +1,10 @@
 import { BingAIClient } from '../index.js';
 
 const bingAIClient = new BingAIClient({
-    userToken: '', // "_U" cookie from bing.com
+    // "_U" cookie from bing.com
+    userToken: '',
+    // If the above doesn't work, provide all your cookies as a string instead
+    cookies: '',
     debug: false,
 });
 
