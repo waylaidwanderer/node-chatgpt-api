@@ -139,7 +139,7 @@ export default class BingAIClient {
                     ],
                     isStartOfSession: invocationId === 0,
                     message: {
-                        author: 'system',
+                        author: 'user',
                         inputMethod: 'Keyboard',
                         text: message,
                         messageType: 'Chat',
