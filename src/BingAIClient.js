@@ -1,11 +1,15 @@
 import './fetch-polyfill.js';
 import crypto from 'crypto';
 import WebSocket from 'ws';
+import Keyv from 'keyv';
 
 export default class BingAIClient {
     constructor(opts) {
         this.opts = opts;
         this.debug = opts.debug;
+        const cacheOptions = opts.cache || {};
+        cacheOptions.namespace = cacheOptions.namespace || 'bing';
+        this.conversationsCache = new Keyv(cacheOptions);
    }
 
     async createNewConversation() {

@@ -84,6 +84,7 @@ switch (clientToUse) {
         client = new BingAIClient({
             userToken: settings.bingAiClient.userToken,
             debug: settings.bingAiClient.debug,
+            cache: settings.cacheOptions,
         });
         break;
     default:
@@ -180,7 +181,6 @@ async function onMessage(message) {
                 conversationId: response.conversationId,
                 parentMessageId: response.messageId,
             };
-            await client.conversationsCache.set('lastConversation', conversationData);
         } else {
             conversationData = {
                 conversationId: response.conversationId,
@@ -189,6 +189,7 @@ async function onMessage(message) {
                 invocationId: response.invocationId,
             };
         }
+        await client.conversationsCache.set('lastConversation', conversationData);
         const output = tryBoxen(responseText, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
         console.log(output);
     } catch (error) {
@@ -216,10 +217,6 @@ async function useEditor() {
 }
 
 async function resumeConversation() {
-    if (clientToUse !== 'chatgpt') {
-        logWarning('Resuming conversations is only supported for ChatGPT client.');
-        return conversation();
-    }
     conversationData = (await client.conversationsCache.get('lastConversation')) || {};
     if (conversationData.conversationId) {
         logSuccess(`Resumed conversation ${conversationData.conversationId}.`);
