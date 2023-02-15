@@ -158,6 +158,10 @@ export default class BingAIClient {
 
         const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
+            const messageTimeout = setTimeout(
+                () => reject(new Error('Timed out waiting for response. Try enabling debug mode to see more information.')),
+                120 * 1000,
+            );
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
@@ -201,6 +205,7 @@ export default class BingAIClient {
                             return;
                         }
                         this.cleanupWebSocketConnection(ws);
+                        clearTimeout(messageTimeout);
                         resolve({
                             message,
                             conversationExpiryTime: event?.item?.conversationExpiryTime,
