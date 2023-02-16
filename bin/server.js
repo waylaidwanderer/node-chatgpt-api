@@ -108,7 +108,9 @@ server.post('/conversation', async (request, reply) => {
 
     if (result !== undefined) {
         if (body.stream === true) {
+            reply.sse({event:'RESULT', id: '', data: JSON.stringify(result) });
             reply.sse({ id: '', data: '[DONE]' });
+            
         } else {
             reply.send(result);
         }
