@@ -148,7 +148,7 @@ server.post('/api/chat', async (request, reply) => {
             throw invalidError;
         }
         const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
-        const targetClient = client;
+        let targetClient = client;
         if (Array.isArray(client)) {
             targetClient = client[Math.floor(Math.random() * client.length)]
         }
