@@ -4,17 +4,22 @@
 
 ## Updates
 <details open>
-<summary><strong>2023-02-11</strong></summary>
+<summary><strong>2023-02-15</strong></summary>
 
-With the help of @PawanOsman, **we've figured out a way to continue using the ChatGPT raw models**. To hopefully prevent losing access again, we've decided to provide reverse proxy servers compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy server instead of the OpenAI API server. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information on available proxy servers and how they work.
-
-Please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using the official OpenAI API instead with the `text-davinci-003` model.
+The method we were using to access the ChatGPT raw models has been patched, unfortunately. Your options right now are to either use the official OpenAI API with the `text-davinci-003` model (which costs money), or use a browser-based solution to interface with ChatGPT's backend (which is less powerful, more rate-limited and is not supported by this library at this time).
 </details>
 
 <details>
 <summary><strong>Previous Updates</strong></summary>
 
 <br/>
+<details>
+<summary><strong>2023-02-11</strong></summary>
+
+With the help of @PawanOsman, **we've figured out a way to continue using the ChatGPT raw models**. To hopefully prevent losing access again, we've decided to provide reverse proxy servers compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy server instead of the OpenAI API server. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information on available proxy servers and how they work.
+
+Please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using the official OpenAI API instead with the `text-davinci-003` model.
+</details>
 <details>
 <summary><strong>2023-02-10</strong></summary>
 
@@ -386,14 +391,17 @@ ChatGPT's responses are automatically copied to your clipboard, so you can paste
 
 ## Using a Reverse Proxy
 As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a reverse proxy server instead of the official ChatGPT API.
-For now, **this is the only way to use the ChatGPT raw models**.
+~~For now, **this is the only way to use the ChatGPT raw models**.~~ This method has been patched, but you may still want to use a reverse proxy for other reasons.
+
+<details>
+<summary><strong>Instructions</strong></summary>
 
 How does it work? Simple answer: `ChatGPTClient` > reverse proxy > OpenAI server. The reverse proxy server does some magic under the hood to access the raw model directly via OpenAI's server and then returns the response to `ChatGPTClient`.
 
 Instructions are provided below.
 
 <details open>
-<summary><strong>https://chatgpt.hato.ai/completions</strong> (mine)</summary>
+<summary><strong>https://chatgpt.hato.ai/completions</strong> (mine, <strong>currently offline</strong>)</summary>
 
 #### Instructions
 1. Get your ChatGPT access token from https://chat.openai.com/api/auth/session (look for the `accessToken` property).
@@ -411,7 +419,7 @@ Instructions are provided below.
 </details>
 
 <details open>
-<summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon)</summary>
+<summary><strong>https://chatgpt.pawan.krd/api/completions</strong> (@PawanOsmon, <strong>currently offline</strong>)</summary>
 
 #### Instructions
 1. Get your ChatGPT access token from https://chat.openai.com/api/auth/session (look for the `accessToken` property).
@@ -425,6 +433,7 @@ Instructions are provided below.
 #### Notes
 - Non-streaming responses over 60s are not supported. Use `stream: true` (API) or `onProgress` (client) as a workaround.
 - Rate limit of 50 requests per 15 seconds.
+</details>
 </details>
 
 ## Caveats

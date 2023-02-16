@@ -48,10 +48,7 @@ const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 
 let client;
 switch (clientToUse) {
     case 'bing':
-        client = new BingAIClient({
-            userToken: settings.bingAiClient.userToken,
-            debug: settings.bingAiClient.debug,
-        });
+        client = new BingAIClient(settings.bingAiClient);
         break;
     default:
         client = new ChatGPTClient(

@@ -82,8 +82,7 @@ let client;
 switch (clientToUse) {
     case 'bing':
         client = new BingAIClient({
-            userToken: settings.bingAiClient.userToken,
-            debug: settings.bingAiClient.debug,
+            ...settings.bingAiClient,
             cache: settings.cacheOptions,
         });
         break;
