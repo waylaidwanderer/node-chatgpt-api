@@ -58,11 +58,24 @@ switch (clientToUse) {
         });
         break;
     default:
-        client = new ChatGPTClient(
-            settings.openaiApiKey,
-            settings.chatGptClient,
-            settings.cacheOptions,
-        );
+        if (settings.openaiApiKey?.indexOf(',') > -1) {
+            const keys = settings.openaiApiKey.split(',');
+            client = [];
+            keys.forEach(k => {
+                client.push(new ChatGPTClient(
+                    k,
+                    settings.chatGptClient,
+                    settings.cacheOptions,
+                ));
+            });
+        } else {
+            client = new ChatGPTClient(
+                settings.openaiApiKey,
+                settings.chatGptClient,
+                settings.cacheOptions,
+            );
+        }
+
         break;
 }
 
@@ -135,7 +148,11 @@ server.post('/api/chat', async (request, reply) => {
             throw invalidError;
         }
         const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
-        result = await client.sendMessage(body.message, {
+        const targetClient = client;
+        if (Array.isArray(client)) {
+            targetClient = client[Math.floor(Math.random() * client.length)]
+        }
+        result = await targetClient.sendMessage(body.message, {
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
             parentMessageId,
             conversationSignature: body.conversationSignature,
