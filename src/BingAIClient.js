@@ -5,7 +5,10 @@ import Keyv from 'keyv';
 
 export default class BingAIClient {
     constructor(opts) {
-        this.opts = opts;
+        this.opts = {
+            ...opts,
+            host: opts.host || 'https://www.bing.com',
+        };
         this.debug = opts.debug;
         const cacheOptions = opts.cache || {};
         cacheOptions.namespace = cacheOptions.namespace || 'bing';
@@ -13,7 +16,7 @@ export default class BingAIClient {
    }
 
     async createNewConversation() {
-        const response = await fetch("https://www.bing.com/turing/conversation/create", {
+        const response = await fetch(`${host}/turing/conversation/create`, {
             headers: {
                 "accept": "application/json",
                 "accept-language": "en-US,en;q=0.9",
