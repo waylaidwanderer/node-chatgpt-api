@@ -26,7 +26,7 @@ export default {
     // Options for the Bing client
     bingAiClient: {
         // If www.bing.com is reverse proxy, you can customize the configuration host 
-        host:'',
+        host: '',
         // The "_U" cookie value from bing.com
         userToken: '',
         // If the above doesn't work, provide all your cookies as a string instead

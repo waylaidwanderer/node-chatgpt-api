@@ -7,7 +7,7 @@ export default class BingAIClient {
     constructor(opts) {
         this.opts = {
             ...opts,
-            host:opts.host||'www.bing.com'
+            host: opts.host || 'https://www.bing.com',
         };
         this.debug = opts.debug;
         const cacheOptions = opts.cache || {};
@@ -16,7 +16,7 @@ export default class BingAIClient {
    }
 
     async createNewConversation() {
-        const response = await fetch(`https://${host}/turing/conversation/create`, {
+        const response = await fetch(`${host}/turing/conversation/create`, {
             headers: {
                 "accept": "application/json",
                 "accept-language": "en-US,en;q=0.9",
