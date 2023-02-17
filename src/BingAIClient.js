@@ -252,12 +252,22 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2: {
+                        clearTimeout(messageTimeout);
+                        this.cleanupWebSocketConnection(ws);
                         if (event.item?.result?.error) {
-                            this.cleanupWebSocketConnection(ws);
                             if (this.debug) {
                                 console.debug(event.item.result.value, event.item.result.message);
                                 console.debug(event.item.result.error);
                                 console.debug(event.item.result.exception);
+                            }
+                            if (replySoFar) {
+                                message.adaptiveCards[0].body[0].text = replySoFar;
+                                message.text = replySoFar;
+                                resolve({
+                                    message,
+                                    conversationExpiryTime: event?.item?.conversationExpiryTime,
+                                });
+                                return;
                             }
                             reject(`${event.item.result.value}: ${event.item.result.message}`);
                             return;
@@ -265,12 +275,11 @@ export default class BingAIClient {
                         const messages = event.item?.messages || [];
                         const message = messages.length ? messages[messages.length - 1] : null;
                         if (!message) {
-                            this.cleanupWebSocketConnection(ws);
-                            clearTimeout(messageTimeout);
                             reject('No message was generated.');
                             return;
                         }
                         if (message?.author !== 'bot') {
+                            reject('Unexpected message author.');
                             return;
                         }
                         const offenseTrigger = event.item.messages[0].offense !== 'None';
@@ -278,8 +287,6 @@ export default class BingAIClient {
                             message.adaptiveCards[0].body[0].text = replySoFar;
                             message.text = replySoFar;
                         }
-                        this.cleanupWebSocketConnection(ws);
-                        clearTimeout(messageTimeout);
                         resolve({
                             message,
                             conversationExpiryTime: event?.item?.conversationExpiryTime,
