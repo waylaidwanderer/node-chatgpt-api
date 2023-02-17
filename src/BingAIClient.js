@@ -16,7 +16,7 @@ export default class BingAIClient {
    }
 
     async createNewConversation() {
-        const response = await fetch(`${host}/turing/conversation/create`, {
+        const response = await fetch(`${this.opts.host}/turing/conversation/create`, {
             headers: {
                 "accept": "application/json",
                 "accept-language": "en-US,en;q=0.9",
