@@ -295,6 +295,9 @@ Alternatively, you can install and run the package directly.
     - using `docker-compose up` (requires Docker)
 
 #### Usage
+<details>
+<summary><strong>Method 1 (POST)</strong></summary>
+
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format.
 Optional parameters are only necessary for conversations that span multiple requests:
 ```JSON
@@ -337,15 +340,27 @@ If there was an error sending the message to ChatGPT:
     "error": "There was an error communicating with ChatGPT."
 }
 ```
+</details>
+<details>
+<summary><strong>Method 2 (SSE)</strong></summary>
 
 You can set `"stream": true` in the request body to receive a stream of tokens as they are generated.
-```JSON
-{
-    "message": "Write a poem about cats.",
-    "conversationId": "your-conversation-id (optional)",
-    "parentMessageId": "your-parent-message-id (optional)",
-    "stream": true
-}
+
+```js
+import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
+
+const opts = {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        "message": "Write a poem about cats.",
+        "conversationId": "your-conversation-id (optional)",
+        "parentMessageId": "your-parent-message-id (optional)",
+        "stream": true
+    }),
+};
 ```
 
 See [demos/use-api-server-streaming.js](demos/use-api-server-streaming.js) for an example of how to receive the response as it's generated. You will receive one token at a time, so you will need to concatenate them yourself.
@@ -362,6 +377,7 @@ Successful output:
 { data: ' you', event: '', id: '', retry: undefined }
 { data: ' today', event: '', id: '', retry: undefined }
 { data: '?', event: '', id: '', retry: undefined }
+{ data: '<result JSON here>', event: 'result', id: '', retry: undefined }
 { data: '[DONE]', event: '', id: '', retry: undefined }
 // Hello! How can I help you today?
 ```
@@ -379,6 +395,11 @@ if (message.event === 'error') {
   console.error(JSON.parse(message.data).error); // There was an error communicating with ChatGPT.
 }
 ```
+</details>
+
+#### Notes
+- Method 1 is simple, but Time to First Byte (TTFB) is long.
+- Method 2 uses a non-standard implementation of [server-sent event API](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events); you should import `fetch-event-source` first and use `POST` method.
 
 ### CLI
 

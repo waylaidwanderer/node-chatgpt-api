@@ -111,6 +111,7 @@ server.post('/conversation', async (request, reply) => {
             console.debug(result);
         }
         if (body.stream === true) {
+            reply.sse({ event: 'result', id: '', data: JSON.stringify(result) });
             reply.sse({ id: '', data: '[DONE]' });
             await nextTick();
             return reply.raw.end();
@@ -155,3 +156,4 @@ function nextTick() {
         process.nextTick(resolve);
     });
 }
+
