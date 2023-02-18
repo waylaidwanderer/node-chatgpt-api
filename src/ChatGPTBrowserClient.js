@@ -10,7 +10,7 @@ export default class ChatGPTBrowserClient {
     ) {
         this.options = options;
         this.accessToken = options.accessToken;
-        this.cfToken = options.cfToken;
+        this.cookies = options.cookies;
         this.model = options.model || 'text-davinci-002-render-sha';
 
         cacheOptions.namespace = cacheOptions.namespace || 'chatgpt-browser';
@@ -32,7 +32,7 @@ export default class ChatGPTBrowserClient {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${this.accessToken}`,
-                Cookie: this.cfToken ? `cf_clearance=${this.cfToken}` : undefined,
+                Cookie: this.cookies || undefined,
             },
             body: JSON.stringify({
                 conversation_id: conversationId,

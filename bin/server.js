@@ -5,6 +5,7 @@ import { FastifySSEPlugin } from "fastify-sse-v2";
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
+import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
 import { KeyvFile } from 'keyv-file';
 
@@ -49,6 +50,12 @@ let client;
 switch (clientToUse) {
     case 'bing':
         client = new BingAIClient(settings.bingAiClient);
+        break;
+    case 'chatgpt-browser':
+        client = new ChatGPTBrowserClient(
+            settings.chatGptBrowserClient,
+            settings.cacheOptions,
+        );
         break;
     default:
         client = new ChatGPTClient(
