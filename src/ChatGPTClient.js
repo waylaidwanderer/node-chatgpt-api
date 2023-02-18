@@ -74,6 +74,8 @@ export default class ChatGPTClient {
                 Authorization: `Bearer ${this.apiKey}`,
             },
             body: JSON.stringify(modelOptions),
+            bodyTimeout: 0,
+            headersTimeout: 0,
         };
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {

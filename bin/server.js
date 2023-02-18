@@ -107,35 +107,37 @@ server.post('/conversation', async (request, reply) => {
     }
 
     if (result !== undefined) {
-        if (body.stream === true) {
-            reply.sse({ id: '', data: '[DONE]' });
-        } else {
-            reply.send(result);
-        }
         if (settings.apiOptions?.debug) {
             console.debug(result);
         }
-    } else {
-        const code = error?.data?.code || 503;
-        if (code === 503) {
-            console.error(error);
-        } else if (settings.apiOptions?.debug) {
-            console.debug(error);
-        }
-        const message = error?.data?.message || `There was an error communicating with ${clientToUse === 'bing' ? 'Bing' : 'ChatGPT'}.`;
         if (body.stream === true) {
-            reply.sse({
-                id: '',
-                event: 'error',
-                data: JSON.stringify({
-                    code,
-                    error: message,
-                }),
-            });
-        } else {
-            reply.code(code).send({ error: message });
+            reply.sse({ id: '', data: '[DONE]' });
+            await nextTick();
+            return reply.raw.end();
         }
+        return reply.send(result);
     }
+
+    const code = error?.data?.code || 503;
+    if (code === 503) {
+        console.error(error);
+    } else if (settings.apiOptions?.debug) {
+        console.debug(error);
+    }
+    const message = error?.data?.message || `There was an error communicating with ${clientToUse === 'bing' ? 'Bing' : 'ChatGPT'}.`;
+    if (body.stream === true) {
+        reply.sse({
+            id: '',
+            event: 'error',
+            data: JSON.stringify({
+                code,
+                error: message,
+            }),
+        });
+        await nextTick();
+        return reply.raw.end();
+    }
+    return reply.code(code).send({ error: message });
 });
 
 server.listen({
@@ -147,3 +149,9 @@ server.listen({
         process.exit(1);
     }
 });
+
+function nextTick() {
+    return new Promise((resolve) => {
+        process.nextTick(resolve);
+    });
+}
