@@ -7,6 +7,9 @@ const bingAIClient = new BingAIClient({
     userToken: '',
     // If the above doesn't work, provide all your cookies as a string instead
     cookies: '',
+    // A proxy string like "http://<ip>:<port>"
+    proxy: '',
+    // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
 });
 
