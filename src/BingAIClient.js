@@ -2,6 +2,8 @@ import './fetch-polyfill.js';
 import crypto from 'crypto';
 import WebSocket from 'ws';
 import Keyv from 'keyv';
+import { ProxyAgent } from 'undici';
+import HttpsProxyAgent from 'https-proxy-agent';
 
 export default class BingAIClient {
     constructor(opts) {
@@ -16,7 +18,7 @@ export default class BingAIClient {
    }
 
     async createNewConversation() {
-        const response = await fetch(`${this.opts.host}/turing/conversation/create`, {
+        const fetchOptions = {
             headers: {
                 "accept": "application/json",
                 "accept-language": "en-US,en;q=0.9",
@@ -39,14 +41,22 @@ export default class BingAIClient {
                 "Referer": "https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx",
                 "Referrer-Policy": "origin-when-cross-origin"
             },
-        });
-
+        };
+        if (this.opts.proxy) {
+            fetchOptions.dispatcher = new ProxyAgent(this.opts.proxy);
+        }
+        const response = await fetch(`${this.opts.host}/turing/conversation/create`, fetchOptions);
         return response.json();
     }
 
     async createWebSocketConnection() {
         return new Promise((resolve) => {
-            const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub');
+            let agent;
+            if (this.opts.proxy) {
+                agent = new HttpsProxyAgent(this.opts.proxy);
+            }
+
+            const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
 
             ws.on('error', console.error);
 
