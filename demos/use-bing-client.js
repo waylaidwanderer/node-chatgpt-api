@@ -1,7 +1,15 @@
 import { BingAIClient } from '../index.js';
 
 const bingAIClient = new BingAIClient({
-    userToken: '', // "_U" cookie from bing.com
+    // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
+    host: '',
+    // "_U" cookie from bing.com
+    userToken: '',
+    // If the above doesn't work, provide all your cookies as a string instead
+    cookies: '',
+    // A proxy string like "http://<ip>:<port>"
+    proxy: '',
+    // (Optional) Set to true to enable `console.debug()` logging
     debug: false,
 });
 

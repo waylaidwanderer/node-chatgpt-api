@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "1.16.1",
+  "version": "1.18.0",
   "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
   "main": "index.js",
   "bin": {
@@ -45,12 +45,13 @@
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "fastify-sse-v2": "^3.0.0",
+    "fetch-undici": "^3.0.1",
     "gpt-3-encoder": "^1.1.4",
+    "https-proxy-agent": "^5.0.1",
     "inquirer": "^9.1.4",
     "inquirer-autocomplete-prompt": "^3.0.0",
     "keyv": "^4.5.2",
     "keyv-file": "^0.2.0",
-    "node-fetch": "^3.3.0",
     "ora": "^6.1.2",
     "ws": "^8.12.0"
   }

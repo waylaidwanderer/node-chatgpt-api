@@ -25,8 +25,14 @@ export default {
     cacheOptions: {},
     // Options for the Bing client
     bingAiClient: {
+        // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
+        host: '',
         // The "_U" cookie value from bing.com
         userToken: '',
+        // If the above doesn't work, provide all your cookies as a string instead
+        cookies: '',
+        // A proxy string like "http://<ip>:<port>"
+        proxy: '',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
