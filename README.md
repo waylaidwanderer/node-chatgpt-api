@@ -291,7 +291,7 @@ Alternatively, you can install and run the package directly.
 
 #### Usage
 <details>
-<summary><strong>Method 1</strong></summary>
+<summary><strong>Method 1 (POST)</strong></summary>
 
 To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format.
 Optional parameters are only necessary for conversations that span multiple requests:
@@ -337,7 +337,7 @@ If there was an error sending the message to ChatGPT:
 ```
 </details>
 <details>
-<summary><strong>Method 2</strong></summary>
+<summary><strong>Method 2 (SSE)</strong></summary>
 
 You can set `"stream": true` in the request body to receive a stream of tokens as they are generated.
 
