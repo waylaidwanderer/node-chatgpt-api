@@ -4,15 +4,22 @@
 
 ## Updates
 <details open>
-<summary><strong>2023-02-15</strong></summary>
+<summary><strong>2023-02-19</strong></summary>
 
-The method we were using to access the ChatGPT raw models has been patched, unfortunately. Your options right now are to either use the official OpenAI API with the `text-davinci-003` model (which costs money), or use a browser-based solution to interface with ChatGPT's backend (which is less powerful, more rate-limited and is not supported by this library at this time).
+I've added an experimental `ChatGPTBrowserClient` which depends on a reverse proxy server that makes use of a Cloudflare bypass, allowing you to talk to ChatGPT (chat.openai.com) without requiring browser automation. All you need is your access token from https://chat.openai.com/api/auth/session.
+
+As always, please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using `ChatGPTClient` instead with the `text-davinci-003` model.
 </details>
 
 <details>
 <summary><strong>Previous Updates</strong></summary>
 
 <br/>
+<details>
+<summary><strong>2023-02-15</strong></summary>
+
+The method we were using to access the ChatGPT raw models has been patched, unfortunately. Your options right now are to either use the official OpenAI API with the `text-davinci-003` model (which costs money), or use a browser-based solution to interface with ChatGPT's backend (which is less powerful, more rate-limited and is not supported by this library at this time).
+</details>
 <details>
 <summary><strong>2023-02-11</strong></summary>
 
@@ -129,97 +136,17 @@ npm i @waylaidwanderer/chatgpt-api
 <details open>
 <summary><strong>BingAIClient</strong></summary>
 
-```JS
-import { BingAIClient } from '@waylaidwanderer/chatgpt-api';
-
-const bingAIClient = new BingAIClient({
-  // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
-  host: '',
-  // "_U" cookie from bing.com
-  userToken: '',
-  // If the above doesn't work, provide all your cookies as a string instead
-  cookies: '',
-  // A proxy string like "http://<ip>:<port>"
-  proxy: '',
-  // (Optional) Set to true to enable `console.debug()` logging    
-  debug: false,
-});
-
-let response = await bingAIClient.sendMessage('Write a short poem about cats', {
-  onProgress: (token) => {
-    process.stdout.write(token);
-  },
-});
-console.log(response);
-
-response = await bingAIClient.sendMessage('Now write it in French', {
-  conversationSignature: response.conversationSignature,
-  conversationId: response.conversationId,
-  clientId: response.clientId,
-  invocationId: response.invocationId,
-  onProgress: (token) => {
-    process.stdout.write(token);
-  },
-});
-console.log(response);
-```
+See [`demos/use-bing-client.js`](demos/use-bing-client.js).
 </details>
-<details>
+<details open>
 <summary><strong>ChatGPTClient</strong></summary>
 
-```JS
-import { ChatGPTClient } from '@waylaidwanderer/chatgpt-api';
+See [`demos/use-client.js`](demos/use-client.js).
+</details>
+<details open>
+<summary><strong>ChatGPTBrowserClient</strong></summary>
 
-const clientOptions = {
-    // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
-    // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
-    // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
-    // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
-    modelOptions: {
-        // You can override the model name and any other parameters here.
-        // model: 'text-chat-davinci-002-20221122',
-        // Set max_tokens here to override the default max_tokens of 1000 for the completion.
-        // max_tokens: 1000,
-    },
-    // (Optional) Davinci models have a max context length of 4097 tokens, but you may need to change this for other models.
-    // maxContextTokens: 4097,
-    // (Optional) You might want to lower this to save money if using a paid model like `text-davinci-003`.
-    // Earlier messages will be dropped until the prompt is within the limit.
-    // maxPromptTokens: 3097,
-    // (Optional) Set custom instructions instead of "You are ChatGPT...".
-    // promptPrefix: 'You are Bob, a cowboy in Western times...',
-    // (Optional) Set a custom name for the user
-    // userLabel: 'User',
-    // (Optional) Set a custom name for ChatGPT
-    // chatGptLabel: 'ChatGPT',
-    // (Optional) Set to true to enable `console.debug()` logging
-    debug: false,
-};
-
-const cacheOptions = {
-  // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
-  // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
-  // For example, to use a JSON file (`npm i keyv-file`) as a database:
-  // store: new KeyvFile({ filename: 'cache.json' }),
-};
-
-const chatGptClient = new ChatGPTClient('OPENAI_API_KEY', clientOptions, cacheOptions);
-
-const response = await chatGptClient.sendMessage('Hello!');
-console.log(response); // { response: 'Hi! How can I help you today?', conversationId: '...', messageId: '...' }
-
-const response2 = await chatGptClient.sendMessage('Write a poem about cats.', { conversationId: response.conversationId, parentMessageId: response.messageId });
-console.log(response2.response); // Cats are the best pets in the world.
-
-const response3 = await chatGptClient.sendMessage('Now write it in French.', {
-  conversationId: response2.conversationId,
-  parentMessageId: response2.messageId,
-  // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
-  // You will receive one token at a time, so you will need to concatenate them yourself.
-  onProgress: (token) => console.log(token),
-});
-console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.
-```
+See [`demos/use-browser-client.js`](demos/use-browser-client.js).
 </details>
 
 ### API Server
@@ -233,6 +160,10 @@ npm i -g @waylaidwanderer/chatgpt-api
 then run it using
 `chatgpt-api`.
 This takes an optional `--settings=<path_to_settings.js>` parameter, or looks for `settings.js` in the current directory if not set, with the following contents:
+
+<details>
+<summary><strong>settings.js</strong></summary>
+
 ```JS
 module.exports = {
     // Your OpenAI API key (for `ChatGPTClient`)
@@ -298,6 +229,7 @@ module.exports = {
     storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
 };
 ```
+</details>
 
 Alternatively, you can install and run the package directly.
 
