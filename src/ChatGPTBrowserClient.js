@@ -89,6 +89,10 @@ export default class ChatGPTBrowserClient {
                             console.debug('Server closed the connection unexpectedly, returning...');
                         }
                         if (!done) {
+                            if (!lastEvent) {
+                                reject(new Error('Server closed the connection unexpectedly. Please make sure you are using a valid access token.'));
+                                return;
+                            }
                             onProgress('[DONE]');
                             controller.abort();
                             resolve(lastEvent);
