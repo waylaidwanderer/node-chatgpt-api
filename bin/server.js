@@ -82,7 +82,9 @@ server.post('/conversation', async (request, reply) => {
             if (settings.apiOptions?.debug) {
                 console.debug(token);
             }
-            reply.sse({ id: '', data: token });
+            if (token !== '[DONE]') {
+                reply.sse({ id: '', data: token });
+            }
         };
     } else {
         onProgress = null;

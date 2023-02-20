@@ -115,13 +115,18 @@ export default class ChatGPTBrowserClient {
                             done = true;
                             return;
                         }
-                        const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
-                        const data = JSON.parse(message.data);
-                        const newMessage = data.message.content.parts[0];
-                        // get the difference between the current text and the previous text
-                        const difference = newMessage.substring(lastMessage.length);
-                        lastEvent = data;
-                        onProgress(difference);
+                        try {
+                            const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
+                            const data = JSON.parse(message.data);
+                            const newMessage = data.message.content.parts[0];
+                            // get the difference between the current text and the previous text
+                            const difference = newMessage.substring(lastMessage.length);
+                            lastEvent = data;
+                            onProgress(difference);
+                        } catch (err) {
+                            console.debug(message.data);
+                            console.error(err);
+                        }
                     },
                 });
             } catch (err) {
