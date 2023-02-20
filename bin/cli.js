@@ -168,12 +168,12 @@ async function onMessage(message) {
             ...conversationData,
             onProgress: (token) => {
                 reply += token;
-                const output = tryBoxen(`${(reply.hexDecode() || reply).trim()}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
+                const output = tryBoxen(`${reply.trim()}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
         let responseText = clientToUse === 'chatgpt' ? response.response : (response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response);
-        responseText = (responseText.hexDecode() || responseText).trim();
+        responseText = responseText.trim();
         clipboard.write(responseText).then(() => {}).catch(() => {});
         spinner.stop();
         if (clientToUse === 'chatgpt') {
