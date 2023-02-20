@@ -3,7 +3,7 @@ import { ChatGPTClient } from '../index.js';
 
 const clientOptions = {
     // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
-    // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
+    // Warning: This will expose your `openaiApiKey` to a third party. Consider the risks before using this.
     // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
     modelOptions: {

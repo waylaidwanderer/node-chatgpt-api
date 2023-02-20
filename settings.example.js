@@ -1,9 +1,16 @@
 export default {
+    // Options for the Keyv cache, see https://www.npmjs.com/package/keyv.
+    // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default).
+    // Only applies when using `ChatGPTClient`.
+    cacheOptions: {},
+    // If set, `ChatGPTClient` will use `keyv-file` to store conversations to this JSON file instead of in memory.
+    // However, `cacheOptions.store` will override this if set
+    storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
     // Your OpenAI API key (for `ChatGPTClient`)
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     chatGptClient: {
         // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
-        // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
+        // Warning: This will expose your `openaiApiKey` to a third party. Consider the risks before using this.
         // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
         // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
         modelOptions: {
@@ -26,10 +33,6 @@ export default {
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
-    // Options for the Keyv cache, see https://www.npmjs.com/package/keyv.
-    // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default).
-    // Does not apply when using `BingAIClient`.
-    cacheOptions: {},
     // Options for the Bing client
     bingAiClient: {
         // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
@@ -45,7 +48,7 @@ export default {
     },
     chatGptBrowserClient: {
         // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
-        // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
+        // Warning: This will expose your access token to a third party. Consider the risks before using this.
         reverseProxyUrl: 'https://chatgpt.duti.tech/api/conversation',
         // Access token from https://chat.openai.com/api/auth/session
         accessToken: '',
@@ -68,7 +71,4 @@ export default {
         // (Optional) Set to "bing" to use `BingAIClient` instead of `ChatGPTClient`.
         // clientToUse: 'bing',
     },
-    // If set, `ChatGPTClient` will use `keyv-file` to store conversations to this JSON file instead of in memory.
-    // However, `cacheOptions.store` will override this if set
-    storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
 }
