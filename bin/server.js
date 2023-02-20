@@ -161,8 +161,6 @@ server.listen({
 });
 
 function nextTick() {
-    return new Promise((resolve) => {
-        process.nextTick(resolve);
-    });
+    return new Promise(resolve => setTimeout(resolve, 0));
 }
 
