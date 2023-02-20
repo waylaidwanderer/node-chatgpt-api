@@ -139,6 +139,9 @@ export default class ChatGPTClient {
                             if (!message.data) {
                                 return;
                             }
+                            if (message.event == 'ping') {
+                                return;
+                            }
                             if (message.data === '[DONE]') {
                                 onProgress('[DONE]');
                                 controller.abort();
