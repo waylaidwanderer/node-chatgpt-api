@@ -172,21 +172,32 @@ async function onMessage(message) {
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
-        const responseText = clientToUse === 'chatgpt' ? response.response : (response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response);
+        let responseText;
+        switch (clientToUse) {
+            case 'bing':
+                responseText = response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response;
+                break;
+            default:
+                responseText = response.response;
+                break;
+        }
         clipboard.write(responseText).then(() => {}).catch(() => {});
         spinner.stop();
-        if (clientToUse === 'chatgpt') {
-            conversationData = {
-                conversationId: response.conversationId,
-                parentMessageId: response.messageId,
-            };
-        } else {
-            conversationData = {
-                conversationId: response.conversationId,
-                conversationSignature: response.conversationSignature,
-                clientId: response.clientId,
-                invocationId: response.invocationId,
-            };
+        switch (clientToUse) {
+            case 'bing':
+                conversationData = {
+                    conversationId: response.conversationId,
+                    conversationSignature: response.conversationSignature,
+                    clientId: response.clientId,
+                    invocationId: response.invocationId,
+                };
+                break;
+            default:
+                conversationData = {
+                    conversationId: response.conversationId,
+                    parentMessageId: response.messageId,
+                };
+                break;
         }
         await client.conversationsCache.set('lastConversation', conversationData);
         const output = tryBoxen(responseText, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
