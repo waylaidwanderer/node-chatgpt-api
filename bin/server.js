@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { FastifySSEPlugin } from "fastify-sse-v2";
+import { FastifySSEPlugin } from "@waylaidwanderer/fastify-sse-v2";
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
