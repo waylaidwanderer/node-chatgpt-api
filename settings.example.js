@@ -36,6 +36,17 @@ export default {
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
+    chatGptBrowserClient: {
+        // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
+        // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
+        reverseProxyUrl: 'https://chatgpt.duti.tech/api/conversation',
+        // Access token from https://chat.openai.com/api/auth/session
+        accessToken: '',
+        // Cookies from chat.openai.com (likely not required if using reverse proxy server).
+        cookies: '',
+        // (Optional) Set to true to enable `console.debug()` logging
+        // debug: true,
+    },
     // Options for the API server
     apiOptions: {
         port: process.env.API_PORT || 3000,

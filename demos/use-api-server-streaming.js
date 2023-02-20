@@ -38,6 +38,12 @@ try {
                 console.log(message);
                 return;
             }
+            if (message.event === 'result') {
+                const result = JSON.parse(message.data);
+                const { response, conversationId } = result;
+                console.log({ response, conversationId });
+                return;
+            }
             console.log(message);
             reply += message.data;
         },

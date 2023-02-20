@@ -1,33 +1,19 @@
-// import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
-import { ChatGPTClient } from '../index.js';
+// import { ChatGPTBrowserClient } from '@waylaidwanderer/chatgpt-api';
+import { ChatGPTBrowserClient } from '../index.js';
 
 const clientOptions = {
     // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
     // Warning: This will expose your `openaiApiKey` to a third-party. Consider the risks before using this.
-    // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
-    // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
-    modelOptions: {
-        // You can override the model name and any other parameters here.
-        // model: 'text-chat-davinci-002-20221122',
-    },
-    // (Optional) Set custom instructions instead of "You are ChatGPT...".
-    // promptPrefix: 'You are Bob, a cowboy in Western times...',
-    // (Optional) Set a custom name for the user
-    // userLabel: 'User',
-    // (Optional) Set a custom name for ChatGPT
-    // chatGptLabel: 'ChatGPT',
+    reverseProxyUrl: 'https://chatgpt.duti.tech/api/conversation',
+    // Access token from https://chat.openai.com/api/auth/session
+    accessToken: '',
+    // Cookies from chat.openai.com (likely not required if using reverse proxy server).
+    cookies: '',
     // (Optional) Set to true to enable `console.debug()` logging
-    debug: false,
+    // debug: true,
 };
 
-const cacheOptions = {
-    // Options for the Keyv cache, see https://www.npmjs.com/package/keyv
-    // This is used for storing conversations, and supports additional drivers (conversations are stored in memory by default)
-    // For example, to use a JSON file (`npm i keyv-file`) as a database:
-    // store: new KeyvFile({ filename: 'cache.json' }),
-};
-
-const chatGptClient = new ChatGPTClient('OPENAI_API_KEY', clientOptions, cacheOptions);
+const chatGptClient = new ChatGPTBrowserClient(clientOptions);
 
 const response = await chatGptClient.sendMessage('Hello!');
 console.log(response); // { response: 'Hi! How can I help you today?', conversationId: '...', messageId: '...' }

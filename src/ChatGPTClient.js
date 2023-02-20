@@ -184,6 +184,7 @@ export default class ChatGPTClient {
         const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
 
         let reply = '';
+        let result = null;
         if (typeof opts.onProgress === 'function') {
             await this.getCompletion(prompt, (message) => {
                 if (message === '[DONE]') {
@@ -200,7 +201,7 @@ export default class ChatGPTClient {
                 reply += token;
             });
         } else {
-            const result = await this.getCompletion(prompt, null);
+            result = await this.getCompletion(prompt, null);
             if (this.options.debug) {
                 console.debug(JSON.stringify(result));
             }
@@ -228,6 +229,7 @@ export default class ChatGPTClient {
             response: replyMessage.message,
             conversationId,
             messageId: replyMessage.id,
+            details: result,
         };
     }
 
