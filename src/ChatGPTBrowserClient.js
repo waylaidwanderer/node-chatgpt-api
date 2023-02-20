@@ -105,10 +105,7 @@ export default class ChatGPTBrowserClient {
                         if (debug) {
                             console.debug(message);
                         }
-                        if (!message.data) {
-                            return;
-                        }
-                        if (message.event == 'ping') {
+                        if (!message.data || message.event === 'ping') {
                             return;
                         }
                         if (message.data === '[DONE]') {
