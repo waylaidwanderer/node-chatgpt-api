@@ -184,6 +184,7 @@ const clientOptions = {
     // (Optional) Davinci models have a max context length of 4097 tokens, but you may need to change this for other models.
     // maxContextTokens: 4097,
     // (Optional) You might want to lower this to save money if using a paid model like `text-davinci-003`.
+    // Earlier messages will be dropped until the prompt is within the limit.
     // maxPromptTokens: 3097,
     // (Optional) Set custom instructions instead of "You are ChatGPT...".
     // promptPrefix: 'You are Bob, a cowboy in Western times...',
@@ -250,6 +251,7 @@ module.exports = {
         // (Optional) Davinci models have a max context length of 4097 tokens, but you may need to change this for other models.
         // maxContextTokens: 4097,
         // (Optional) You might want to lower this to save money if using a paid model like `text-davinci-003`.
+        // Earlier messages will be dropped until the prompt is within the limit.
         // maxPromptTokens: 3097,
         // (Optional) Set custom instructions instead of "You are ChatGPT...".
         // promptPrefix: 'You are Bob, a cowboy in Western times...',

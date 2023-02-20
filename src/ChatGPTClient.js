@@ -28,7 +28,8 @@ export default class ChatGPTClient {
 
         // Davinci models have a max context length of 4097 tokens.
         this.maxContextTokens = this.options.maxContextTokens || 4097;
-        // I decided to limit conversations to 3097 tokens, leaving 1000 tokens for the response.
+        // I decided to limit conversations to 3097 tokens by default, leaving 1000 tokens for the response.
+        // Earlier messages will be dropped until the prompt is within the limit.
         this.maxPromptTokens = this.options.maxPromptTokens || 3097;
         this.maxResponseTokens = this.modelOptions.max_tokens || 1000;
 
