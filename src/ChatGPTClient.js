@@ -86,7 +86,7 @@ export default class ChatGPTClient {
             },
             body: JSON.stringify(modelOptions),
             bodyTimeout: 0,
-            headersTimeout: 0,
+            headersTimeout: 3 * 60 * 1000,
         };
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
