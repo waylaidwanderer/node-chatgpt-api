@@ -82,8 +82,8 @@ let client;
 switch (clientToUse) {
     case 'bing':
         client = new BingAIClient({
-            userToken: settings.bingAiClient.userToken,
-            debug: settings.bingAiClient.debug,
+            ...settings.bingAiClient,
+            cache: settings.cacheOptions,
         });
         break;
     default:
@@ -172,23 +172,34 @@ async function onMessage(message) {
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
-        const responseText = clientToUse === 'chatgpt' ? response.response : (response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response);
+        let responseText;
+        switch (clientToUse) {
+            case 'bing':
+                responseText = response.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || response.response;
+                break;
+            default:
+                responseText = response.response;
+                break;
+        }
         clipboard.write(responseText).then(() => {}).catch(() => {});
         spinner.stop();
-        if (clientToUse === 'chatgpt') {
-            conversationData = {
-                conversationId: response.conversationId,
-                parentMessageId: response.messageId,
-            };
-            await client.conversationsCache.set('lastConversation', conversationData);
-        } else {
-            conversationData = {
-                conversationId: response.conversationId,
-                conversationSignature: response.conversationSignature,
-                clientId: response.clientId,
-                invocationId: response.invocationId,
-            };
+        switch (clientToUse) {
+            case 'bing':
+                conversationData = {
+                    conversationId: response.conversationId,
+                    conversationSignature: response.conversationSignature,
+                    clientId: response.clientId,
+                    invocationId: response.invocationId,
+                };
+                break;
+            default:
+                conversationData = {
+                    conversationId: response.conversationId,
+                    parentMessageId: response.messageId,
+                };
+                break;
         }
+        await client.conversationsCache.set('lastConversation', conversationData);
         const output = tryBoxen(responseText, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
         console.log(output);
     } catch (error) {
@@ -216,10 +227,6 @@ async function useEditor() {
 }
 
 async function resumeConversation() {
-    if (clientToUse !== 'chatgpt') {
-        logWarning('Resuming conversations is only supported for ChatGPT client.');
-        return conversation();
-    }
     conversationData = (await client.conversationsCache.get('lastConversation')) || {};
     if (conversationData.conversationId) {
         logSuccess(`Resumed conversation ${conversationData.conversationId}.`);

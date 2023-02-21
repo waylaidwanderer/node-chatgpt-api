@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { FastifySSEPlugin } from "fastify-sse-v2";
 import fastifyStatic from '@fastify/static';
+import { FastifySSEPlugin } from "@waylaidwanderer/fastify-sse-v2";
 import fs from 'fs';
 import path from 'path';
 import CryptoJS from "crypto-js";
 import { pathToFileURL } from 'url'
 
 import ChatGPTClient from '../src/ChatGPTClient.js';
+import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
 import { KeyvFile } from 'keyv-file';
 
@@ -52,10 +53,13 @@ const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 
 let client;
 switch (clientToUse) {
     case 'bing':
-        client = new BingAIClient({
-            userToken: settings.bingAiClient.userToken,
-            debug: settings.bingAiClient.debug,
-        });
+        client = new BingAIClient(settings.bingAiClient);
+        break;
+    case 'chatgpt-browser':
+        client = new ChatGPTBrowserClient(
+            settings.chatGptBrowserClient,
+            settings.cacheOptions,
+        );
         break;
     default:
         if (settings.openaiApiKey?.indexOf(',') > -1) {
@@ -129,7 +133,9 @@ server.post('/api/chat', async (request, reply) => {
             if (settings.apiOptions?.debug) {
                 console.debug(token);
             }
-            reply.sse({ id: '', data: token });
+            if (token !== '[DONE]') {
+                reply.sse({ id: '', data: token });
+            }
         };
     } else {
         onProgress = null;
@@ -165,40 +171,38 @@ server.post('/api/chat', async (request, reply) => {
     }
 
     if (result !== undefined) {
-        if (body.stream === true) {
-            // reply.sse({ id: '', data: '[DONE]' });
-            console.log('stream done result: ', result);
-            reply.sse({ id: '', data: '[DONE]' + JSON.stringify({
-                messageId: result?.messageId,
-                conversationId: result?.conversationId
-            }) });
-        } else {
-            reply.send(result);
-        }
         if (settings.apiOptions?.debug) {
             console.debug(result);
         }
-    } else {
-        const code = error?.data?.code || 503;
-        if (code === 503) {
-            console.error(error);
-        } else if (settings.apiOptions?.debug) {
-            console.debug(error);
-        }
-        const message = error?.data?.message || `There was an error communicating with ${clientToUse === 'bing' ? 'Bing' : 'ChatGPT'}.`;
         if (body.stream === true) {
-            reply.sse({
-                id: '',
-                event: 'error',
-                data: JSON.stringify({
-                    code,
-                    error: message,
-                }),
-            });
-        } else {
-            reply.code(code).send({ error: message });
+            reply.sse({ event: 'result', id: '', data: JSON.stringify(result) });
+            reply.sse({ id: '', data: '[DONE]' });
+            await nextTick();
+            return reply.raw.end();
         }
+        return reply.send(result);
     }
+
+    const code = error?.data?.code || 503;
+    if (code === 503) {
+        console.error(error);
+    } else if (settings.apiOptions?.debug) {
+        console.debug(error);
+    }
+    const message = error?.data?.message || `There was an error communicating with ${clientToUse === 'bing' ? 'Bing' : 'ChatGPT'}.`;
+    if (body.stream === true) {
+        reply.sse({
+            id: '',
+            event: 'error',
+            data: JSON.stringify({
+                code,
+                error: message,
+            }),
+        });
+        await nextTick();
+        return reply.raw.end();
+    }
+    return reply.code(code).send({ error: message });
 });
 
 const port = settings.apiOptions?.port || settings.port || 3000
@@ -213,3 +217,8 @@ server.listen({
         process.exit(1);
     }
 });
+
+function nextTick() {
+    return new Promise(resolve => setTimeout(resolve, 0));
+}
+

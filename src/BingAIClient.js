@@ -1,15 +1,24 @@
 import './fetch-polyfill.js';
 import crypto from 'crypto';
 import WebSocket from 'ws';
+import Keyv from 'keyv';
+import { ProxyAgent } from 'undici';
+import HttpsProxyAgent from 'https-proxy-agent';
 
 export default class BingAIClient {
     constructor(opts) {
-        this.userToken = opts.userToken;
+        this.opts = {
+            ...opts,
+            host: opts.host || 'https://www.bing.com',
+        };
         this.debug = opts.debug;
+        const cacheOptions = opts.cache || {};
+        cacheOptions.namespace = cacheOptions.namespace || 'bing';
+        this.conversationsCache = new Keyv(cacheOptions);
    }
 
     async createNewConversation() {
-        const response = await fetch("https://www.bing.com/turing/conversation/create", {
+        const fetchOptions = {
             headers: {
                 "accept": "application/json",
                 "accept-language": "en-US,en;q=0.9",
@@ -28,18 +37,26 @@ export default class BingAIClient {
                 "sec-fetch-site": "same-origin",
                 "x-ms-client-request-id": crypto.randomUUID(),
                 "x-ms-useragent": "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32",
-                "cookie": `_U=${this.userToken}`,
+                "cookie": this.opts.cookies || `_U=${this.opts.userToken}`,
                 "Referer": "https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx",
                 "Referrer-Policy": "origin-when-cross-origin"
             },
-        });
-
+        };
+        if (this.opts.proxy) {
+            fetchOptions.dispatcher = new ProxyAgent(this.opts.proxy);
+        }
+        const response = await fetch(`${this.opts.host}/turing/conversation/create`, fetchOptions);
         return response.json();
     }
 
     async createWebSocketConnection() {
         return new Promise((resolve) => {
-            const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub');
+            let agent;
+            if (this.opts.proxy) {
+                agent = new HttpsProxyAgent(this.opts.proxy);
+            }
+
+            const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
 
             ws.on('error', console.error);
 
@@ -158,6 +175,10 @@ export default class BingAIClient {
 
         const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
+            const messageTimeout = setTimeout(() => {
+                this.cleanupWebSocketConnection(ws);
+                reject(new Error('Timed out waiting for response. Try enabling debug mode to see more information.'))
+            }, 120 * 1000,);
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
@@ -187,13 +208,14 @@ export default class BingAIClient {
                         replySoFar = updatedText;
                         return;
                     case 2:
-                        if (event.result?.value?.includes('Error')) {
+                        if (event.item?.result?.error) {
                             this.cleanupWebSocketConnection(ws);
                             if (this.debug) {
-                                console.debug(event.result.value, event.result.message);
-                                console.debug(event.result.exception);
+                                console.debug(event.item.result.value, event.item.result.message);
+                                console.debug(event.item.result.error);
+                                console.debug(event.item.result.exception);
                             }
-                            reject(`${event.result.value}: ${event.result.message}`);
+                            reject(`${event.item.result.value}: ${event.item.result.message}`);
                             return;
                         }
                         const message = event.item?.messages?.[1];
@@ -201,6 +223,7 @@ export default class BingAIClient {
                             return;
                         }
                         this.cleanupWebSocketConnection(ws);
+                        clearTimeout(messageTimeout);
                         resolve({
                             message,
                             conversationExpiryTime: event?.item?.conversationExpiryTime,
