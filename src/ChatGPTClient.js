@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
+import { Agent } from 'undici';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
 
@@ -85,8 +86,10 @@ export default class ChatGPTClient {
                 Authorization: `Bearer ${this.apiKey}`,
             },
             body: JSON.stringify(modelOptions),
-            bodyTimeout: 0,
-            headersTimeout: 3 * 60 * 1000,
+            dispatcher: new Agent({
+                bodyTimeout: 0,
+                headersTimeout: 0,
+            }),
         };
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
