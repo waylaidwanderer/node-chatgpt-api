@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { FastifySSEPlugin } from "fastify-sse-v2";
+import { FastifySSEPlugin } from "@waylaidwanderer/fastify-sse-v2";
 import fs from 'fs';
 import { pathToFileURL } from 'url'
 import ChatGPTClient from '../src/ChatGPTClient.js';
@@ -82,7 +82,9 @@ server.post('/conversation', async (request, reply) => {
             if (settings.apiOptions?.debug) {
                 console.debug(token);
             }
-            reply.sse({ id: '', data: token });
+            if (token !== '[DONE]') {
+                reply.sse({ id: '', data: token });
+            }
         };
     } else {
         onProgress = null;
@@ -159,8 +161,6 @@ server.listen({
 });
 
 function nextTick() {
-    return new Promise((resolve) => {
-        process.nextTick(resolve);
-    });
+    return new Promise(resolve => setTimeout(resolve, 0));
 }
 

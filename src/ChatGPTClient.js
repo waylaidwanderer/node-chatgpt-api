@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
+import { Agent } from 'undici';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
 
@@ -25,6 +26,17 @@ export default class ChatGPTClient {
             presence_penalty: typeof modelOptions.presence_penalty === 'undefined' ? 1 : modelOptions.presence_penalty,
             stop: modelOptions.stop,
         };
+
+        // Davinci models have a max context length of 4097 tokens.
+        this.maxContextTokens = this.options.maxContextTokens || 4097;
+        // I decided to limit conversations to 3097 tokens by default, leaving 1000 tokens for the response.
+        // Earlier messages will be dropped until the prompt is within the limit.
+        this.maxPromptTokens = this.options.maxPromptTokens || 3097;
+        this.maxResponseTokens = this.modelOptions.max_tokens || 1000;
+
+        if (this.maxPromptTokens + this.maxResponseTokens > this.maxContextTokens) {
+            throw new Error(`maxPromptTokens + max_tokens (${this.maxPromptTokens} + ${this.maxResponseTokens} = ${this.maxPromptTokens + this.maxResponseTokens}) must be less than or equal to maxContextTokens (${this.maxContextTokens})`);
+        }
 
         this.userLabel = this.options.userLabel || 'User';
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
@@ -74,8 +86,10 @@ export default class ChatGPTClient {
                 Authorization: `Bearer ${this.apiKey}`,
             },
             body: JSON.stringify(modelOptions),
-            bodyTimeout: 0,
-            headersTimeout: 0,
+            dispatcher: new Agent({
+                bodyTimeout: 0,
+                headersTimeout: 0,
+            }),
         };
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
@@ -125,7 +139,7 @@ export default class ChatGPTClient {
                             if (debug) {
                                 console.debug(message);
                             }
-                            if (!message.data) {
+                            if (!message.data || message.event === 'ping') {
                                 return;
                             }
                             if (message.data === '[DONE]') {
@@ -257,8 +271,7 @@ export default class ChatGPTClient {
 
         let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         let promptBody = '';
-        // I decided to limit conversations to 3097 tokens, leaving 1000 tokens for the response.
-        const maxTokenCount = 3097;
+        const maxTokenCount = this.maxPromptTokens;
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
@@ -279,11 +292,13 @@ export default class ChatGPTClient {
             // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
             // resist doing it the "proper" way.
             const newTokenCount = this.getTokenCount(`${promptPrefix}${newPromptBody}${promptSuffix}`);
-            // Always add the first (technically last) message, even if it puts us over the token limit.
-            // TODO: throw an error if the first message is over 3000 tokens
-            if (promptBody && newTokenCount > maxTokenCount) {
-                // This message would put us over the token limit, so don't add it.
-                break;
+            if (newTokenCount > maxTokenCount) {
+                if (promptBody) {
+                    // This message would put us over the token limit, so don't add it.
+                    break;
+                }
+                // This is the first message, so we can't add it. Just throw an error.
+                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
             }
             promptBody = newPromptBody;
             currentTokenCount = newTokenCount;
@@ -292,8 +307,8 @@ export default class ChatGPTClient {
         const prompt = `${promptBody}${promptSuffix}`;
 
         const numTokens = this.getTokenCount(prompt);
-        // Use up to 4097 tokens (prompt + response), but try to leave 1000 tokens for the response.
-        this.modelOptions.max_tokens = Math.min(4097 - numTokens, 1000);
+        // Use up to `this.maxContextTokens` tokens (prompt + response), but try to leave `this.maxTokens` tokens for the response.
+        this.modelOptions.max_tokens = Math.min(this.maxContextTokens - numTokens, this.maxResponseTokens);
 
         return prompt;
     }

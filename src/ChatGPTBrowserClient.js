@@ -89,6 +89,10 @@ export default class ChatGPTBrowserClient {
                             console.debug('Server closed the connection unexpectedly, returning...');
                         }
                         if (!done) {
+                            if (!lastEvent) {
+                                reject(new Error('Server closed the connection unexpectedly. Please make sure you are using a valid access token.'));
+                                return;
+                            }
                             onProgress('[DONE]');
                             controller.abort();
                             resolve(lastEvent);
@@ -105,7 +109,7 @@ export default class ChatGPTBrowserClient {
                         if (debug) {
                             console.debug(message);
                         }
-                        if (!message.data) {
+                        if (!message.data || message.event === 'ping') {
                             return;
                         }
                         if (message.data === '[DONE]') {
@@ -115,13 +119,18 @@ export default class ChatGPTBrowserClient {
                             done = true;
                             return;
                         }
-                        const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
-                        const data = JSON.parse(message.data);
-                        const newMessage = data.message.content.parts[0];
-                        // get the difference between the current text and the previous text
-                        const difference = newMessage.substring(lastMessage.length);
-                        lastEvent = data;
-                        onProgress(difference);
+                        try {
+                            const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
+                            const data = JSON.parse(message.data);
+                            const newMessage = data.message.content.parts[0];
+                            // get the difference between the current text and the previous text
+                            const difference = newMessage.substring(lastMessage.length);
+                            lastEvent = data;
+                            onProgress(difference);
+                        } catch (err) {
+                            console.debug(message.data);
+                            console.error(err);
+                        }
                     },
                 });
             } catch (err) {

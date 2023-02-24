@@ -252,7 +252,7 @@ export default class BingAIClient {
                 }
                 const event = events[0];
                 switch (event.type) {
-                    case 1:
+                    case 1: {
                         const messages = event?.arguments?.[0]?.messages;
                         if (!messages?.length || messages[0].author !== 'bot') {
                             return;
@@ -266,9 +266,14 @@ export default class BingAIClient {
                         onProgress(difference);
                         replySoFar = updatedText;
                         return;
+                    }
                     case 2: {
                         clearTimeout(messageTimeout);
                         this.cleanupWebSocketConnection(ws);
+                        if (event.item?.result?.value === 'InvalidSession') {
+                            reject(`${event.item.result.value}: ${event.item.result.message}`);
+                            return;
+                        }
                         if (event.item?.result?.error) {
                             if (this.debug) {
                                 console.debug(event.item.result.value, event.item.result.message);
