@@ -149,7 +149,8 @@ export default class ChatGPTBrowserClient {
         let conversation;
         if (conversationId) {
             conversation = await this.conversationsCache.get(conversationId);
-        } else {
+        }
+        if (!conversation) {
             conversation = {
                 messages: [],
                 createdAt: Date.now(),
