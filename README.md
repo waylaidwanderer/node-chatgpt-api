@@ -102,6 +102,7 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
          * [CLI](#cli)
       * [Using a Reverse Proxy](#using-a-reverse-proxy)
    * [Caveats](#caveats)
+   * [Web Client](#web-client)
    * [Contributing](#contributing)
    * [License](#license)
 
@@ -437,6 +438,9 @@ This means my implementation or the underlying model may not behave exactly the 
   > Current date: 2023-01-31"
 
   As OpenAI updates ChatGPT, this preamble may also change. The default prompt prefix in my implementation attempts to replicate a similar behavior to the current ChatGPT model.
+
+## Web Client
+A web client is available for this library's API server is also available at [waylaidwanderer/chatgpt-web-client](https://github.com/waylaidwanderer/chatgpt-web-client).
 
 ## Contributing
 If you'd like to contribute to this project, please create a pull request with a detailed description of your changes.
