@@ -18,19 +18,19 @@ As always, please note that if you choose to go this route, you are exposing you
 <details>
 <summary><strong>2023-02-15</strong></summary>
 
-The method we were using to access the ChatGPT raw models has been patched, unfortunately. Your options right now are to either use the official OpenAI API with the `text-davinci-003` model (which costs money), or use a browser-based solution to interface with ChatGPT's backend (which is less powerful, more rate-limited and is not supported by this library at this time).
+The method we were using to access the ChatGPT underlying models has been patched, unfortunately. Your options right now are to either use the official OpenAI API with the `text-davinci-003` model (which costs money), or use a browser-based solution to interface with ChatGPT's backend (which is less powerful, more rate-limited and is not supported by this library at this time).
 </details>
 <details>
 <summary><strong>2023-02-11</strong></summary>
 
-With the help of @PawanOsman, **we've figured out a way to continue using the ChatGPT raw models**. To hopefully prevent losing access again, we've decided to provide reverse proxy servers compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy server instead of the OpenAI API server. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information on available proxy servers and how they work.
+With the help of @PawanOsman, **we've figured out a way to continue using the ChatGPT underlying models**. To hopefully prevent losing access again, we've decided to provide reverse proxy servers compatible with the OpenAI API. I've updated `ChatGPTClient` to support using a reverse proxy server instead of the OpenAI API server. See [Using a Reverse Proxy](#using-a-reverse-proxy) for more information on available proxy servers and how they work.
 
 Please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using the official OpenAI API instead with the `text-davinci-003` model.
 </details>
 <details>
 <summary><strong>2023-02-10</strong></summary>
 
-~~I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the raw model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.~~
+~~I've found a new working model for `text-chat-davinci-002`, `text-chat-davinci-002-sh-alpha-aoruigiofdj83`. This is the underlying model that the ChatGPT Plus "Turbo" version uses. Responses are blazing fast. I've updated the library to use this model.~~
 
 Bad timing; `text-chat-davinci-002-sh-alpha-aoruigiofdj83` was removed shortly after, possibly due to a new model somewhere out there?
 </details>
@@ -80,7 +80,7 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
 
-This is an implementation of [ChatGPT](https://chat.openai.com/chat), with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT raw model, `text-chat-davinci-002`.
+This is an implementation of [ChatGPT](https://chat.openai.com/chat), with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT underlying model, `text-chat-davinci-002`.
 
 #### About Bing's GPT-4 version of ChatGPT
 An experimental client for Bing's GPT-4 version of ChatGPT is available in [`BingAIClient`](src/BingAIClient.js). It works much like ChatGPT, but it's powered by GPT-4 instead of GPT-3. For more information on its capabilities and limitations, see [this Reddit comment](https://www.reddit.com/r/ChatGPT/comments/10xjda1/comment/j7snwxx/?utm_source=reddit&utm_medium=web2x&context=3).
@@ -107,7 +107,7 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
 
 ## Features
 - Experimental support for Bing's version of ChatGPT, powered by GPT-4.
-- Support for the official ChatGPT raw model, `text-chat-davinci-002`, via OpenAI's API.
+- Support for the official ChatGPT underlying model, `text-chat-davinci-002`, via OpenAI's API.
 - Includes an API server (with Docker support) you can run to use ChatGPT in non-Node.js applications.
 - Includes a `ChatGPTClient` and `BingAIClient` class that you can use in your own Node.js applications.
 - Includes a CLI interface where you can chat with ChatGPT.
@@ -378,12 +378,12 @@ ChatGPT's responses are automatically copied to your clipboard, so you can paste
 
 ## Using a Reverse Proxy
 As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a reverse proxy server instead of the official ChatGPT API.
-~~For now, **this is the only way to use the ChatGPT raw models**.~~ This method has been patched, but you may still want to use a reverse proxy for other reasons.
+~~For now, **this is the only way to use the ChatGPT underlying models**.~~ This method has been patched, but you may still want to use a reverse proxy for other reasons.
 
 <details>
 <summary><strong>Instructions</strong></summary>
 
-How does it work? Simple answer: `ChatGPTClient` > reverse proxy > OpenAI server. The reverse proxy server does some magic under the hood to access the raw model directly via OpenAI's server and then returns the response to `ChatGPTClient`.
+How does it work? Simple answer: `ChatGPTClient` > reverse proxy > OpenAI server. The reverse proxy server does some magic under the hood to access the underlying model directly via OpenAI's server and then returns the response to `ChatGPTClient`.
 
 Instructions are provided below.
 
@@ -396,7 +396,7 @@ Instructions are provided below.
     * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
 2. Set `reverseProxyUrl` to `https://chatgpt.hato.ai/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
 3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
-4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the underlying model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 
 #### Notes
@@ -414,7 +414,7 @@ Instructions are provided below.
     * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
 2. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
 3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
-4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the raw model name, and you cannot use a model that your account does not have access to.
+4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the underlying model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 
 #### Notes
@@ -424,8 +424,9 @@ Instructions are provided below.
 </details>
 
 ## Caveats
-Since `text-chat-davinci-002` is ChatGPT's raw model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.
-This means my implementation or the raw model may not behave exactly the same in some ways:
+### Regarding `ChatGPTClient`
+Since `text-chat-davinci-002` is ChatGPT's underlying model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.
+This means my implementation or the underlying model may not behave exactly the same in some ways:
 - Conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system.
 - ChatGPT's model parameters (temperature, frequency penalty, etc.) are unknown, so I set some defaults that I thought would be reasonable.
 - Conversations are limited to roughly the last 3000 tokens, so earlier messages may be forgotten during longer conversations.
