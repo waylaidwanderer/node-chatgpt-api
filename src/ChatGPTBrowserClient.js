@@ -120,8 +120,12 @@ export default class ChatGPTBrowserClient {
                             return;
                         }
                         try {
-                            const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
                             const data = JSON.parse(message.data);
+                            // ignore any messages that are not from the assistant
+                            if (data.message?.author?.role !== 'assistant') {
+                                return;
+                            }
+                            const lastMessage = lastEvent ? lastEvent.message.content.parts[0] : '';
                             const newMessage = data.message.content.parts[0];
                             // get the difference between the current text and the previous text
                             const difference = newMessage.substring(lastMessage.length);
