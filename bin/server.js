@@ -83,7 +83,7 @@ server.post('/conversation', async (request, reply) => {
                 console.debug(token);
             }
             if (token !== '[DONE]') {
-                reply.sse({ id: '', data: token });
+                reply.sse({ id: '', data: JSON.stringify(token) });
             }
         };
     } else {
