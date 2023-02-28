@@ -120,6 +120,7 @@ export default class BingAIClient {
             clientId,
             invocationId = 0,
             onProgress,
+            abortController = new AbortController(),
         } = opts;
 
         if (typeof onProgress !== 'function') {
@@ -142,6 +143,7 @@ export default class BingAIClient {
         }
 
         const ws = await this.createWebSocketConnection();
+
         const obj = {
             arguments: [
                 {
@@ -175,10 +177,19 @@ export default class BingAIClient {
 
         const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
+
             const messageTimeout = setTimeout(() => {
                 this.cleanupWebSocketConnection(ws);
                 reject(new Error('Timed out waiting for response. Try enabling debug mode to see more information.'))
-            }, 120 * 1000,);
+            }, 120 * 1000);
+
+            // abort the request if the abort controller is aborted
+            abortController.signal.addEventListener('abort', () => {
+                clearTimeout(messageTimeout);
+                this.cleanupWebSocketConnection(ws);
+                reject('Request aborted');
+            });
+
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {

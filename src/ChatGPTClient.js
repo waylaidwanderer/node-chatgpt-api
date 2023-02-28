@@ -65,7 +65,10 @@ export default class ChatGPTClient {
         this.conversationsCache = new Keyv(cacheOptions);
     }
 
-    async getCompletion(prompt, onProgress) {
+    async getCompletion(prompt, onProgress, abortController = null) {
+        if (!abortController) {
+            abortController = new AbortController();
+        }
         const modelOptions = { ...this.modelOptions };
         if (typeof onProgress === 'function') {
             modelOptions.stream = true;
@@ -93,12 +96,11 @@ export default class ChatGPTClient {
         };
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
-                const controller = new AbortController();
                 try {
                     let done = false;
                     await fetchEventSource(url, {
                         ...opts,
-                        signal: controller.signal,
+                        signal: abortController.signal,
                         async onopen(response) {
                             if (response.status === 200) {
                                 return;
@@ -124,7 +126,7 @@ export default class ChatGPTClient {
                             // workaround for private API not sending [DONE] event
                             if (!done) {
                                 onProgress('[DONE]');
-                                controller.abort();
+                                abortController.abort();
                                 resolve();
                             }
                         },
@@ -144,7 +146,7 @@ export default class ChatGPTClient {
                             }
                             if (message.data === '[DONE]') {
                                 onProgress('[DONE]');
-                                controller.abort();
+                                abortController.abort();
                                 resolve();
                                 done = true;
                                 return;
@@ -157,7 +159,13 @@ export default class ChatGPTClient {
                 }
             });
         }
-        const response = await fetch(url, opts);
+        const response = await fetch(
+            url,
+            {
+                ...opts,
+                signal: abortController.signal,
+            },
+        );
         if (response.status !== 200) {
             const body = await response.text();
             const error = new Error(`Failed to send message. HTTP ${response.status} - ${body}`);
@@ -201,22 +209,30 @@ export default class ChatGPTClient {
         let reply = '';
         let result = null;
         if (typeof opts.onProgress === 'function') {
-            await this.getCompletion(prompt, (message) => {
-                if (message === '[DONE]') {
-                    return;
-                }
-                const token = message.choices[0].text;
-                if (this.options.debug) {
-                    console.debug(token);
-                }
-                if (token === this.endToken) {
-                    return;
-                }
-                opts.onProgress(token);
-                reply += token;
-            });
+            await this.getCompletion(
+                prompt,
+                (message) => {
+                    if (message === '[DONE]') {
+                        return;
+                    }
+                    const token = message.choices[0].text;
+                    if (this.options.debug) {
+                        console.debug(token);
+                    }
+                    if (token === this.endToken) {
+                        return;
+                    }
+                    opts.onProgress(token);
+                    reply += token;
+                },
+                opts.abortController || new AbortController(),
+            );
         } else {
-            result = await this.getCompletion(prompt, null);
+            result = await this.getCompletion(
+                prompt,
+                null,
+                opts.abortController || new AbortController(),
+            );
             if (this.options.debug) {
                 console.debug(JSON.stringify(result));
             }

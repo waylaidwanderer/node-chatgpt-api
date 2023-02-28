@@ -75,6 +75,13 @@ await server.register(cors, {
 
 server.post('/conversation', async (request, reply) => {
     const body = request.body || {};
+    const abortController = new AbortController();
+
+    reply.raw.on('close', () => {
+        if (abortController.signal.aborted === false) {
+            abortController.abort();
+        }
+    });
 
     let onProgress;
     if (body.stream === true) {
@@ -110,6 +117,7 @@ server.post('/conversation', async (request, reply) => {
             clientId: body.clientId,
             invocationId: body.invocationId,
             onProgress,
+            abortController,
         });
     } catch (e) {
         error = e;
