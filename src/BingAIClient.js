@@ -324,8 +324,8 @@ export default class BingAIClient {
                             reject('Unexpected message author.');
                             return;
                         }
-                        const offenseTrigger = event.item.messages[0].offense !== 'None';
-                        if (offenseTrigger) {
+                        // The moderation filter triggered, so just return the text we have so far
+                        if (event.item.messages[0].topicChangerText) {
                             message.adaptiveCards[0].body[0].text = replySoFar;
                             message.text = replySoFar;
                         }
