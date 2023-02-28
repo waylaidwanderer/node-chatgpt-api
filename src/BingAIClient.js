@@ -5,13 +5,11 @@ import Keyv from 'keyv';
 import { ProxyAgent } from 'undici';
 import HttpsProxyAgent from 'https-proxy-agent';
 
-String.prototype.hexEncode = function() {
-    return this.split('').map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-};
-
-String.prototype.hexDecode = function() {
-    return this.split(/(\w\w)/g).filter(p => !!p).map(c => String.fromCharCode(parseInt(c, 16))).join('');
-};
+/**
+ * https://stackoverflow.com/a/58326357
+ * @param {number} size
+ */
+const genRanHex = (size) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 export default class BingAIClient {
     constructor(opts) {
@@ -130,6 +128,7 @@ export default class BingAIClient {
             invocationId = 0,
             parentMessageId = invocationId || crypto.randomUUID(),
             onProgress,
+            abortController = new AbortController(),
         } = opts;
 
         if (typeof onProgress !== 'function') {
@@ -196,6 +195,7 @@ export default class BingAIClient {
         conversation.messages.push(userMessage);
 
         const ws = await this.createWebSocketConnection();
+
         const obj = {
             arguments: [
                 {
@@ -207,7 +207,17 @@ export default class BingAIClient {
                         'disable_emoji_spoken_text',
                         'responsible_ai_policy_235',
                         'enablemm',
+                        'harmonyv3',
+                        'dtappid',
+                        'dloffstream',
+                        'dv3sugg',
                     ],
+                    sliceIds: [
+                        '222dtappid',
+                        '216dloffstream',
+                        '225cricinfos0',
+                    ],
+                    traceId: genRanHex(32),
                     isStartOfSession: true,
                     message: {
                         author: 'user',
@@ -234,10 +244,19 @@ export default class BingAIClient {
 
         const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
+
             const messageTimeout = setTimeout(() => {
                 this.cleanupWebSocketConnection(ws);
                 reject(new Error('Timed out waiting for response. Try enabling debug mode to see more information.'))
-            }, 120 * 1000,);
+            }, 120 * 1000);
+
+            // abort the request if the abort controller is aborted
+            abortController.signal.addEventListener('abort', () => {
+                clearTimeout(messageTimeout);
+                this.cleanupWebSocketConnection(ws);
+                reject('Request aborted');
+            });
+
             ws.on('message', (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
