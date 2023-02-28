@@ -181,7 +181,7 @@ export default class BingAIClient {
 
         const previousMessagesFormatted = previousMessages?.map((message) => {
             if (message.author === 'user') {
-                return `Human: ${message.text}`;
+                return `Human B: ${message.text}`;
             }
             return `Sydney: ${message.text}`;
         }).join('\n');
