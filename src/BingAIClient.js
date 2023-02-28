@@ -5,6 +5,12 @@ import Keyv from 'keyv';
 import { ProxyAgent } from 'undici';
 import HttpsProxyAgent from 'https-proxy-agent';
 
+/**
+ * https://stackoverflow.com/a/58326357
+ * @param {number} size
+ */
+const genRanHex = (size) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
 export default class BingAIClient {
     constructor(opts) {
         this.opts = {
@@ -155,7 +161,17 @@ export default class BingAIClient {
                         'disable_emoji_spoken_text',
                         'responsible_ai_policy_235',
                         'enablemm',
+                        'harmonyv3',
+                        'dtappid',
+                        'dloffstream',
+                        'dv3sugg',
                     ],
+                    sliceIds: [
+                        '222dtappid',
+                        '216dloffstream',
+                        '225cricinfos0',
+                    ],
+                    traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
