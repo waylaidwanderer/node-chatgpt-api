@@ -3,12 +3,15 @@ import fs from 'fs';
 import { pathToFileURL } from 'url';
 import { KeyvFile } from 'keyv-file';
 import ChatGPTClient from '../src/ChatGPTClient.js';
+import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import boxen from 'boxen';
 import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
 import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
 import BingAIClient from '../src/BingAIClient.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;
@@ -86,6 +89,12 @@ switch (clientToUse) {
             cache: settings.cacheOptions,
         });
         break;
+    case 'chatgpt-browser':
+        client = new ChatGPTBrowserClient(
+            settings.chatGptBrowserClient,
+            settings.cacheOptions,
+        );
+        break;        
     default:
         client = new ChatGPTClient(
             settings.openaiApiKey,

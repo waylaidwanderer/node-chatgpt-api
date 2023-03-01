@@ -8,6 +8,8 @@ import ChatGPTClient from '../src/ChatGPTClient.js';
 import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
 import { KeyvFile } from 'keyv-file';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const arg = process.argv.find((arg) => arg.startsWith('--settings'));
 let path;

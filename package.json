@@ -9,9 +9,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/server.js",
-    "server": "node bin/server.js",
-    "cli": "node bin/cli.js"
+    "start": "NODE_NO_WARNINGS=1 node bin/server.js",
+    "server": "NODE_NO_WARNINGS=1 node bin/server.js",
+    "cli": "NODE_NO_WARNINGS=1 node bin/cli.js"
   },
   "author": "waylaidwanderer",
   "license": "MIT",
