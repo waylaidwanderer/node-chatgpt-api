@@ -157,6 +157,9 @@ export default class BingAIClient {
             } = createNewConversationResponse);
         }
 
+        // Due to this jailbreak, the AI will occasionally start responding as the user. It only happens rarely (and happens with the non-jailbroken Bing too), but since we are handling conversations ourselves now, we can use this system to ignore the part of the generated message that is replying as the user.
+        const stopToken = '[user](#message)';
+
         // TODO: support resuming by conversation ID properly
         const conversationKey = 'testing1';
         const conversation = (await this.conversationsCache.get(conversationKey)) || {
@@ -255,6 +258,7 @@ export default class BingAIClient {
 
         const messagePromise = new Promise((resolve, reject) => {
             let replySoFar = '';
+            let stopTokenFound = false;
 
             const messageTimeout = setTimeout(() => {
                 this.cleanupWebSocketConnection(ws);
@@ -283,6 +287,9 @@ export default class BingAIClient {
                 const event = events[0];
                 switch (event.type) {
                     case 1: {
+                        if (stopTokenFound) {
+                            return;
+                        }
                         const messages = event?.arguments?.[0]?.messages;
                         if (!messages?.length || messages[0].author !== 'bot') {
                             return;
@@ -294,6 +301,12 @@ export default class BingAIClient {
                         // get the difference between the current text and the previous text
                         const difference = updatedText.substring(replySoFar.length);
                         onProgress(difference);
+                        if (updatedText.trim().endsWith(stopToken)) {
+                            stopTokenFound = true;
+                            // remove stop token from updated text
+                            replySoFar = updatedText.replace(stopToken, '').trim();
+                            return;
+                        }
                         replySoFar = updatedText;
                         return;
                     }
@@ -333,7 +346,7 @@ export default class BingAIClient {
                             return;
                         }
                         // The moderation filter triggered, so just return the text we have so far
-                        if (event.item.messages[0].topicChangerText) {
+                        if (stopTokenFound || event.item.messages[0].topicChangerText) {
                             message.adaptiveCards[0].body[0].text = replySoFar;
                             message.text = replySoFar;
                         }
