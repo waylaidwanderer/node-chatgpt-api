@@ -229,7 +229,7 @@ export default class BingAIClient {
                         '225cricinfos0',
                     ],
                     traceId: genRanHex(32),
-                    isStartOfSession: true,
+                    isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
                         text: message,
