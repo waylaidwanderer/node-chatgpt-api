@@ -39,22 +39,40 @@ export default class ChatGPTClient {
             throw new Error(`maxPromptTokens + max_tokens (${this.maxPromptTokens} + ${this.maxResponseTokens} = ${this.maxPromptTokens + this.maxResponseTokens}) must be less than or equal to maxContextTokens (${this.maxContextTokens})`);
         }
 
+        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
+        const isChatGptModel = this.isChatGptModel;
+        this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
+        const isUnofficialChatGptModel = this.isUnofficialChatGptModel;
+
         this.userLabel = this.options.userLabel || 'User';
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
-        const isChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
-
         if (isChatGptModel) {
-            this.endToken = '<|im_end|>';
-            this.separatorToken = '<|im_sep|>';
-        } else {
-            this.endToken = '<|endoftext|>';
-            this.separatorToken = this.endToken;
+            if (this.userLabel.toLowerCase() === 'user') {
+                this.userLabel = null;
+            }
+            if (this.chatGptLabel.toLowerCase() === 'assistant') {
+                this.chatGptLabel = null;
+            }
         }
 
-        if (!this.modelOptions.stop) {
-            if (isChatGptModel) {
-                this.modelOptions.stop = [this.endToken, this.separatorToken];
+        // {"role": "user", "content": "Hello"} - with the ChatGPT API this uses 8 tokens
+        this.messageTokenOffset = 7;
+
+        if (isChatGptModel) {
+            this.startToken = '';
+            this.endToken = '';
+        } else if (isUnofficialChatGptModel) {
+            this.startToken = '<|im_start|>';
+            this.endToken = '<|im_end|>';
+        } else {
+            this.startToken = '<|endoftext|>';
+            this.endToken = this.startToken;
+        }
+
+        if (!isChatGptModel && !this.modelOptions.stop) {
+            if (isUnofficialChatGptModel) {
+                this.modelOptions.stop = [this.endToken, this.startToken];
             } else {
                 this.modelOptions.stop = [this.endToken];
             }
@@ -62,11 +80,19 @@ export default class ChatGPTClient {
             // I chose not to do one for `chatGptLabel` because I've never seen it happen
         }
 
+        if (this.options.reverseProxyUrl) {
+            this.completionsUrl = this.options.reverseProxyUrl;
+        } else if (isChatGptModel) {
+            this.completionsUrl = 'https://api.openai.com/v1/chat/completions';
+        } else {
+            this.completionsUrl = 'https://api.openai.com/v1/completions';
+        }
+
         cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
         this.conversationsCache = new Keyv(cacheOptions);
     }
 
-    async getCompletion(prompt, onProgress, abortController = null) {
+    async getCompletion(input, onProgress, abortController = null) {
         if (!abortController) {
             abortController = new AbortController();
         }
@@ -74,9 +100,13 @@ export default class ChatGPTClient {
         if (typeof onProgress === 'function') {
             modelOptions.stream = true;
         }
-        modelOptions.prompt = prompt;
+        if (this.isChatGptModel) {
+            modelOptions.messages = input;
+        } else {
+            modelOptions.prompt = input;
+        }
         const debug = this.options.debug;
-        const url = this.options.reverseProxyUrl || 'https://api.openai.com/v1/completions';
+        const url = this.completionsUrl;
         if (debug) {
             console.debug();
             console.debug(url);
@@ -205,18 +235,27 @@ export default class ChatGPTClient {
 
         conversation.messages.push(userMessage);
 
-        const prompt = await this.buildPrompt(conversation.messages, userMessage.id);
+        let payload;
+        if (this.isChatGptModel) {
+            payload = await this.buildChatPayload(conversation.messages, userMessage.id);
+        } else {
+            payload = await this.buildPrompt(conversation.messages, userMessage.id);
+        }
 
         let reply = '';
         let result = null;
         if (typeof opts.onProgress === 'function') {
             await this.getCompletion(
-                prompt,
+                payload,
                 (message) => {
                     if (message === '[DONE]') {
                         return;
                     }
-                    const token = message.choices[0].text;
+                    const token = this.isChatGptModel ? message.choices[0].delta.content : message.choices[0].text;
+                    // first event's delta content is always undefined
+                    if (!token) {
+                        return;
+                    }
                     if (this.options.debug) {
                         console.debug(token);
                     }
@@ -230,14 +269,18 @@ export default class ChatGPTClient {
             );
         } else {
             result = await this.getCompletion(
-                prompt,
+                payload,
                 null,
                 opts.abortController || new AbortController(),
             );
             if (this.options.debug) {
                 console.debug(JSON.stringify(result));
             }
-            reply = result.choices[0].text.replace(this.endToken, '');
+            if (this.isChatGptModel) {
+                reply = result.choices[0].message.content;
+            } else {
+                reply = result.choices[0].text.replace(this.endToken, '');
+            }
         }
 
         // avoids some rendering issues when using the CLI app
@@ -265,6 +308,67 @@ export default class ChatGPTClient {
         };
     }
 
+    async buildChatPayload(messages, parentMessageId) {
+        const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
+
+        let systemMessage;
+        if (this.options.promptPrefix) {
+            systemMessage = this.options.promptPrefix.trim();
+        } else {
+            const currentDateString = new Date().toLocaleDateString(
+                'en-us',
+                { year: 'numeric', month: 'long', day: 'numeric' },
+            );
+            systemMessage = `You are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}`;
+        }
+
+        const payload = [];
+
+        let isFirstMessage = true;
+        let currentTokenCount = systemMessage ? (this.getTokenCount(systemMessage) + this.messageTokenOffset) : 0;
+        const maxTokenCount = this.maxPromptTokens;
+        // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
+        while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
+            const message = orderedMessages.pop();
+
+            let messageString = message.message;
+            if (message.role === 'User') {
+                if (this.userLabel) {
+                    messageString = `${this.userLabel}:\n${messageString}`;
+                }
+                if (this.chatGptLabel) {
+                    messageString = `${messageString}\n${this.chatGptLabel}:\n`;
+                }
+            }
+
+            const newTokenCount = this.getTokenCount(messageString) + currentTokenCount + this.messageTokenOffset;
+            if (newTokenCount > maxTokenCount) {
+                if (!isFirstMessage) {
+                    // This message would put us over the token limit, so don't add it.
+                    break;
+                }
+                // This is the first message, so we can't add it. Just throw an error.
+                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
+            }
+
+            payload.unshift({
+                role: message.role === 'User' ? 'user' : 'assistant',
+                content: messageString,
+            });
+            isFirstMessage = false;
+            currentTokenCount = newTokenCount;
+        }
+
+        if (systemMessage) {
+            payload.unshift({
+                role: 'system',
+                content: systemMessage,
+            });
+        }
+
+        return payload;
+    }
+
     async buildPrompt(messages, parentMessageId) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
@@ -272,17 +376,16 @@ export default class ChatGPTClient {
         if (this.options.promptPrefix) {
             promptPrefix = this.options.promptPrefix.trim();
             // If the prompt prefix doesn't end with the separator token, add it.
-            if (!promptPrefix.endsWith(`${this.separatorToken}\n\n`)) {
-                promptPrefix = `${promptPrefix.trim()}${this.separatorToken}\n\n`;
+            if (!promptPrefix.endsWith(`${this.startToken}\n\n`)) {
+                promptPrefix = `${promptPrefix.trim()}${this.startToken}\n\n`;
             }
-            promptPrefix = `\n${this.separatorToken}Instructions:\n${promptPrefix}`;
+            promptPrefix = `\n${this.startToken}Instructions:\n${promptPrefix}`;
         } else {
             const currentDateString = new Date().toLocaleDateString(
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
-
-            promptPrefix = `\n${this.separatorToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.separatorToken}\n\n`
+            promptPrefix = `\n${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.startToken}\n\n`
         }
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
@@ -332,11 +435,11 @@ export default class ChatGPTClient {
     }
 
     getTokenCount(text) {
-        if (this.modelOptions.model === CHATGPT_MODEL) {
-            // With this model, "<|im_end|>" and "<|im_sep|>" is 1 token, but tokenizers aren't aware of it yet.
+        if (this.isUnofficialChatGptModel) {
+            // With this model, "<|im_end|>" and "<|im_start|>" is 1 token, but tokenizers aren't aware of it yet.
             // Replace it with "<|endoftext|>" (which it does know about) so that the tokenizer can count it as 1 token.
             text = text.replace(/<\|im_end\|>/g, '<|endoftext|>');
-            text = text.replace(/<\|im_sep\|>/g, '<|endoftext|>');
+            text = text.replace(/<\|im_start\|>/g, '<|endoftext|>');
         }
         return gptEncode(text).length;
     }
