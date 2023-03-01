@@ -296,6 +296,8 @@ export default class BingAIClient {
                             reject(`${event.item.result.value}: ${event.item.result.message}`);
                             return;
                         }
+                        const messages = event.item?.messages || [];
+                        const message = messages.length ? messages[messages.length - 1] : null;
                         if (event.item?.result?.error) {
                             if (this.debug) {
                                 console.debug(event.item.result.value, event.item.result.message);
@@ -314,8 +316,6 @@ export default class BingAIClient {
                             reject(`${event.item.result.value}: ${event.item.result.message}`);
                             return;
                         }
-                        const messages = event.item?.messages || [];
-                        const message = messages.length ? messages[messages.length - 1] : null;
                         if (!message) {
                             reject('No message was generated.');
                             return;
