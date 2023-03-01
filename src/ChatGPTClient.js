@@ -360,7 +360,9 @@ export default class ChatGPTClient {
         }
 
         if (systemMessage) {
-            payload.unshift({
+            // We insert the system message before the last message.
+            // This seems to be more effective when it comes to instructing the model.
+            payload.splice(payload.length - 1, 0, {
                 role: 'system',
                 content: systemMessage,
             });
