@@ -156,12 +156,15 @@ export default class BingAIClient {
                 clientId,
             } = createNewConversationResponse);
         }
+
+        // TODO: support resuming by conversation ID properly
         const conversationKey = 'testing1';
         const conversation = (await this.conversationsCache.get(conversationKey)) || {
             messages: [],
             createdAt: Date.now(),
         };
 
+        // TODO: limit token usage
         const previousCachedMessages = this.constructor.getMessagesForConversation(conversation.messages, parentMessageId)
             .map((message) => {
                 return {
