@@ -4,17 +4,24 @@
 
 ## Updates
 <details open>
-<summary><strong>2023-02-19</strong></summary>
+<summary><strong>2023-03-01</strong></summary>
 
-I've added an experimental `ChatGPTBrowserClient` which depends on a reverse proxy server that makes use of a Cloudflare bypass, allowing you to talk to ChatGPT (chat.openai.com) without requiring browser automation. All you need is your access token from https://chat.openai.com/api/auth/session.
+**Support for the official ChatGPT model has been added!** You can now use the `gpt-3.5-turbo` model with the official OpenAI API, using `ChatGPTClient`. This is the same model that ChatGPT uses, and it's the most powerful model available right now. It's also the most expensive model, costing $0.0005 per request. Usage of this model is **not free**, however it is **10x cheaper** (priced at $0.002 per 1k tokens) than `text-davinci-003`.
 
-As always, please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using `ChatGPTClient` instead with the `text-davinci-003` model.
+See OpenAI's post, [Introducing ChatGPT and Whisper APIs](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) for more information.
 </details>
 
 <details>
 <summary><strong>Previous Updates</strong></summary>
 
 <br/>
+<details>
+<summary><strong>2023-02-19</strong></summary>
+
+I've added an experimental `ChatGPTBrowserClient` which depends on a reverse proxy server that makes use of a Cloudflare bypass, allowing you to talk to ChatGPT (chat.openai.com) without requiring browser automation. All you need is your access token from https://chat.openai.com/api/auth/session.
+
+As always, please note that if you choose to go this route, you are exposing your access token to a closed-source third-party server. If you are concerned about this, you may choose to either use a free ChatGPT account to minimize risks, or continue using `ChatGPTClient` instead with the `text-davinci-003` model.
+</details>
 <details>
 <summary><strong>2023-02-15</strong></summary>
 
@@ -73,24 +80,12 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
 
 # ChatGPT API
 
->  A ChatGPT implementation with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT model via OpenAI's API. Available as a Node.js module, REST API server, and CLI app.
+> A client implementation for ChatGPT and Bing AI. Available as a Node.js module, REST API server, and CLI app.
 
 [![NPM](https://img.shields.io/npm/v/@waylaidwanderer/chatgpt-api.svg)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
 [![npm](https://img.shields.io/npm/dt/@waylaidwanderer/chatgpt-api)](https://www.npmjs.com/package/@waylaidwanderer/chatgpt-api)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/waylaidwanderer/node-chatgpt-api/blob/main/LICENSE)
 [![GitHub Repo stars](https://img.shields.io/github/stars/waylaidwanderer/node-chatgpt-api)](https://github.com/waylaidwanderer/node-chatgpt-api/)
-
-This is an implementation of [ChatGPT](https://chat.openai.com/chat), with support for Bing's GPT-4 version of ChatGPT, plus the official ChatGPT underlying model, `text-chat-davinci-002`.
-
-#### About Bing's GPT-4 version of ChatGPT
-An experimental client for Bing's GPT-4 version of ChatGPT is available in [`BingAIClient`](src/BingAIClient.js). It works much like ChatGPT, but it's powered by GPT-4 instead of GPT-3. For more information on its capabilities and limitations, see [this Reddit comment](https://www.reddit.com/r/ChatGPT/comments/10xjda1/comment/j7snwxx/?utm_source=reddit&utm_medium=web2x&context=3).
-
-#### About `text-chat-davinci-002`
-The model name `text-chat-davinci-002-20230126` was briefly leaked while I was inspecting the network requests made by the official ChatGPT website, and I discovered that it works with the [OpenAI API](https://beta.openai.com/docs/api-reference/completions). Since then, that model and others have been disabled, but I'm keeping this repo updated with the newer versions of `text-chat-davinci-002` as we find them. **Usage of this model currently does not cost any credits.**
-
-As far as I'm aware, I was the first one who discovered this, and usage of the model has since been implemented in libraries like [acheong08/ChatGPT](https://github.com/acheong08/ChatGPT) and [transitive-bullshit/chatgpt-api](https://github.com/transitive-bullshit/chatgpt-api) as we collaborated and shared knowledge.
-
-By itself, the model does not have any conversational support, so `ChatGPTClient` uses a cache to store conversations and pass them to the model as context. This allows you to have persistent conversations with ChatGPT in a nearly identical way to the official website.
 
 # Table of Contents
    * [Features](#features)
@@ -107,17 +102,19 @@ By itself, the model does not have any conversational support, so `ChatGPTClient
    * [License](#license)
 
 ## Features
-- Experimental support for Bing's version of ChatGPT, powered by GPT-4.
-- Support for the official ChatGPT underlying model, `text-chat-davinci-002`, via OpenAI's API.
 - Includes an API server (with Docker support) you can run to use ChatGPT in non-Node.js applications.
-- Includes a `ChatGPTClient` and `BingAIClient` class that you can use in your own Node.js applications.
 - Includes a CLI interface where you can chat with ChatGPT.
-- (`ChatGPTClient`) Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
-  - Conversations are stored in memory by default, but you can optionally [install a storage adapter](https://www.npmjs.com/package/keyv#usage) to persist conversations to a database.
-  - The `keyv-file` adapter is also included in this package, and can be used to store conversations in a JSON file if you're using the API server or CLI (see `settings.example.js`).
-- (`ChatGPTClient`) Supports configurable prompt prefixes, and custom names for the user and ChatGPT.
-  - In essence, this allows you to turn ChatGPT into a different character.
-  - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
+- Includes clients that you can use in your own Node.js applications.
+- `ChatGPTClient`: support for the official ChatGPT underlying model, `gpt-3.5-turbo`, via OpenAI's API.
+  - Replicates chat threads from the official ChatGPT website (with conversation IDs and message IDs), with persistent conversations using [Keyv](https://www.npmjs.com/package/keyv).
+    - Conversations are stored in memory by default, but you can optionally [install a storage adapter](https://www.npmjs.com/package/keyv#usage) to persist conversations to a database.
+    - The `keyv-file` adapter is also included in this package, and can be used to store conversations in a JSON file if you're using the API server or CLI (see `settings.example.js`).
+  - Supports configurable prompt prefixes, and custom names for the user and ChatGPT.
+    - In essence, this allows you to make a chatbot with any personality you want.
+    - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
+  - Retains support for models like `text-davinci-003`
+- `BingAIClient`: support for Bing's version of ChatGPT, powered by GPT-4.
+- `ChatGPTBrowserClient`: support for the official ChatGPT website, using a reverse proxy server for a Cloudflare bypass.
 
 ## Getting Started
 
@@ -379,7 +376,8 @@ ChatGPT's responses are automatically copied to your clipboard, so you can paste
 
 ## Using a Reverse Proxy
 As shown in the examples above, you can set `reverseProxyUrl` in `ChatGPTClient`'s options to use a reverse proxy server instead of the official ChatGPT API.
-~~For now, **this is the only way to use the ChatGPT underlying models**.~~ This method has been patched, but you may still want to use a reverse proxy for other reasons.
+~~For now, **this is the only way to use the ChatGPT underlying models**.~~ This method has been patched and the instructions below are no longer relevant, but you may still want to use a reverse proxy for other reasons.
+Currently, reverse proxy servers are still used for performing a Cloudflare bypass for `ChatGPTBrowserClient`.
 
 <details>
 <summary><strong>Instructions</strong></summary>
@@ -426,18 +424,12 @@ Instructions are provided below.
 
 ## Caveats
 ### Regarding `ChatGPTClient`
-Since `text-chat-davinci-002` is ChatGPT's underlying model, I had to do my best to replicate the way the official ChatGPT website uses it. After extensive testing and comparing responses, I believe that the model used by ChatGPT has some additional fine-tuning.
+Since `gpt-3.5-turbo` is ChatGPT's underlying model, I had to do my best to replicate the way the official ChatGPT website uses it.
 This means my implementation or the underlying model may not behave exactly the same in some ways:
 - Conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system.
 - ChatGPT's model parameters (temperature, frequency penalty, etc.) are unknown, so I set some defaults that I thought would be reasonable.
 - Conversations are limited to roughly the last 3000 tokens, so earlier messages may be forgotten during longer conversations.
   - This works in a similar way to ChatGPT, except I'm pretty sure they have some additional way of retrieving context from earlier messages when needed (which can probably be achieved with embeddings, but I consider that out-of-scope for now).
-- It is well known that, as part of the fine-tuning, ChatGPT had the following preamble:
-  > "You are ChatGPT, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.
-  > Knowledge cutoff: 2021-09
-  > Current date: 2023-01-31"
-
-  As OpenAI updates ChatGPT, this preamble may also change. The default prompt prefix in my implementation attempts to replicate a similar behavior to the current ChatGPT model.
 
 ## Web Client
 A web client is available for this library's API server is also available at [waylaidwanderer/chatgpt-web-client](https://github.com/waylaidwanderer/chatgpt-web-client).
