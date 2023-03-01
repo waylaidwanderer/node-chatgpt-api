@@ -304,7 +304,7 @@ export default class ChatGPTClient {
             response: replyMessage.message,
             conversationId,
             messageId: replyMessage.id,
-            details: result,
+            details: result || {},
         };
     }
 
