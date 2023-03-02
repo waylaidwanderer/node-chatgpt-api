@@ -371,13 +371,13 @@ export default class ChatGPTClient {
         }
 
         if (systemMessage) {
-            // We insert the system message before the last message.
-            // This seems to be more effective when it comes to instructing the model.
-            payload.splice(payload.length - 1, 0, {
+            const systemMessagePayload = {
                 role: 'user',
                 name: 'system_instructions',
                 content: systemMessage,
-            });
+            };
+            // insert at start of array
+            payload.unshift(systemMessagePayload);
         }
 
         return payload;
