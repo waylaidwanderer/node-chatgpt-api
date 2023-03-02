@@ -6,7 +6,7 @@
 <details open>
 <summary><strong>2023-03-01</strong></summary>
 
-**Support for the official ChatGPT model has been added!** You can now use the `gpt-3.5-turbo` model with the official OpenAI API, using `ChatGPTClient`. This is the same model that ChatGPT uses, and it's the most powerful model available right now. It's also the most expensive model, costing $0.0005 per request. Usage of this model is **not free**, however it is **10x cheaper** (priced at $0.002 per 1k tokens) than `text-davinci-003`.
+**Support for the official ChatGPT model has been added!** You can now use the `gpt-3.5-turbo` model with the official OpenAI API, using `ChatGPTClient`. This is the same model that ChatGPT uses, and it's the most powerful model available right now. Usage of this model is **not free**, however it is **10x cheaper** (priced at $0.002 per 1k tokens) than `text-davinci-003`.
 
 See OpenAI's post, [Introducing ChatGPT and Whisper APIs](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) for more information.
 
