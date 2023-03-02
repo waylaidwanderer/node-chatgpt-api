@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "1.20.4",
+  "version": "1.22.2",
   "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
   "main": "index.js",
   "bin": {
@@ -39,12 +39,10 @@
   ],
   "dependencies": {
     "@fastify/cors": "^8.2.0",
-    "@fastify/static": "^6.9.0",
     "@waylaidwanderer/fastify-sse-v2": "^3.1.0",
     "@waylaidwanderer/fetch-event-source": "^3.0.1",
     "boxen": "^7.0.1",
     "clipboardy": "^3.0.0",
-    "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "fetch-undici": "^3.0.1",

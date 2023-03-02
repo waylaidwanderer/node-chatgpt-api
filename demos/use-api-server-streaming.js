@@ -16,7 +16,7 @@ const opts = {
 try {
     let reply = '';
     const controller = new AbortController();
-    await fetchEventSource('http://localhost:3000/conversation', {
+    await fetchEventSource('http://localhost:3001/conversation', {
         ...opts,
         signal: controller.signal,
         onopen(response) {
@@ -40,12 +40,11 @@ try {
             }
             if (message.event === 'result') {
                 const result = JSON.parse(message.data);
-                const { response, conversationId } = result;
-                console.log({ response, conversationId });
+                console.log(result);
                 return;
             }
             console.log(message);
-            reply += message.data;
+            reply += JSON.parse(message.data);
         },
     });
     console.log(reply);

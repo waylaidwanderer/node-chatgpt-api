@@ -126,6 +126,13 @@ server.post('/api/chat', async (request, reply) => {
         reply.code(400).send(error?.message || 'Auth Failed')
     }
     const body = request.body || {};
+    const abortController = new AbortController();
+
+    reply.raw.on('close', () => {
+        if (abortController.signal.aborted === false) {
+            abortController.abort();
+        }
+    });
 
     let onProgress;
     if (body.stream === true) {
@@ -134,7 +141,7 @@ server.post('/api/chat', async (request, reply) => {
                 console.debug(token);
             }
             if (token !== '[DONE]') {
-                reply.sse({ id: '', data: token });
+                reply.sse({ id: '', data: JSON.stringify(token) });
             }
         };
     } else {
@@ -165,6 +172,7 @@ server.post('/api/chat', async (request, reply) => {
             clientId: body.clientId,
             invocationId: body.invocationId,
             onProgress,
+            abortController,
         });
     } catch (e) {
         error = e;
