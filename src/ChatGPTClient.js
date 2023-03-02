@@ -333,10 +333,13 @@ export default class ChatGPTClient {
 
             let messageString = message.message;
             if (message.role === 'User') {
+                // The "name" property isn't recognized by the AI for some reason, so we manually add it here.
                 if (this.userLabel) {
                     messageString = `${this.userLabel}:\n${messageString}`;
                 }
-                if (this.chatGptLabel) {
+                // The "name" property is normally recognized by the AI but the first message is not from the AI,
+                // so we manually add it here.
+                if (this.chatGptLabel && isFirstMessage) {
                     messageString = `${messageString}\n${this.chatGptLabel}:\n`;
                 }
             }
@@ -351,10 +354,18 @@ export default class ChatGPTClient {
                 throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
             }
 
-            payload.unshift({
+            const messagePayload = {
                 role: message.role === 'User' ? 'user' : 'assistant',
                 content: messageString,
-            });
+            };
+            // Set name property as the user labels, but make it fit the required format.
+            if (message.role === 'User' && this.userLabel) {
+                messagePayload.name = this.userLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
+            } else if (message.role === 'ChatGPT' && this.chatGptLabel) {
+                messagePayload.name = this.chatGptLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
+            }
+
+            payload.unshift(messagePayload);
             isFirstMessage = false;
             currentTokenCount = newTokenCount;
         }
@@ -363,7 +374,8 @@ export default class ChatGPTClient {
             // We insert the system message before the last message.
             // This seems to be more effective when it comes to instructing the model.
             payload.splice(payload.length - 1, 0, {
-                role: 'system',
+                role: 'user',
+                name: 'system_instructions',
                 content: systemMessage,
             });
         }
