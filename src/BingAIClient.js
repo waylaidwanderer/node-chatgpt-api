@@ -121,7 +121,7 @@ export default class BingAIClient {
         opts = {},
     ) {
         let {
-            toneStyle = 'balanced',//or creative, precise
+            toneStyle = 'balanced', //or creative, precise
             conversationSignature,
             conversationId,
             clientId,
@@ -154,9 +154,9 @@ export default class BingAIClient {
         let toneOption;
         if (toneStyle === 'creative') {
             toneOption = 'h3imaginative';
-        }else if (toneStyle === 'precise') {
+        } else if (toneStyle === 'precise') {
             toneOption = 'h3precise';
-        }else {
+        } else {
             toneOption = 'harmonyv3';
         }
 
