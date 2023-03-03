@@ -109,13 +109,9 @@ export default class ChatGPTBrowserClient {
                             onProgress('[DONE]');
                             abortController.abort();
                             resolve(lastEvent);
-                            
-                            try {
-                                if (!conversationId) {
-                                    genTitle(lastEvent);
-                                }
-                            } catch(err) {
-                                console.error('error generating title', err);
+
+                            if (!conversationId) {
+                                genTitle(lastEvent);
                             }
                         }
                     },
@@ -139,12 +135,8 @@ export default class ChatGPTBrowserClient {
                             resolve(lastEvent);
                             done = true;
 
-                            try {
-                                if (!conversationId) {
-                                    genTitle(lastEvent);
-                                }
-                            } catch(err) {
-                                console.error('error generating title', err);
+                            if (!conversationId) {
+                                genTitle(lastEvent);
                             }
                             return;
                         }
