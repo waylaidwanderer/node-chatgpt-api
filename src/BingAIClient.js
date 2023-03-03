@@ -165,21 +165,21 @@ export default class BingAIClient {
                 {
                     source: 'cib',
                     optionsSets: [
-                        "nlu_direct_response_filter",
-                        "deepleo",
-                        "disable_emoji_spoken_text",
-                        "responsible_ai_policy_235",
-                        "enablemm",
+                        'nlu_direct_response_filter',
+                        'deepleo',
+                        'disable_emoji_spoken_text',
+                        'responsible_ai_policy_235',
+                        'enablemm',
                         toneOption,
-                        "dtappid",
-                        "cricinfo",
-                        "cricinfov2",
-                        "dv3sugg"
+                        'dtappid',
+                        'cricinfo',
+                        'cricinfov2',
+                        'dv3sugg'
                     ],
                     sliceIds: [
-                        "222dtappid",
-                        "225cricinfo",
-                        "224locals0"
+                        '222dtappid',
+                        '225cricinfo',
+                        '224locals0'
                     ],
                     traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,
