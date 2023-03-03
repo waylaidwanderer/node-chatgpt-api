@@ -1,7 +1,7 @@
 import './fetch-polyfill.js';
 import crypto from 'crypto';
 import Keyv from 'keyv';
-import { encode as gptEncode } from 'gpt-3-encoder';
+import { encoding_for_model, get_encoding } from '@dqbd/tiktoken';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 import { Agent } from 'undici';
 
@@ -56,18 +56,20 @@ export default class ChatGPTClient {
             }
         }
 
-        // {"role": "user", "content": "Hello"} - with the ChatGPT API this uses 8 tokens
-        this.messageTokenOffset = 7;
-
         if (isChatGptModel) {
             this.startToken = '';
             this.endToken = '';
         } else if (isUnofficialChatGptModel) {
             this.startToken = '<|im_start|>';
             this.endToken = '<|im_end|>';
+            this.gptEncoder = encoding_for_model('text-davinci-003', {
+                '<|im_start|>': 100264,
+                '<|im_end|>': 100265,
+            });
         } else {
             this.startToken = '<|endoftext|>';
             this.endToken = this.startToken;
+            this.gptEncoder = encoding_for_model('text-davinci-003');
         }
 
         if (!isChatGptModel && !this.modelOptions.stop) {
@@ -322,10 +324,21 @@ export default class ChatGPTClient {
             systemMessage = `You are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}`;
         }
 
+        const systemMessagePayload = systemMessage ? {
+            role: 'user',
+            name: 'system_instructions',
+            content: systemMessage,
+        } : null;
+
+        const messagesArrayForTokenCount = [];
+        if (systemMessagePayload) {
+            messagesArrayForTokenCount.push(systemMessagePayload);
+        }
+
         const payload = [];
 
         let isFirstMessage = true;
-        let currentTokenCount = systemMessage ? (this.getTokenCount(systemMessage) + this.messageTokenOffset) : 0;
+        let currentTokenCount = systemMessagePayload ? this.constructor.getTokenCountForMessages(messagesArrayForTokenCount) : 0;
         const maxTokenCount = this.maxPromptTokens;
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
@@ -344,16 +357,6 @@ export default class ChatGPTClient {
                 }
             }
 
-            const newTokenCount = this.getTokenCount(messageString) + currentTokenCount + this.messageTokenOffset;
-            if (newTokenCount > maxTokenCount) {
-                if (!isFirstMessage) {
-                    // This message would put us over the token limit, so don't add it.
-                    break;
-                }
-                // This is the first message, so we can't add it. Just throw an error.
-                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
-            }
-
             const messagePayload = {
                 role: message.role === 'User' ? 'user' : 'assistant',
                 content: messageString,
@@ -363,6 +366,17 @@ export default class ChatGPTClient {
                 messagePayload.name = this.userLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
             } else if (message.role === 'ChatGPT' && this.chatGptLabel) {
                 messagePayload.name = this.chatGptLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
+            }
+
+            messagesArrayForTokenCount.push(messagePayload);
+            const newTokenCount = this.constructor.getTokenCountForMessages(messagesArrayForTokenCount);
+            if (newTokenCount > maxTokenCount) {
+                if (!isFirstMessage) {
+                    // This message would put us over the token limit, so don't add it.
+                    break;
+                }
+                // This is the first message, so we can't add it. Just throw an error.
+                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
             }
 
             payload.unshift(messagePayload);
@@ -449,13 +463,36 @@ export default class ChatGPTClient {
     }
 
     getTokenCount(text) {
-        if (this.isUnofficialChatGptModel) {
-            // With this model, "<|im_end|>" and "<|im_start|>" is 1 token, but tokenizers aren't aware of it yet.
-            // Replace it with "<|endoftext|>" (which it does know about) so that the tokenizer can count it as 1 token.
-            text = text.replace(/<\|im_end\|>/g, '<|endoftext|>');
-            text = text.replace(/<\|im_start\|>/g, '<|endoftext|>');
-        }
-        return gptEncode(text).length;
+        return this.gptEncoder.encode(text, 'all').length;
+    }
+
+    /**
+     * Algorithm adapted from "6. Counting tokens for chat API calls" of
+     * https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+     * @param {*[]} messages
+     */
+    static getTokenCountForMessages(messages) {
+        // Get the encoding tokenizer
+        const tokenizer = get_encoding('cl100k_base');
+
+        // Map each message to the number of tokens it contains
+        const messageTokenCounts = messages.map((message) => {
+            // Map each property of the message to the number of tokens it contains
+            const propertyTokenCounts = Object.entries(message).map(([key, value]) => {
+                // Count the number of tokens in the property value
+                const numTokens = tokenizer.encode(value).length;
+
+                // Subtract 1 token if the property key is 'name'
+                const adjustment = (key === 'name') ? 1 : 0;
+                return numTokens - adjustment;
+            });
+
+            // Sum the number of tokens in all properties and add 4 for metadata
+            return propertyTokenCounts.reduce((a, b) => a + b, 4);
+        });
+
+        // Sum the number of tokens in all messages and add 2 for metadata
+        return messageTokenCounts.reduce((a, b) => a + b, 2);
     }
 
     /**

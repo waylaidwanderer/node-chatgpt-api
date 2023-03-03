@@ -38,6 +38,7 @@
     "bing-chat"
   ],
   "dependencies": {
+    "@dqbd/tiktoken": "^0.4.0",
     "@fastify/cors": "^8.2.0",
     "@waylaidwanderer/fastify-sse-v2": "^3.1.0",
     "@waylaidwanderer/fetch-event-source": "^3.0.1",
@@ -46,7 +47,6 @@
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "fetch-undici": "^3.0.1",
-    "gpt-3-encoder": "^1.1.4",
     "https-proxy-agent": "^5.0.1",
     "inquirer": "^9.1.4",
     "inquirer-autocomplete-prompt": "^3.0.0",
