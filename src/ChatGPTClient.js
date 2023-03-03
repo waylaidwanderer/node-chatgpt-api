@@ -344,22 +344,9 @@ export default class ChatGPTClient {
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
             const message = orderedMessages.pop();
 
-            let messageString = message.message;
-            if (message.role === 'User') {
-                // The "name" property isn't recognized by the AI for some reason, so we manually add it here.
-                if (this.userLabel) {
-                    messageString = `${this.userLabel}:\n${messageString}`;
-                }
-                // The "name" property is normally recognized by the AI but the first message is not from the AI,
-                // so we manually add it here.
-                if (this.chatGptLabel && isFirstMessage) {
-                    messageString = `${messageString}\n${this.chatGptLabel}:\n`;
-                }
-            }
-
             const messagePayload = {
                 role: message.role === 'User' ? 'user' : 'assistant',
-                content: messageString,
+                content: message.message,
             };
             // Set name property as the user labels, but make it fit the required format.
             if (message.role === 'User' && this.userLabel) {
