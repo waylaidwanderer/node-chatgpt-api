@@ -4,6 +4,7 @@ import Keyv from 'keyv';
 import { encode as gptEncode } from 'gpt-3-encoder';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 import { Agent } from 'undici';
+import { ProxyAgent } from 'undici';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
 
@@ -125,6 +126,11 @@ export default class ChatGPTClient {
                 headersTimeout: 0,
             }),
         };
+
+        if (this.options.proxy) {
+            opts.dispatcher = new ProxyAgent(this.options.proxy);
+        }
+
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
                 try {

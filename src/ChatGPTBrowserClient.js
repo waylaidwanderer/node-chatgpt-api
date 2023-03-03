@@ -2,6 +2,7 @@ import './fetch-polyfill.js';
 import crypto from 'crypto';
 import Keyv from 'keyv';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
+import { ProxyAgent } from 'undici';
 
 export default class ChatGPTBrowserClient {
     constructor(
@@ -38,6 +39,7 @@ export default class ChatGPTBrowserClient {
                 Authorization: `Bearer ${this.accessToken}`,
                 Cookie: this.cookies || undefined,
             },
+            
             body: JSON.stringify({
                 conversation_id: conversationId,
                 action,
@@ -55,12 +57,20 @@ export default class ChatGPTBrowserClient {
                 model: this.model,
             }),
         };
+        
+        if (this.options.proxy) {
+            opts.dispatcher = new ProxyAgent(this.options.proxy);
+        }
+
         if (debug) {
             console.debug();
             console.debug(url);
             console.debug(opts);
             console.debug();
         }
+
+        const genTitle = this.genTitle.bind(this);
+
         // data: {"message": {"id": "UUID", "role": "assistant", "user": null, "create_time": null, "update_time": null, "content": {"content_type": "text", "parts": ["That's alright! If you don't have a specific question or topic in mind, I can suggest some general conversation starters or topics to explore. \n\nFor example, we could talk about your interests, hobbies, or goals. Alternatively, we could discuss current events, pop culture, or science and technology. Is there anything in particular that you're curious about or would like to learn more about?"]}, "end_turn": true, "weight": 1.0, "metadata": {"message_type": "next", "model_slug": "text-davinci-002-render-sha", "finish_details": {"type": "stop", "stop": "<|im_end|>"}}, "recipient": "all"}, "conversation_id": "UUID", "error": null}
         return new Promise(async (resolve, reject) => {
             let lastEvent = null;
@@ -99,6 +109,14 @@ export default class ChatGPTBrowserClient {
                             onProgress('[DONE]');
                             abortController.abort();
                             resolve(lastEvent);
+                            
+                            try {
+                                if (!conversationId) {
+                                    genTitle(lastEvent);
+                                }
+                            } catch(err) {
+                                console.error('error generating title', err);
+                            }
                         }
                     },
                     onerror(err) {
@@ -120,6 +138,14 @@ export default class ChatGPTBrowserClient {
                             abortController.abort();
                             resolve(lastEvent);
                             done = true;
+
+                            try {
+                                if (!conversationId) {
+                                    genTitle(lastEvent);
+                                }
+                            } catch(err) {
+                                console.error('error generating title', err);
+                            }
                             return;
                         }
                         try {
@@ -208,5 +234,52 @@ export default class ChatGPTBrowserClient {
             messageId: replyMessage.id,
             details: result,
         };
+    }
+
+    genTitle(event) {
+        const debug = this.options.debug;
+        if (debug) {
+            console.log('Generate title: ', event);
+        }
+        if (!event || !event.conversation_id || !event.message || !event.message.id) {
+            return;
+        }
+
+        try {
+            const conversationId = event.conversation_id;
+            const messageId = event.message.id;
+            
+            const url = 'https://chat.openai.com/backend-api/conversation/gen_title/' + conversationId;
+            const opts = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.accessToken}`,
+                    Cookie: this.cookies || undefined,
+                },
+                body: JSON.stringify({
+                    message_id: messageId,
+                    model: this.model,
+                }),
+            };
+
+            if (debug) {
+                console.log('gen title fetch opts: ', opts);
+            }
+            
+            if (this.options.proxy) {
+                opts.dispatcher = new ProxyAgent(this.options.proxy);
+            }
+
+            fetch(url, opts).then((ret) => {
+                if (debug) {
+                    ret.json().then((data) => {
+                        console.log('Gen title response: ', data);
+                    });
+                }
+            }).catch(console.error);
+        } catch(err) {
+            console.error(err);
+        }
     }
 }
