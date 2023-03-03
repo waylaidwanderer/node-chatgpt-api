@@ -325,8 +325,8 @@ export default class ChatGPTClient {
         }
 
         const systemMessagePayload = systemMessage ? {
-            role: 'user',
-            name: 'system_instructions',
+            role: 'system',
+            name: 'instructions',
             content: systemMessage,
         } : null;
 
@@ -371,12 +371,7 @@ export default class ChatGPTClient {
             currentTokenCount = newTokenCount;
         }
 
-        if (systemMessage) {
-            const systemMessagePayload = {
-                role: 'user',
-                name: 'system_instructions',
-                content: systemMessage,
-            };
+        if (systemMessagePayload) {
             // insert at start of array
             payload.unshift(systemMessagePayload);
         }
