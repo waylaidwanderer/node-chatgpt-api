@@ -313,8 +313,13 @@ export default class ChatGPTClient {
     async buildChatPayload(messages, parentMessageId) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
+        // This will override promptPrefix if set
+        const messagesPrefix = this.options.messagesPrefix || [];
+
         let systemMessage;
-        if (this.options.promptPrefix) {
+        if (messagesPrefix.length > 0) {
+            systemMessage = null;
+        } else if (this.options.promptPrefix) {
             systemMessage = this.options.promptPrefix.trim();
         } else {
             const currentDateString = new Date().toLocaleDateString(
@@ -326,11 +331,10 @@ export default class ChatGPTClient {
 
         const systemMessagePayload = systemMessage ? {
             role: 'system',
-            name: 'instructions',
             content: systemMessage,
         } : null;
 
-        const messagesArrayForTokenCount = [];
+        const messagesArrayForTokenCount = [...messagesPrefix];
         if (systemMessagePayload) {
             messagesArrayForTokenCount.push(systemMessagePayload);
         }
@@ -338,7 +342,7 @@ export default class ChatGPTClient {
         const payload = [];
 
         let isFirstMessage = true;
-        let currentTokenCount = systemMessagePayload ? this.constructor.getTokenCountForMessages(messagesArrayForTokenCount) : 0;
+        let currentTokenCount = messagesArrayForTokenCount.length > 0 ? this.constructor.getTokenCountForMessages(messagesArrayForTokenCount) : 0;
         const maxTokenCount = this.maxPromptTokens;
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
@@ -371,8 +375,10 @@ export default class ChatGPTClient {
             currentTokenCount = newTokenCount;
         }
 
-        if (systemMessagePayload) {
-            // insert at start of array
+        // insert at start of array
+        if (messagesPrefix.length > 0) {
+            payload.unshift(...messagesPrefix);
+        } else if (systemMessagePayload) {
             payload.unshift(systemMessagePayload);
         }
 
