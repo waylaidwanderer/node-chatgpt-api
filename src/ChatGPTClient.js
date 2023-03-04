@@ -349,48 +349,57 @@ export default class ChatGPTClient {
         }
         let promptBody = '';
         const maxTokenCount = this.maxPromptTokens;
-        // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
-        while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
-            const message = orderedMessages.pop();
-            const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
-            const messageString = `${roleLabel}:\n${message.message}${this.endToken}\n`;
-            let newPromptBody;
-            if (promptBody || isChatGptModel) {
-                newPromptBody = `${messageString}${promptBody}`;
-            } else {
-                // Always insert prompt prefix before the last user message, if not gpt-3.5-turbo.
-                // This makes the AI obey the prompt instructions better, which is important for custom instructions.
-                // After a bunch of testing, it doesn't seem to cause the AI any confusion, even if you ask it things
-                // like "what's the last thing I wrote?".
-                newPromptBody = `${promptPrefix}${messageString}${promptBody}`;
-            }
 
-            // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
-            // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
-            // resist doing it the "proper" way.
-            let newTokenCount;
-            if (isChatGptModel) {
-                newTokenCount = this.constructor.getTokenCountForMessages([
-                    instructionsPayload,
-                    {
-                        ...messagePayload,
-                        content: newPromptBody,
-                    },
-                ]);
-            } else {
-                newTokenCount = this.getTokenCount(`${newPromptBody}${promptSuffix}`);
-            }
-            if (newTokenCount > maxTokenCount) {
-                if (promptBody) {
-                    // This message would put us over the token limit, so don't add it.
-                    break;
+        // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
+        // Do this within a recursive async function so that it doesn't block the event loop for too long.
+        const buildPromptBody = async () => {
+            if (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
+                const message = orderedMessages.pop();
+                const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
+                const messageString = `${this.startToken}${roleLabel}:\n${message.message}${this.endToken}\n`;
+                let newPromptBody;
+                if (promptBody || isChatGptModel) {
+                    newPromptBody = `${messageString}${promptBody}`;
+                } else {
+                    // Always insert prompt prefix before the last user message, if not gpt-3.5-turbo.
+                    // This makes the AI obey the prompt instructions better, which is important for custom instructions.
+                    // After a bunch of testing, it doesn't seem to cause the AI any confusion, even if you ask it things
+                    // like "what's the last thing I wrote?".
+                    newPromptBody = `${promptPrefix}${messageString}${promptBody}`;
                 }
-                // This is the first message, so we can't add it. Just throw an error.
-                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
+
+                // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
+                // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
+                // resist doing it the "proper" way.
+                let newTokenCount;
+                if (isChatGptModel) {
+                    newTokenCount = this.constructor.getTokenCountForMessages([
+                        instructionsPayload,
+                        {
+                            ...messagePayload,
+                            content: newPromptBody,
+                        },
+                    ]);
+                } else {
+                    newTokenCount = this.getTokenCount(`${newPromptBody}${promptSuffix}`);
+                }
+                if (newTokenCount > maxTokenCount) {
+                    if (promptBody) {
+                        // This message would put us over the token limit, so don't add it.
+                        return false;
+                    }
+                    // This is the first message, so we can't add it. Just throw an error.
+                    throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
+                }
+                promptBody = newPromptBody;
+                currentTokenCount = newTokenCount;
+                await new Promise((resolve) => setTimeout(resolve, 0));
+                return buildPromptBody();
             }
-            promptBody = newPromptBody;
-            currentTokenCount = newTokenCount;
-        }
+            return true;
+        };
+
+        await buildPromptBody();
 
         const prompt = `${promptBody}${promptSuffix}`;
 
