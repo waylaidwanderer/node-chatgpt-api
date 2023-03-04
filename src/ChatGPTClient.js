@@ -6,6 +6,7 @@ import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 import { Agent } from 'undici';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
+const CHATGPT_TOKENIZER = get_encoding('cl100k_base');
 
 export default class ChatGPTClient {
     constructor(
@@ -437,7 +438,7 @@ export default class ChatGPTClient {
      */
     static getTokenCountForMessages(messages) {
         // Get the encoding tokenizer
-        const tokenizer = get_encoding('cl100k_base');
+        const tokenizer = CHATGPT_TOKENIZER;
 
         // Map each message to the number of tokens it contains
         const messageTokenCounts = messages.map((message) => {
