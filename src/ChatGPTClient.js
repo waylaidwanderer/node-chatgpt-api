@@ -332,7 +332,7 @@ export default class ChatGPTClient {
 
         let currentTokenCount;
         if (isChatGptModel) {
-            currentTokenCount = await this.constructor.getTokenCountForMessages([messagePayload]);
+            currentTokenCount = this.constructor.getTokenCountForMessages([messagePayload]);
         } else {
             currentTokenCount = this.getTokenCount(messagePayload.content);
         }
@@ -359,7 +359,7 @@ export default class ChatGPTClient {
             // resist doing it the "proper" way.
             let newTokenCount;
             if (isChatGptModel) {
-                newTokenCount = await this.constructor.getTokenCountForMessages([
+                newTokenCount = this.constructor.getTokenCountForMessages([
                     {
                         ...messagePayload,
                         content: newPromptBody,
@@ -385,7 +385,7 @@ export default class ChatGPTClient {
         let numTokens;
         if (isChatGptModel) {
             messagePayload.content = prompt;
-            numTokens = await this.constructor.getTokenCountForMessages([messagePayload]);
+            numTokens = this.constructor.getTokenCountForMessages([messagePayload]);
         } else {
             numTokens = this.getTokenCount(prompt);
         }
@@ -407,35 +407,28 @@ export default class ChatGPTClient {
      * https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
      * @param {*[]} messages
      */
-    static async getTokenCountForMessages(messages) {
-        try {
-            // Get the encoding tokenizer
-            const tokenizer = get_encoding('cl100k_base');
+    static getTokenCountForMessages(messages) {
+        // Get the encoding tokenizer
+        const tokenizer = get_encoding('cl100k_base');
 
-            // Map each message to the number of tokens it contains
-            const messageTokenCounts = messages.map((message) => {
-                // Map each property of the message to the number of tokens it contains
-                const propertyTokenCounts = Object.entries(message).map(([key, value]) => {
-                    // Count the number of tokens in the property value
-                    const numTokens = tokenizer.encode(value).length;
+        // Map each message to the number of tokens it contains
+        const messageTokenCounts = messages.map((message) => {
+            // Map each property of the message to the number of tokens it contains
+            const propertyTokenCounts = Object.entries(message).map(([key, value]) => {
+                // Count the number of tokens in the property value
+                const numTokens = tokenizer.encode(value).length;
 
-                    // Subtract 1 token if the property key is 'name'
-                    const adjustment = (key === 'name') ? 1 : 0;
-                    return numTokens - adjustment;
-                });
-
-                // Sum the number of tokens in all properties and add 4 for metadata
-                return propertyTokenCounts.reduce((a, b) => a + b, 4);
+                // Subtract 1 token if the property key is 'name'
+                const adjustment = (key === 'name') ? 1 : 0;
+                return numTokens - adjustment;
             });
 
-            // Sum the number of tokens in all messages and add 2 for metadata
-            return messageTokenCounts.reduce((a, b) => a + b, 2);
-        } catch (err) {
-            // try this workaround if the tokenizer fails
-            console.error(err);
-            await new Promise((resolve) => setTimeout(resolve, 1));
-            return this.getTokenCountForMessages(messages);
-        }
+            // Sum the number of tokens in all properties and add 4 for metadata
+            return propertyTokenCounts.reduce((a, b) => a + b, 4);
+        });
+
+        // Sum the number of tokens in all messages and add 2 for metadata
+        return messageTokenCounts.reduce((a, b) => a + b, 2);
     }
 
     /**
