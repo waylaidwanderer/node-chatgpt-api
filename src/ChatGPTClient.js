@@ -48,8 +48,10 @@ export default class ChatGPTClient {
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
         if (isChatGptModel) {
-            this.startToken = '';
-            this.endToken = '';
+            // These somehow don't count as tokens but using them will help the AI understand the context since we are
+            // building the chat log ourselves.
+            this.startToken = '<|im_start|>';
+            this.endToken = '<|im_end|>';
         } else if (isUnofficialChatGptModel) {
             this.startToken = '<|im_start|>';
             this.endToken = '<|im_end|>';
@@ -63,8 +65,8 @@ export default class ChatGPTClient {
             this.gptEncoder = encoding_for_model('text-davinci-003');
         }
 
-        if (!isChatGptModel && !this.modelOptions.stop) {
-            if (isUnofficialChatGptModel) {
+        if (!this.modelOptions.stop) {
+            if (this.startToken !== this.endToken) {
                 this.modelOptions.stop = [this.endToken, this.startToken];
             } else {
                 this.modelOptions.stop = [this.endToken];
@@ -322,7 +324,7 @@ export default class ChatGPTClient {
             promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
         }
 
-        const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
+        const promptSuffix = `${this.startToken}${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
 
         const instructionsPayload = {
             role: 'system',
