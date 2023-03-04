@@ -309,8 +309,8 @@ export default class ChatGPTClient {
         let promptPrefix;
         if (this.options.promptPrefix) {
             promptPrefix = this.options.promptPrefix.trim();
-            // If the prompt prefix doesn't end with the separator token, add it.
-            if (!promptPrefix.endsWith(`${this.endToken}\n\n`)) {
+            // If the prompt prefix doesn't end with the end token, add it.
+            if (!promptPrefix.endsWith(`${this.endToken}`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.endToken}\n\n`;
             }
             promptPrefix = `${this.startToken}Instructions:\n${promptPrefix}`;
