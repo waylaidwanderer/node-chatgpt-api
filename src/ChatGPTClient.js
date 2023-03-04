@@ -52,8 +52,8 @@ export default class ChatGPTClient {
             // Use these faux tokens to help the AI understand the context since we are building the chat log ourselves.
             // Trying to use "<|im_start|>" causes the AI to still generate "<" or "<|" at the end sometimes for some reason,
             // without tripping the stop sequences, so I'm using "##im_start##" instead.
-            this.startToken = 'im_start##';
-            this.endToken = '##im_end';
+            this.startToken = '||>';
+            this.endToken = '';
         } else if (isUnofficialChatGptModel) {
             this.startToken = '<|im_start|>';
             this.endToken = '<|im_end|>';
@@ -68,13 +68,13 @@ export default class ChatGPTClient {
         }
 
         if (!this.modelOptions.stop) {
-            if (this.startToken !== this.endToken) {
-                this.modelOptions.stop = [this.endToken, this.startToken];
-            } else {
-                this.modelOptions.stop = [this.endToken];
+            const stopTokens = [this.startToken];
+            if (this.endToken && this.endToken !== this.startToken) {
+                stopTokens.push(this.endToken);
             }
-            this.modelOptions.stop.push(`\n${this.userLabel}:`);
+            stopTokens.push(`\n${this.userLabel}:`);
             // I chose not to do one for `chatGptLabel` because I've never seen it happen
+            this.modelOptions.stop = stopTokens;
         }
 
         if (this.options.reverseProxyUrl) {
