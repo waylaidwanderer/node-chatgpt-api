@@ -48,15 +48,6 @@ export default class ChatGPTClient {
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
         if (isChatGptModel) {
-            if (this.userLabel.toLowerCase() === 'user') {
-                this.userLabel = null;
-            }
-            if (this.chatGptLabel.toLowerCase() === 'assistant') {
-                this.chatGptLabel = null;
-            }
-        }
-
-        if (isChatGptModel) {
             this.startToken = '';
             this.endToken = '';
         } else if (isUnofficialChatGptModel) {
@@ -239,7 +230,9 @@ export default class ChatGPTClient {
 
         let payload;
         if (this.isChatGptModel) {
-            payload = await this.buildChatPayload(conversation.messages, userMessage.id);
+            // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
+            // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
+            payload = await this.buildPrompt(conversation.messages, userMessage.id, true);
         } else {
             payload = await this.buildPrompt(conversation.messages, userMessage.id);
         }
@@ -310,82 +303,7 @@ export default class ChatGPTClient {
         };
     }
 
-    async buildChatPayload(messages, parentMessageId) {
-        const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
-
-        // This will override promptPrefix if set
-        const messagesPrefix = this.options.messagesPrefix || [];
-
-        let systemMessage;
-        if (messagesPrefix.length > 0) {
-            systemMessage = null;
-        } else if (this.options.promptPrefix) {
-            systemMessage = this.options.promptPrefix.trim();
-        } else {
-            const currentDateString = new Date().toLocaleDateString(
-                'en-us',
-                { year: 'numeric', month: 'long', day: 'numeric' },
-            );
-            systemMessage = `You are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}`;
-        }
-
-        const systemMessagePayload = systemMessage ? {
-            role: 'system',
-            content: systemMessage,
-        } : null;
-
-        const messagesArrayForTokenCount = [...messagesPrefix];
-        if (systemMessagePayload) {
-            messagesArrayForTokenCount.push(systemMessagePayload);
-        }
-
-        const payload = [];
-
-        let isFirstMessage = true;
-        let currentTokenCount = messagesArrayForTokenCount.length > 0 ? this.constructor.getTokenCountForMessages(messagesArrayForTokenCount) : 0;
-        const maxTokenCount = this.maxPromptTokens;
-        // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
-        while (currentTokenCount < maxTokenCount && orderedMessages.length > 0) {
-            const message = orderedMessages.pop();
-
-            const messagePayload = {
-                role: message.role === 'User' ? 'user' : 'assistant',
-                content: message.message,
-            };
-            // Set name property as the user labels, but make it fit the required format.
-            if (message.role === 'User' && this.userLabel) {
-                messagePayload.name = this.userLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
-            } else if (message.role === 'ChatGPT' && this.chatGptLabel) {
-                messagePayload.name = this.chatGptLabel.replace(/[^\w-]/gi, '-').substring(0, 64);
-            }
-
-            messagesArrayForTokenCount.push(messagePayload);
-            const newTokenCount = this.constructor.getTokenCountForMessages(messagesArrayForTokenCount);
-            if (newTokenCount > maxTokenCount) {
-                if (!isFirstMessage) {
-                    // This message would put us over the token limit, so don't add it.
-                    break;
-                }
-                // This is the first message, so we can't add it. Just throw an error.
-                throw new Error(`Prompt is too long. Max token count is ${maxTokenCount}, but prompt is ${newTokenCount} tokens long.`);
-            }
-
-            payload.unshift(messagePayload);
-            isFirstMessage = false;
-            currentTokenCount = newTokenCount;
-        }
-
-        // insert at start of array
-        if (messagesPrefix.length > 0) {
-            payload.unshift(...messagesPrefix);
-        } else if (systemMessagePayload) {
-            payload.unshift(systemMessagePayload);
-        }
-
-        return payload;
-    }
-
-    async buildPrompt(messages, parentMessageId) {
+    async buildPrompt(messages, parentMessageId, isChatGptModel = false) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
         let promptPrefix;
@@ -406,7 +324,18 @@ export default class ChatGPTClient {
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
 
-        let currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
+        const messagePayload = {
+            role: 'system',
+            name: 'user',
+            content: `${promptPrefix}${promptSuffix}`,
+        }
+
+        let currentTokenCount;
+        if (isChatGptModel) {
+            currentTokenCount = this.constructor.getTokenCountForMessages([messagePayload]);
+        } else {
+            currentTokenCount = this.getTokenCount(messagePayload.content);
+        }
         let promptBody = '';
         const maxTokenCount = this.maxPromptTokens;
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
@@ -428,7 +357,17 @@ export default class ChatGPTClient {
             // The reason I don't simply get the token count of the messageString and add it to currentTokenCount is because
             // joined words may combine into a single token. Actually, that isn't really applicable here, but I can't
             // resist doing it the "proper" way.
-            const newTokenCount = this.getTokenCount(`${promptPrefix}${newPromptBody}${promptSuffix}`);
+            let newTokenCount;
+            if (isChatGptModel) {
+                newTokenCount = this.constructor.getTokenCountForMessages([
+                    {
+                        ...messagePayload,
+                        content: newPromptBody,
+                    },
+                ]);
+            } else {
+                newTokenCount = this.getTokenCount(`${promptPrefix}${newPromptBody}${promptSuffix}`);
+            }
             if (newTokenCount > maxTokenCount) {
                 if (promptBody) {
                     // This message would put us over the token limit, so don't add it.
@@ -443,10 +382,19 @@ export default class ChatGPTClient {
 
         const prompt = `${promptBody}${promptSuffix}`;
 
-        const numTokens = this.getTokenCount(prompt);
+        let numTokens;
+        if (isChatGptModel) {
+            messagePayload.content = prompt;
+            numTokens = this.constructor.getTokenCountForMessages([messagePayload]);
+        } else {
+            numTokens = this.getTokenCount(prompt);
+        }
         // Use up to `this.maxContextTokens` tokens (prompt + response), but try to leave `this.maxTokens` tokens for the response.
         this.modelOptions.max_tokens = Math.min(this.maxContextTokens - numTokens, this.maxResponseTokens);
 
+        if (isChatGptModel) {
+            return [messagePayload];
+        }
         return prompt;
     }
 
