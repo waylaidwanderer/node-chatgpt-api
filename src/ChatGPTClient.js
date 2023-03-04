@@ -48,10 +48,11 @@ export default class ChatGPTClient {
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
         if (isChatGptModel) {
-            // These somehow don't count as tokens but using them will help the AI understand the context since we are
-            // building the chat log ourselves.
-            this.startToken = '<|im_start|>';
-            this.endToken = '<|im_end|>';
+            // Use these faux tokens to help the AI understand the context since we are building the chat log ourselves.
+            // Trying to use "<|im_start|>" causes the AI to still generate "<" or "<|" at the end sometimes for some reason,
+            // without tripping the stop sequences, so I'm using "##im_start##" instead.
+            this.startToken = '##im_start##';
+            this.endToken = '##im_end##';
         } else if (isUnofficialChatGptModel) {
             this.startToken = '<|im_start|>';
             this.endToken = '<|im_end|>';
