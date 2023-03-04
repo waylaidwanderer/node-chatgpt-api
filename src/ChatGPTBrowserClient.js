@@ -237,41 +237,37 @@ export default class ChatGPTBrowserClient {
             return;
         }
 
-        try {
-            const conversationId = event.conversation_id;
-            const messageId = event.message.id;
-            
-            const url = 'https://chat.openai.com/backend-api/conversation/gen_title/' + conversationId;
-            const opts = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.accessToken}`,
-                    Cookie: this.cookies || undefined,
-                },
-                body: JSON.stringify({
-                    message_id: messageId,
-                    model: this.model,
-                }),
-            };
+        const conversationId = event.conversation_id;
+        const messageId = event.message.id;
+        
+        const url = 'https://chat.openai.com/backend-api/conversation/gen_title/' + conversationId;
+        const opts = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.accessToken}`,
+                Cookie: this.cookies || undefined,
+            },
+            body: JSON.stringify({
+                message_id: messageId,
+                model: this.model,
+            }),
+        };
 
-            if (debug) {
-                console.log('gen title fetch opts: ', opts);
-            }
-            
-            if (this.options.proxy) {
-                opts.dispatcher = new ProxyAgent(this.options.proxy);
-            }
-
-            fetch(url, opts).then((ret) => {
-                if (debug) {
-                    ret.json().then((data) => {
-                        console.log('Gen title response: ', data);
-                    });
-                }
-            }).catch(console.error);
-        } catch(err) {
-            console.error(err);
+        if (debug) {
+            console.log('gen title fetch opts: ', opts);
         }
+        
+        if (this.options.proxy) {
+            opts.dispatcher = new ProxyAgent(this.options.proxy);
+        }
+
+        fetch(url, opts).then((ret) => {
+            if (debug) {
+                ret.json().then((data) => {
+                    console.log('Gen title response: ', data);
+                });
+            }
+        }).catch(console.error);
     }
 }
