@@ -324,17 +324,26 @@ export default class ChatGPTClient {
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
 
+        const instructionsPayload = {
+            role: 'system',
+            name: 'instructions',
+            content: promptPrefix,
+        };
+
         const messagePayload = {
             role: 'system',
             name: 'user',
-            content: `${promptPrefix}${promptSuffix}`,
-        }
+            content: promptSuffix,
+        };
 
         let currentTokenCount;
         if (isChatGptModel) {
-            currentTokenCount = this.constructor.getTokenCountForMessages([messagePayload]);
+            currentTokenCount = this.constructor.getTokenCountForMessages([
+                instructionsPayload,
+                messagePayload,
+            ]);
         } else {
-            currentTokenCount = this.getTokenCount(messagePayload.content);
+            currentTokenCount = this.getTokenCount(`${promptPrefix}${promptSuffix}`);
         }
         let promptBody = '';
         const maxTokenCount = this.maxPromptTokens;
@@ -360,6 +369,7 @@ export default class ChatGPTClient {
             let newTokenCount;
             if (isChatGptModel) {
                 newTokenCount = this.constructor.getTokenCountForMessages([
+                    instructionsPayload,
                     {
                         ...messagePayload,
                         content: newPromptBody,
@@ -380,12 +390,15 @@ export default class ChatGPTClient {
             currentTokenCount = newTokenCount;
         }
 
-        const prompt = isChatGptModel ? `${promptPrefix}${promptBody}${promptSuffix}` : `${promptBody}${promptSuffix}`;
+        const prompt = `${promptBody}${promptSuffix}`;
 
         let numTokens;
         if (isChatGptModel) {
             messagePayload.content = prompt;
-            numTokens = this.constructor.getTokenCountForMessages([messagePayload]);
+            numTokens = this.constructor.getTokenCountForMessages([
+                instructionsPayload,
+                messagePayload,
+            ]);
         } else {
             numTokens = this.getTokenCount(prompt);
         }
@@ -393,7 +406,10 @@ export default class ChatGPTClient {
         this.modelOptions.max_tokens = Math.min(this.maxContextTokens - numTokens, this.maxResponseTokens);
 
         if (isChatGptModel) {
-            return [messagePayload];
+            return [
+                instructionsPayload,
+                messagePayload,
+            ];
         }
         return prompt;
     }
