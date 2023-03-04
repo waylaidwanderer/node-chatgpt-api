@@ -313,13 +313,13 @@ export default class ChatGPTClient {
             if (!promptPrefix.endsWith(`${this.startToken}\n\n`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.startToken}\n\n`;
             }
-            promptPrefix = `\n${this.startToken}Instructions:\n${promptPrefix}`;
+            promptPrefix = `${this.startToken}Instructions:\n${promptPrefix}`;
         } else {
             const currentDateString = new Date().toLocaleDateString(
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
-            promptPrefix = `\n${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.startToken}\n\n`
+            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.startToken}\n\n`
         }
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
