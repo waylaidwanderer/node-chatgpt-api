@@ -310,8 +310,8 @@ export default class ChatGPTClient {
         if (this.options.promptPrefix) {
             promptPrefix = this.options.promptPrefix.trim();
             // If the prompt prefix doesn't end with the separator token, add it.
-            if (!promptPrefix.endsWith(`${this.startToken}\n\n`)) {
-                promptPrefix = `${promptPrefix.trim()}${this.startToken}\n\n`;
+            if (!promptPrefix.endsWith(`${this.endToken}\n\n`)) {
+                promptPrefix = `${promptPrefix.trim()}${this.endToken}\n\n`;
             }
             promptPrefix = `${this.startToken}Instructions:\n${promptPrefix}`;
         } else {
@@ -319,7 +319,7 @@ export default class ChatGPTClient {
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
-            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.startToken}\n\n`
+            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
         }
 
         const promptSuffix = `${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
@@ -344,10 +344,10 @@ export default class ChatGPTClient {
             const roleLabel = message.role === 'User' ? this.userLabel : this.chatGptLabel;
             const messageString = `${roleLabel}:\n${message.message}${this.endToken}\n`;
             let newPromptBody;
-            if (promptBody) {
+            if (promptBody || isChatGptModel) {
                 newPromptBody = `${messageString}${promptBody}`;
             } else {
-                // Always insert prompt prefix before the last user message.
+                // Always insert prompt prefix before the last user message, if not gpt-3.5-turbo.
                 // This makes the AI obey the prompt instructions better, which is important for custom instructions.
                 // After a bunch of testing, it doesn't seem to cause the AI any confusion, even if you ask it things
                 // like "what's the last thing I wrote?".
@@ -366,7 +366,7 @@ export default class ChatGPTClient {
                     },
                 ]);
             } else {
-                newTokenCount = this.getTokenCount(`${promptPrefix}${newPromptBody}${promptSuffix}`);
+                newTokenCount = this.getTokenCount(`${newPromptBody}${promptSuffix}`);
             }
             if (newTokenCount > maxTokenCount) {
                 if (promptBody) {
@@ -380,7 +380,7 @@ export default class ChatGPTClient {
             currentTokenCount = newTokenCount;
         }
 
-        const prompt = `${promptBody}${promptSuffix}`;
+        const prompt = isChatGptModel ? `${promptPrefix}${promptBody}${promptSuffix}` : `${promptBody}${promptSuffix}`;
 
         let numTokens;
         if (isChatGptModel) {
