@@ -27,8 +27,13 @@ export default class ChatGPTClient {
             stop: modelOptions.stop,
         };
 
+        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
+        const isChatGptModel = this.isChatGptModel;
+        this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
+        const isUnofficialChatGptModel = this.isUnofficialChatGptModel;
+
         // Davinci models have a max context length of 4097 tokens.
-        this.maxContextTokens = this.options.maxContextTokens || 4097;
+        this.maxContextTokens = this.options.maxContextTokens || (isChatGptModel ? 4095 : 4097);
         // I decided to reserve 1024 tokens for the response.
         // The max prompt tokens is determined by the max context tokens minus the max response tokens.
         // Earlier messages will be dropped until the prompt is within the limit.
@@ -38,11 +43,6 @@ export default class ChatGPTClient {
         if (this.maxPromptTokens + this.maxResponseTokens > this.maxContextTokens) {
             throw new Error(`maxPromptTokens + max_tokens (${this.maxPromptTokens} + ${this.maxResponseTokens} = ${this.maxPromptTokens + this.maxResponseTokens}) must be less than or equal to maxContextTokens (${this.maxContextTokens})`);
         }
-
-        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
-        const isChatGptModel = this.isChatGptModel;
-        this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
-        const isUnofficialChatGptModel = this.isUnofficialChatGptModel;
 
         this.userLabel = this.options.userLabel || 'User';
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
