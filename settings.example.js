@@ -25,11 +25,11 @@ export default {
         // Earlier messages will be dropped until the prompt is within the limit.
         // maxPromptTokens: 3097,
         // (Optional) Set custom instructions instead of "You are ChatGPT...".
-        // promptPrefix: 'You are Bob, a cowboy in Western times...',
         // (Optional) Set a custom name for the user
         // userLabel: 'User',
-        // (Optional) Set a custom name for ChatGPT
-        // chatGptLabel: 'ChatGPT',
+        // (Optional) Set a custom name for ChatGPT ("ChatGPT" by default)
+        // chatGptLabel: 'Bob',
+        // promptPrefix: 'You are Bob, a cowboy in Western times...',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },

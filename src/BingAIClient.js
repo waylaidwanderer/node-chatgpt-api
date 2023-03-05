@@ -121,6 +121,7 @@ export default class BingAIClient {
         opts = {},
     ) {
         let {
+            toneStyle = 'balanced', //or creative, precise
             conversationSignature,
             conversationId,
             clientId,
@@ -150,6 +151,15 @@ export default class BingAIClient {
 
         const ws = await this.createWebSocketConnection();
 
+        let toneOption;
+        if (toneStyle === 'creative') {
+            toneOption = 'h3imaginative';
+        } else if (toneStyle === 'precise') {
+            toneOption = 'h3precise';
+        } else {
+            toneOption = 'harmonyv3';
+        }
+
         const obj = {
             arguments: [
                 {
@@ -157,19 +167,19 @@ export default class BingAIClient {
                     optionsSets: [
                         'nlu_direct_response_filter',
                         'deepleo',
-                        'enable_debug_commands',
                         'disable_emoji_spoken_text',
                         'responsible_ai_policy_235',
                         'enablemm',
-                        'harmonyv3',
+                        toneOption,
                         'dtappid',
-                        'dloffstream',
-                        'dv3sugg',
+                        'cricinfo',
+                        'cricinfov2',
+                        'dv3sugg'
                     ],
                     sliceIds: [
                         '222dtappid',
-                        '216dloffstream',
-                        '225cricinfos0',
+                        '225cricinfo',
+                        '224locals0'
                     ],
                     traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,

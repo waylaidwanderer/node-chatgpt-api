@@ -7,8 +7,11 @@ const clientOptions = {
     // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
     modelOptions: {
-        // You can override the model name and any other parameters here.
-        // model: 'text-chat-davinci-002-20221122',
+        // You can override the model name and any other parameters here, like so:
+        model: 'gpt-3.5-turbo',
+        // I'm overriding the temperature to 0 here for demonstration purposes, but you shouldn't need to override this
+        // for normal usage.
+        temperature: 0,
         // Set max_tokens here to override the default max_tokens of 1000 for the completion.
         // max_tokens: 1000,
     },
@@ -36,18 +39,30 @@ const cacheOptions = {
 
 const chatGptClient = new ChatGPTClient('OPENAI_API_KEY', clientOptions, cacheOptions);
 
-const response = await chatGptClient.sendMessage('Hello!');
-console.log(response); // { response: 'Hi! How can I help you today?', conversationId: '...', messageId: '...' }
+let response;
+response = await chatGptClient.sendMessage('Hello!');
+console.log(response); // { response: 'Hello! How can I assist you today?', conversationId: '...', messageId: '...' }
 
-const response2 = await chatGptClient.sendMessage('Write a poem about cats.', { conversationId: response.conversationId, parentMessageId: response.messageId });
-console.log(response2.response); // Cats are the best pets in the world.
+response = await chatGptClient.sendMessage('Write a short poem about cats.', { conversationId: response.conversationId, parentMessageId: response.messageId });
+console.log(response.response); // Soft and sleek, with eyes that gleam,\nCats are creatures of grace supreme.\n...
+console.log();
 
-const response3 = await chatGptClient.sendMessage('Now write it in French.', {
-    conversationId: response2.conversationId,
-    parentMessageId: response2.messageId,
+response = await chatGptClient.sendMessage('Now write it in French.', {
+    conversationId: response.conversationId,
+    parentMessageId: response.messageId,
     // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
     // You will receive one token at a time, so you will need to concatenate them yourself.
     onProgress: (token) => process.stdout.write(token),
 });
 console.log();
-console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.
+console.log(response.response); // Doux et élégant, avec des yeux qui brillent,\nLes chats sont des créatures de grâce suprême.\n...
+
+response = await chatGptClient.sendMessage('Repeat my 2nd message verbatim.', {
+    conversationId: response.conversationId,
+    parentMessageId: response.messageId,
+    // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
+    // You will receive one token at a time, so you will need to concatenate them yourself.
+    onProgress: (token) => process.stdout.write(token),
+});
+console.log();
+console.log(response.response); // "Write a short poem about cats."
