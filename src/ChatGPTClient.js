@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import Keyv from 'keyv';
 import { encoding_for_model, get_encoding } from '@dqbd/tiktoken';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
-import { Agent } from 'undici';
+import { Agent, ProxyAgent } from 'undici';
 
 const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
 
@@ -129,6 +129,11 @@ export default class ChatGPTClient {
                 headersTimeout: 0,
             }),
         };
+
+        if (this.options.proxy) {
+            opts.dispatcher = new ProxyAgent(this.options.proxy);
+        }
+
         if (modelOptions.stream) {
             return new Promise(async (resolve, reject) => {
                 try {
