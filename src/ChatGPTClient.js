@@ -5,7 +5,7 @@ import { encoding_for_model, get_encoding } from '@dqbd/tiktoken';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 import { Agent, ProxyAgent } from 'undici';
 
-const CHATGPT_MODEL = 'text-chat-davinci-002-sh-alpha-aoruigiofdj83';
+const CHATGPT_MODEL = 'gpt-3.5-turbo';
 
 export default class ChatGPTClient {
     constructor(
