@@ -119,7 +119,8 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
     - In essence, this allows you to make a chatbot with any personality you want.
     - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
   - Retains support for models like `text-davinci-003`
-- `BingAIClient`: support for Bing's version of ChatGPT, powered by GPT-4.
+- `BingAIClient`: support for Bing's version of ChatGPT, ~~powered by GPT-4~~.
+  - _March 6, 2023:_ Bing AI seems to be using gpt-3.5-turbo now instead of GPT-4. This does explain why Microsoft was so reluctant to outright say that they were using GPT-4. 
 - `ChatGPTBrowserClient`: support for the official ChatGPT website, using a reverse proxy server for a Cloudflare bypass.
   - **There may be a high chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
 
