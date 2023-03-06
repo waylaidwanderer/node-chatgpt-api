@@ -15,7 +15,8 @@ export default {
         // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
         modelOptions: {
             // You can override the model name and any other parameters here.
-            // model: 'text-chat-davinci-002-20221122',
+            // The default model is `gpt-3.5-turbo`.
+            model: 'gpt-3.5-turbo',
             // Set max_tokens here to override the default max_tokens of 1000 for the completion.
             // max_tokens: 1000,
         },
@@ -30,6 +31,8 @@ export default {
         // (Optional) Set a custom name for ChatGPT ("ChatGPT" by default)
         // chatGptLabel: 'Bob',
         // promptPrefix: 'You are Bob, a cowboy in Western times...',
+        // A proxy string like "http://<ip>:<port>"
+        proxy: '',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
@@ -54,8 +57,10 @@ export default {
         accessToken: '',
         // Cookies from chat.openai.com (likely not required if using reverse proxy server).
         cookies: '',
+        // A proxy string like "http://<ip>:<port>"
+        proxy: '',
         // (Optional) Set to true to enable `console.debug()` logging
-        // debug: true,
+        debug: false,
     },
     // Options for the API server
     apiOptions: {
@@ -63,12 +68,12 @@ export default {
         host: process.env.API_HOST || 'localhost',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
-        // (Optional) Set to "bing" to use `BingAIClient` instead of `ChatGPTClient`.
+        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing".
         // clientToUse: 'bing',
     },
     // Options for the CLI app
     cliOptions: {
-        // (Optional) Set to "bing" to use `BingAIClient` instead of `ChatGPTClient`.
+        // (Optional) Possible options: "chatgpt", "bing".
         // clientToUse: 'bing',
     },
 }

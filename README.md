@@ -10,9 +10,11 @@
 
 See OpenAI's post, [Introducing ChatGPT and Whisper APIs](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) for more information.
 
-To use it, set `modelOptions.model` to `gpt-3.5-turbo`, and `ChatGPTClient` will handle the rest. You can still set `userLabel`, `chatGptLabel` and `promptPrefix` (system instructions) as usual.
+~~To use it, set `modelOptions.model` to `gpt-3.5-turbo`, and `ChatGPTClient` will handle the rest.~~  
+The default model used in `ChatGPTClient` is now `gpt-3.5-turbo`.  
+You can still set `userLabel`, `chatGptLabel` and `promptPrefix` (system instructions) as usual.
 
-**There may be a high chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
+**There may be a higher chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
 </details>
 
 <details>
@@ -185,7 +187,8 @@ module.exports = {
         // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
         modelOptions: {
             // You can override the model name and any other parameters here.
-            // model: 'text-chat-davinci-002-20221122',
+            // The default model is `gpt-3.5-turbo`.
+            model: 'gpt-3.5-turbo',
             // Set max_tokens here to override the default max_tokens of 1000 for the completion.
             // max_tokens: 1000,
         },
@@ -195,11 +198,13 @@ module.exports = {
         // Earlier messages will be dropped until the prompt is within the limit.
         // maxPromptTokens: 3097,
         // (Optional) Set custom instructions instead of "You are ChatGPT...".
-        // promptPrefix: 'You are Bob, a cowboy in Western times...',
         // (Optional) Set a custom name for the user
         // userLabel: 'User',
-        // (Optional) Set a custom name for ChatGPT
-        // chatGptLabel: 'ChatGPT',
+        // (Optional) Set a custom name for ChatGPT ("ChatGPT" by default)
+        // chatGptLabel: 'Bob',
+        // promptPrefix: 'You are Bob, a cowboy in Western times...',
+        // A proxy string like "http://<ip>:<port>"
+        proxy: '',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
@@ -224,8 +229,10 @@ module.exports = {
         accessToken: '',
         // Cookies from chat.openai.com (likely not required if using reverse proxy server).
         cookies: '',
+        // A proxy string like "http://<ip>:<port>"
+        proxy: '',
         // (Optional) Set to true to enable `console.debug()` logging
-        // debug: true,
+        debug: false,
     },
     // Options for the API server
     apiOptions: {
@@ -233,12 +240,12 @@ module.exports = {
         host: process.env.API_HOST || 'localhost',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
-        // (Optional) Set to "bing" to use `BingAIClient` instead of `ChatGPTClient`.
+        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing".
         // clientToUse: 'bing',
     },
     // Options for the CLI app
     cliOptions: {
-        // (Optional) Set to "bing" to use `BingAIClient` instead of `ChatGPTClient`.
+        // (Optional) Possible options: "chatgpt", "bing".
         // clientToUse: 'bing',
     },
 };
