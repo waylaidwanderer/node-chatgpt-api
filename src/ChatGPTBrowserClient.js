@@ -39,7 +39,7 @@ export default class ChatGPTBrowserClient {
                 Authorization: `Bearer ${this.accessToken}`,
                 Cookie: this.cookies || undefined,
             },
-            
+
             body: JSON.stringify({
                 conversation_id: conversationId,
                 action,
@@ -57,7 +57,7 @@ export default class ChatGPTBrowserClient {
                 model: this.model,
             }),
         };
-        
+
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
         }
@@ -69,10 +69,8 @@ export default class ChatGPTBrowserClient {
             console.debug();
         }
 
-        const genTitle = this.genTitle.bind(this);
-
         // data: {"message": {"id": "UUID", "role": "assistant", "user": null, "create_time": null, "update_time": null, "content": {"content_type": "text", "parts": ["That's alright! If you don't have a specific question or topic in mind, I can suggest some general conversation starters or topics to explore. \n\nFor example, we could talk about your interests, hobbies, or goals. Alternatively, we could discuss current events, pop culture, or science and technology. Is there anything in particular that you're curious about or would like to learn more about?"]}, "end_turn": true, "weight": 1.0, "metadata": {"message_type": "next", "model_slug": "text-davinci-002-render-sha", "finish_details": {"type": "stop", "stop": "<|im_end|>"}}, "recipient": "all"}, "conversation_id": "UUID", "error": null}
-        return new Promise(async (resolve, reject) => {
+        const response = await new Promise(async (resolve, reject) => {
             let lastEvent = null;
             try {
                 let done = false;
@@ -109,10 +107,6 @@ export default class ChatGPTBrowserClient {
                             onProgress('[DONE]');
                             abortController.abort();
                             resolve(lastEvent);
-
-                            if (!conversationId) {
-                                genTitle(lastEvent);
-                            }
                         }
                     },
                     onerror(err) {
@@ -134,10 +128,6 @@ export default class ChatGPTBrowserClient {
                             abortController.abort();
                             resolve(lastEvent);
                             done = true;
-
-                            if (!conversationId) {
-                                genTitle(lastEvent);
-                            }
                             return;
                         }
                         try {
@@ -162,6 +152,12 @@ export default class ChatGPTBrowserClient {
                 reject(err);
             }
         });
+
+        if (!conversationId) {
+            this.genTitle(response);
+        }
+
+        return response;
     }
 
     async sendMessage(
@@ -239,8 +235,9 @@ export default class ChatGPTBrowserClient {
 
         const conversationId = event.conversation_id;
         const messageId = event.message.id;
-        
-        const url = 'https://chat.openai.com/backend-api/conversation/gen_title/' + conversationId;
+
+        const baseUrl = this.options.reverseProxyUrl || 'https://chat.openai.com/backend-api/conversation';
+        const url = `${baseUrl}/gen_title/${conversationId}`;
         const opts = {
             method: 'POST',
             headers: {
@@ -257,7 +254,7 @@ export default class ChatGPTBrowserClient {
         if (debug) {
             console.log('gen title fetch opts: ', opts);
         }
-        
+
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
         }
@@ -266,7 +263,7 @@ export default class ChatGPTBrowserClient {
             if (debug) {
                 ret.json().then((data) => {
                     console.log('Gen title response: ', data);
-                });
+                }).catch(console.error);
             }
         }).catch(console.error);
     }
