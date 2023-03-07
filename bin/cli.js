@@ -186,10 +186,7 @@ async function onMessage(message) {
         switch (clientToUse) {
             case 'bing':
                 conversationData = {
-                    conversationId: response.conversationId,
-                    conversationSignature: response.conversationSignature,
-                    clientId: response.clientId,
-                    // invocationId: response.invocationId,
+                    jailbreakConversationId: response.jailbreakConversationId,
                     parentMessageId: response.messageId,
                 };
                 break;

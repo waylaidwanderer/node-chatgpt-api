@@ -122,9 +122,10 @@ export default class BingAIClient {
         opts = {},
     ) {
         let {
-            toneStyle = 'balanced', //or creative, precise
-            conversationSignature,
+            toneStyle = 'balanced', // or creative, precise
+            jailbreakConversationId = crypto.randomUUID(),
             conversationId,
+            conversationSignature,
             clientId,
             invocationId = 0,
             parentMessageId = invocationId || crypto.randomUUID(),
@@ -161,8 +162,7 @@ export default class BingAIClient {
         // Due to this jailbreak, the AI will occasionally start responding as the user. It only happens rarely (and happens with the non-jailbroken Bing too), but since we are handling conversations ourselves now, we can use this system to ignore the part of the generated message that is replying as the user.
         const stopToken = '[user](#message)';
 
-        // TODO: support resuming by conversation ID properly
-        const conversationKey = 'testing1';
+        const conversationKey = jailbreakConversationId;
         const conversation = (await this.conversationsCache.get(conversationKey)) || {
             messages: [],
             createdAt: Date.now(),
@@ -396,8 +396,9 @@ export default class BingAIClient {
         await this.conversationsCache.set(conversationKey, conversation);
 
         return {
-            conversationSignature,
+            jailbreakConversationId,
             conversationId,
+            conversationSignature,
             clientId,
             invocationId: invocationId + 1,
             messageId: replyMessage.id,
