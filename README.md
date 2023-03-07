@@ -102,8 +102,9 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
          * [API Server](#api-server)
          * [CLI](#cli)
       * [Using a Reverse Proxy](#using-a-reverse-proxy)
-   * [Caveats](#caveats)
+   * [Projects](#projects)
    * [Web Client](#web-client)
+   * [Caveats](#caveats)
    * [Contributing](#contributing)
    * [License](#license)
 
@@ -435,6 +436,17 @@ Instructions are provided below.
 </details>
 </details>
 
+## Projects
+🚀 A list of awesome projects using `@waylaidwanderer/chatgpt-api`:
+- [ChatGPT Web Client](https://github.com/waylaidwanderer/chatgpt-web-client): this is my web client using this project's API server, built using Nuxt 3. Also usable with other compatible API server implementations.
+- [ChatGPT Clone](https://github.com/danny-avila/chatgpt-clone): a clone of ChatGPT, uses official model, reverse-engineered UI, with AI model switching, message search, and prompt templates.
+
+Add yours to the list by [editing this README](https://github.com/waylaidwanderer/node-chatgpt-api/edit/main/README.md) and creating a pull request!
+
+## Web Client
+A web client is available for this project's API server is also available at [waylaidwanderer/chatgpt-web-client](https://github.com/waylaidwanderer/chatgpt-web-client).
+Or use one of the many projects listed above!
+
 ## Caveats
 ### Regarding `ChatGPTClient`
 Since `gpt-3.5-turbo` is ChatGPT's underlying model, I had to do my best to replicate the way the official ChatGPT website uses it.
@@ -442,10 +454,7 @@ This means my implementation or the underlying model may not behave exactly the 
 - Conversations are not tied to any user IDs, so if that's important to you, you should implement your own user ID system.
 - ChatGPT's model parameters (temperature, frequency penalty, etc.) are unknown, so I set some defaults that I thought would be reasonable.
 - Conversations are limited to roughly the last 3000 tokens, so earlier messages may be forgotten during longer conversations.
-  - This works in a similar way to ChatGPT, except I'm pretty sure they have some additional way of retrieving context from earlier messages when needed (which can probably be achieved with embeddings, but I consider that out-of-scope for now).
-
-## Web Client
-A web client is available for this library's API server is also available at [waylaidwanderer/chatgpt-web-client](https://github.com/waylaidwanderer/chatgpt-web-client).
+    - This works in a similar way to ChatGPT, except I'm pretty sure they have some additional way of retrieving context from earlier messages when needed (which can probably be achieved with embeddings, but I consider that out-of-scope for now).
 
 ## Contributing
 If you'd like to contribute to this project, please create a pull request with a detailed description of your changes.
