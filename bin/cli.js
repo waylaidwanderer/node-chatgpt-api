@@ -164,6 +164,10 @@ async function onMessage(message) {
     spinner.prefixText = '\n   ';
     spinner.start();
     try {
+        if (clientToUse === 'bing' && !conversationData.jailbreakConversationId) {
+            // activate jailbreak mode for Bing
+            conversationData.jailbreakConversationId = true;
+        }
         const response = await client.sendMessage(message, {
             ...conversationData,
             onProgress: (token) => {
@@ -186,8 +190,12 @@ async function onMessage(message) {
         switch (clientToUse) {
             case 'bing':
                 conversationData = {
-                    jailbreakConversationId: response.jailbreakConversationId,
                     parentMessageId: response.messageId,
+                    jailbreakConversationId: response.jailbreakConversationId,
+                    //conversationId: response.conversationId,
+                    //conversationSignature: response.conversationSignature,
+                    //clientId: response.clientId,
+                    //invocationId: response.invocationId,
                 };
                 break;
             default:
