@@ -123,7 +123,7 @@ export default class BingAIClient {
     ) {
         let {
             toneStyle = 'balanced', // or creative, precise
-            jailbreakConversationId, // set to `true` for the first message to enable jailbreak mode
+            jailbreakConversationId = false, // set to `true` for the first message to enable jailbreak mode
             conversationId,
             conversationSignature,
             clientId,
