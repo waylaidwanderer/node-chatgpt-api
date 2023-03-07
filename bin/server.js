@@ -117,6 +117,7 @@ server.post('/conversation', async (request, reply) => {
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
+            clientOptions: body.clientOptions, // TODO: configurable whitelist for replaceable options
             onProgress,
             abortController,
         });
