@@ -164,11 +164,15 @@ async function onMessage(message) {
     spinner.prefixText = '\n   ';
     spinner.start();
     try {
+        if (clientToUse === 'bing' && !conversationData.jailbreakConversationId) {
+            // activate jailbreak mode for Bing
+            conversationData.jailbreakConversationId = true;
+        }
         const response = await client.sendMessage(message, {
             ...conversationData,
             onProgress: (token) => {
                 reply += token;
-                const output = tryBoxen(`${reply}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
+                const output = tryBoxen(`${reply.trim()}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
@@ -186,10 +190,12 @@ async function onMessage(message) {
         switch (clientToUse) {
             case 'bing':
                 conversationData = {
-                    conversationId: response.conversationId,
-                    conversationSignature: response.conversationSignature,
-                    clientId: response.clientId,
-                    invocationId: response.invocationId,
+                    parentMessageId: response.messageId,
+                    jailbreakConversationId: response.jailbreakConversationId,
+                    //conversationId: response.conversationId,
+                    //conversationSignature: response.conversationSignature,
+                    //clientId: response.clientId,
+                    //invocationId: response.invocationId,
                 };
                 break;
             default:

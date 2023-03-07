@@ -241,7 +241,6 @@ export default class ChatGPTClient {
             role: 'User',
             message,
         };
-
         conversation.messages.push(userMessage);
 
         let payload;

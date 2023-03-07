@@ -120,6 +120,7 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
     - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
   - Retains support for models like `text-davinci-003`
 - `BingAIClient`: support for Bing's version of ChatGPT, powered by GPT-4.
+  - Includes a built-in jailbreak you can activate which enables unlimited chat messages per conversation, unlimited messages per day, and brings Sydney back. 😊 
 - `ChatGPTBrowserClient`: support for the official ChatGPT website, using a reverse proxy server for a Cloudflare bypass.
   - **There may be a high chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
 
