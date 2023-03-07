@@ -21,6 +21,7 @@ let response = await bingAIClient.sendMessage('Write a short poem about cats', {
 console.log(response);
 
 response = await bingAIClient.sendMessage('Now write it in French', {
+    toneStyle: 'balanced', //or creative, precise
     conversationSignature: response.conversationSignature,
     conversationId: response.conversationId,
     clientId: response.clientId,
