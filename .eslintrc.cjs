@@ -1,0 +1,28 @@
+module.exports = {
+  env: {
+    es2021: true,
+    node: true,
+  },
+  extends: 'airbnb-base',
+  overrides: [
+  ],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  rules: {
+    'indent': ['error', 4, { 'SwitchCase': 1 }],
+    'max-len': [
+      'error', {
+        'code': 150,
+        'ignoreStrings': true,
+        'ignoreTemplateLiterals': true,
+        'ignoreComments': true,
+      }],
+    'linebreak-style': 0,
+    'arrow-parens': [2, 'as-needed', { 'requireForBlockBody': true }],
+    'no-plusplus': ['error', { 'allowForLoopAfterthoughts': true }],
+    'no-console': 'off',
+    'import/extensions': 'off',
+  },
+};
