@@ -44,29 +44,10 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
-let clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
-let perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || {};
+const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+const perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || null;
 
-let client;
-switch (clientToUse) {
-    case 'bing':
-        client = new BingAIClient(settings.bingAiClient);
-        break;
-    case 'chatgpt-browser':
-        client = new ChatGPTBrowserClient(
-            settings.chatGptBrowserClient,
-            settings.cacheOptions,
-        );
-        break;
-    default:
-        clientToUse = 'chatgpt';
-        client = new ChatGPTClient(
-            settings.openaiApiKey,
-            settings.chatGptClient,
-            settings.cacheOptions,
-        );
-        break;
-}
+const clientsCache = {};
 
 const server = fastify();
 
@@ -111,15 +92,24 @@ server.post('/conversation', async (request, reply) => {
             // noinspection ExceptionCaughtLocallyJS
             throw invalidError;
         }
+
+        let clientToUseForMessage = clientToUse;
+        const clientOptions = filterClientOptions(body.clientOptions, clientToUseForMessage);
+        if (clientOptions && clientOptions.clientToUse) {
+            clientToUseForMessage = clientOptions.clientToUse;
+            delete clientOptions.clientToUse;
+        }
+        const messageClient = getClient(clientToUseForMessage);
+
         const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
-        result = await client.sendMessage(body.message, {
+        result = await messageClient.sendMessage(body.message, {
             jailbreakConversationId: body.jailbreakConversationId ? body.jailbreakConversationId.toString() : undefined,
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
             parentMessageId,
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
-            clientOptions: filterClientOptions(body.clientOptions),
+            clientOptions,
             onProgress,
             abortController,
         });
@@ -176,15 +166,57 @@ function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
 
+function getClient(clientToUse) {
+    if (clientsCache[clientToUse]) {
+        return clientsCache[clientToUse];
+    }
+
+    let client;
+    switch (clientToUse) {
+        case 'bing':
+            client = new BingAIClient(settings.bingAiClient);
+            break;
+        case 'chatgpt-browser':
+            client = new ChatGPTBrowserClient(
+                settings.chatGptBrowserClient,
+                settings.cacheOptions,
+            );
+            break;
+        case 'chatgpt':
+            client = new ChatGPTClient(
+                settings.openaiApiKey,
+                settings.chatGptClient,
+                settings.cacheOptions,
+            );
+            break;
+        default:
+            throw new Error(`Invalid clientToUse: ${clientToUse}`);
+    }
+    clientsCache[clientToUse] = client;
+    return client;
+}
+
 /**
  * Filter objects to only include whitelisted properties set in
  * `settings.js` > `apiOptions.perMessageClientOptionsWhitelist`.
  * Returns original object if no whitelist is set.
  * @param {*} inputOptions
+ * @param clientToUse
  */
-function filterClientOptions(inputOptions) {
-    if (!inputOptions) {
+function filterClientOptions(inputOptions, clientToUse) {
+    if (!inputOptions || !perMessageClientOptionsWhitelist) {
         return null;
+    }
+
+    // If inputOptions.clientToUse is set and is in the whitelist, use it instead of the default
+    if (
+        perMessageClientOptionsWhitelist.validClientsToUse
+        && inputOptions.clientToUse
+        && perMessageClientOptionsWhitelist.validClientsToUse.includes(inputOptions.clientToUse)
+    ) {
+        clientToUse = inputOptions.clientToUse;
+    } else {
+        inputOptions.clientToUse = clientToUse;
     }
 
     const whitelist = perMessageClientOptionsWhitelist[clientToUse];
