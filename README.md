@@ -180,9 +180,9 @@ module.exports = {
     // If set, `ChatGPTClient` will use `keyv-file` to store conversations to this JSON file instead of in memory.
     // However, `cacheOptions.store` will override this if set
     storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
-    // Your OpenAI API key (for `ChatGPTClient`)
-    openaiApiKey: process.env.OPENAI_API_KEY || '',
     chatGptClient: {
+        // Your OpenAI API key (for `ChatGPTClient`)
+        openaiApiKey: process.env.OPENAI_API_KEY || '',
         // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
         // Warning: This will expose your `openaiApiKey` to a third party. Consider the risks before using this.
         // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
@@ -291,17 +291,17 @@ Alternatively, you can install and run the package directly.
 Start or continue a conversation.
 Optional parameters are only necessary for conversations that span multiple requests.
 
-| Field                     | Description                                                                                           |
-|---------------------------|-------------------------------------------------------------------------------------------------------|
-| message                   | The message to be displayed to the user.                                                              |
-| conversationId            | (Optional) An ID for the conversation.                                                                |
-| parentMessageId           | (Optional, for `ChatGPTClient` only) The ID of the parent message.                                    |
-| conversationSignature     | (Optional, for `BingAIClient` only) A signature for the conversation.                                 |
-| clientId                  | (Optional, for `BingAIClient` only) The ID of the client.                                             |
-| invocationId              | (Optional, for `BingAIClient` only) The ID of the invocation.                                         |
-| clientOptions             | (Optional) An object containing options for the client.                                               |
-| clientOptions.clientToUse | (Optional) The client to use for this message. Possible values: `chatgpt`, `chatgpt-browser`, `bing`. |
-| clientOptions.*           | (Optional) Any valid options for the client (e.g. `clientOptions.promptPrefix` for `ChatGPTClient`).  |
+| Field                     | Description                                                                                                                                                                                                                                                     |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| message                   | The message to be displayed to the user.                                                                                                                                                                                                                        |
+| conversationId            | (Optional) An ID for the conversation.                                                                                                                                                                                                                          |
+| parentMessageId           | (Optional, for `ChatGPTClient` only) The ID of the parent message.                                                                                                                                                                                              |
+| conversationSignature     | (Optional, for `BingAIClient` only) A signature for the conversation.                                                                                                                                                                                           |
+| clientId                  | (Optional, for `BingAIClient` only) The ID of the client.                                                                                                                                                                                                       |
+| invocationId              | (Optional, for `BingAIClient` only) The ID of the invocation.                                                                                                                                                                                                   |
+| clientOptions             | (Optional) An object containing options for the client.                                                                                                                                                                                                         |
+| clientOptions.clientToUse | (Optional) The client to use for this message. Possible values: `chatgpt`, `chatgpt-browser`, `bing`.                                                                                                                                                           |
+| clientOptions.*           | (Optional) Any valid options for the client. For example, for `ChatGPTClient`, you can set `clientOptions.openaiApiKey` to set an API key for this message only, or `clientOptions.promptPrefix` to give the AI custom instructions for this message only, etc. |
 
 </details>
 
@@ -450,7 +450,7 @@ Instructions are provided below.
     * **This is NOT the same thing as the _session token_.**
     * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
 2. Set `reverseProxyUrl` to `https://chatgpt.hato.ai/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
-3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
+3. Set the "OpenAI API key" parameter (e.g. `settings.chatGptClient.openaiApiKey`) to the ChatGPT access token you got in step 1.
 4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the underlying model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 
@@ -468,7 +468,7 @@ Instructions are provided below.
     * **This is NOT the same thing as the _session token_.**
     * Automatically fetching or refreshing your ChatGPT access token is not currently supported by this library. Please handle this yourself for now.
 2. Set `reverseProxyUrl` to `https://chatgpt.pawan.krd/api/completions` in `settings.js > chatGptClient` or `ChatGPTClient`'s options.
-3. Set the "OpenAI API key" parameter (e.g. `settings.openaiApiKey`) to the ChatGPT access token you got in step 1.
+3. Set the "OpenAI API key" parameter (e.g. `settings.chatGptClient.openaiApiKey`) to the ChatGPT access token you got in step 1.
 4. Set the `model` to `text-davinci-002-render`, `text-davinci-002-render-paid`, or `text-davinci-002-render-sha` depending on which ChatGPT models that your account has access to. Models **must** be a ChatGPT model name, not the underlying model name, and you cannot use a model that your account does not have access to.
     * You can check which ones you have access to by opening DevTools and going to the Network tab. Refresh the page and look at the response body for https://chat.openai.com/backend-api/models.
 

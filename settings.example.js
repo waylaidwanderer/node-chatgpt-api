@@ -6,9 +6,9 @@ export default {
     // If set, `ChatGPTClient` will use `keyv-file` to store conversations to this JSON file instead of in memory.
     // However, `cacheOptions.store` will override this if set
     storageFilePath: process.env.STORAGE_FILE_PATH || './cache.json',
-    // Your OpenAI API key (for `ChatGPTClient`)
-    openaiApiKey: process.env.OPENAI_API_KEY || '',
     chatGptClient: {
+        // Your OpenAI API key (for `ChatGPTClient`)
+        openaiApiKey: process.env.OPENAI_API_KEY || '',
         // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
         // Warning: This will expose your `openaiApiKey` to a third party. Consider the risks before using this.
         // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
