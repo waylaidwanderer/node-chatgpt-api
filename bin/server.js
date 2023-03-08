@@ -1,21 +1,16 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { FastifySSEPlugin } from "@waylaidwanderer/fastify-sse-v2";
+import { FastifySSEPlugin } from '@waylaidwanderer/fastify-sse-v2';
 import fs from 'fs';
-import { pathToFileURL } from 'url'
+import { pathToFileURL } from 'url';
+import { KeyvFile } from 'keyv-file';
 import ChatGPTClient from '../src/ChatGPTClient.js';
 import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
-import { KeyvFile } from 'keyv-file';
 
-const arg = process.argv.find((arg) => arg.startsWith('--settings'));
-let path;
-if (arg) {
-    path = arg.split('=')[1];
-} else {
-    path = './settings.js';
-}
+const arg = process.argv.find(_arg => _arg.startsWith('--settings'));
+const path = arg?.split('=')[1] ?? './settings.js';
 
 let settings;
 if (fs.existsSync(path)) {
@@ -24,9 +19,9 @@ if (fs.existsSync(path)) {
     settings = (await import(pathToFileURL(fullPath).toString())).default;
 } else {
     if (arg) {
-        console.error(`Error: the file specified by the --settings parameter does not exist.`);
+        console.error('Error: the file specified by the --settings parameter does not exist.');
     } else {
-        console.error(`Error: the settings.js file does not exist.`);
+        console.error('Error: the settings.js file does not exist.');
     }
     process.exit(1);
 }
@@ -152,7 +147,7 @@ server.post('/conversation', async (request, reply) => {
 
 server.listen({
     port: settings.apiOptions?.port || settings.port || 3000,
-    host: settings.apiOptions?.host || 'localhost'
+    host: settings.apiOptions?.host || 'localhost',
 }, (error) => {
     if (error) {
         console.error(error);
@@ -164,8 +159,8 @@ function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
 
-function getClient(clientToUse) {
-    switch (clientToUse) {
+function getClient(clientToUseForMessage) {
+    switch (clientToUseForMessage) {
         case 'bing':
             return new BingAIClient(settings.bingAiClient);
         case 'chatgpt-browser':
@@ -180,7 +175,7 @@ function getClient(clientToUse) {
                 settings.cacheOptions,
             );
         default:
-            throw new Error(`Invalid clientToUse: ${clientToUse}`);
+            throw new Error(`Invalid clientToUse: ${clientToUseForMessage}`);
     }
 }
 
@@ -189,9 +184,9 @@ function getClient(clientToUse) {
  * `settings.js` > `apiOptions.perMessageClientOptionsWhitelist`.
  * Returns original object if no whitelist is set.
  * @param {*} inputOptions
- * @param clientToUse
+ * @param clientToUseForMessage
  */
-function filterClientOptions(inputOptions, clientToUse) {
+function filterClientOptions(inputOptions, clientToUseForMessage) {
     if (!inputOptions || !perMessageClientOptionsWhitelist) {
         return null;
     }
@@ -202,12 +197,12 @@ function filterClientOptions(inputOptions, clientToUse) {
         && inputOptions.clientToUse
         && perMessageClientOptionsWhitelist.validClientsToUse.includes(inputOptions.clientToUse)
     ) {
-        clientToUse = inputOptions.clientToUse;
+        clientToUseForMessage = inputOptions.clientToUse;
     } else {
-        inputOptions.clientToUse = clientToUse;
+        inputOptions.clientToUse = clientToUseForMessage;
     }
 
-    const whitelist = perMessageClientOptionsWhitelist[clientToUse];
+    const whitelist = perMessageClientOptionsWhitelist[clientToUseForMessage];
     if (!whitelist) {
         // No whitelist, return all options
         return inputOptions;
@@ -215,12 +210,12 @@ function filterClientOptions(inputOptions, clientToUse) {
 
     const outputOptions = {};
 
-    for (let property in inputOptions) {
+    for (const property of Object.keys(inputOptions)) {
         const allowed = whitelist.includes(property);
 
         if (!allowed && typeof inputOptions[property] === 'object') {
             // Check for nested properties
-            for (let nestedProp in inputOptions[property]) {
+            for (const nestedProp of Object.keys(inputOptions[property])) {
                 const nestedAllowed = whitelist.includes(`${property}.${nestedProp}`);
                 if (nestedAllowed) {
                     outputOptions[property] = outputOptions[property] || {};

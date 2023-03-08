@@ -26,7 +26,7 @@ try {
             throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
         },
         onclose() {
-            throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
+            throw new Error('Failed to send message. Server closed the connection unexpectedly.');
         },
         onerror(err) {
             throw err;

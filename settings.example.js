@@ -97,4 +97,4 @@ export default {
         // (Optional) Possible options: "chatgpt", "bing".
         // clientToUse: 'bing',
     },
-}
+};

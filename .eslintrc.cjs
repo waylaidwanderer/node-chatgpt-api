@@ -24,5 +24,12 @@ module.exports = {
     'no-plusplus': ['error', { 'allowForLoopAfterthoughts': true }],
     'no-console': 'off',
     'import/extensions': 'off',
+    'no-use-before-define': ['error', {
+      'functions': false,
+    }],
+    'no-promise-executor-return': 'off',
+    'no-param-reassign': 'off',
+    'no-continue': 'off',
+    'no-restricted-syntax': 'off',
   },
 };

@@ -1,7 +1,7 @@
 import './fetch-polyfill.js';
 import crypto from 'crypto';
 import Keyv from 'keyv';
-import { encoding_for_model, get_encoding } from '@dqbd/tiktoken';
+import { encoding_for_model as encodingForModel, get_encoding as getEncoding } from '@dqbd/tiktoken';
 import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
 import { Agent, ProxyAgent } from 'undici';
 
@@ -49,9 +49,9 @@ export default class ChatGPTClient {
         };
 
         this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
-        const isChatGptModel = this.isChatGptModel;
+        const { isChatGptModel } = this;
         this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
-        const isUnofficialChatGptModel = this.isUnofficialChatGptModel;
+        const { isUnofficialChatGptModel } = this;
 
         // Davinci models have a max context length of 4097 tokens.
         this.maxContextTokens = this.options.maxContextTokens || (isChatGptModel ? 4095 : 4097);
@@ -122,9 +122,9 @@ export default class ChatGPTClient {
         }
         let tokenizer;
         if (isModelName) {
-            tokenizer = encoding_for_model(encoding, extendSpecialTokens);
+            tokenizer = encodingForModel(encoding, extendSpecialTokens);
         } else {
-            tokenizer = get_encoding(encoding, extendSpecialTokens);
+            tokenizer = getEncoding(encoding, extendSpecialTokens);
         }
         tokenizersCache[encoding] = tokenizer;
         return tokenizer;
@@ -143,7 +143,7 @@ export default class ChatGPTClient {
         } else {
             modelOptions.prompt = input;
         }
-        const debug = this.options.debug;
+        const { debug } = this.options;
         const url = this.completionsUrl;
         if (debug) {
             console.debug();
@@ -169,6 +169,7 @@ export default class ChatGPTClient {
         }
 
         if (modelOptions.stream) {
+            // eslint-disable-next-line no-async-promise-executor
             return new Promise(async (resolve, reject) => {
                 try {
                     let done = false;
@@ -295,11 +296,11 @@ export default class ChatGPTClient {
         if (typeof opts.onProgress === 'function') {
             await this.getCompletion(
                 payload,
-                (message) => {
-                    if (message === '[DONE]') {
+                (progressMessage) => {
+                    if (progressMessage === '[DONE]') {
                         return;
                     }
-                    const token = this.isChatGptModel ? message.choices[0].delta.content : message.choices[0].text;
+                    const token = this.isChatGptModel ? progressMessage.choices[0].delta.content : progressMessage.choices[0].text;
                     // first event's delta content is always undefined
                     if (!token) {
                         return;
@@ -372,7 +373,7 @@ export default class ChatGPTClient {
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
-            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI. Respond conversationally.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
+            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI. Respond conversationally.\nCurrent date: ${currentDateString}${this.endToken}\n\n`;
         }
 
         const promptSuffix = `${this.startToken}${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.
@@ -429,7 +430,7 @@ export default class ChatGPTClient {
                 promptBody = newPromptBody;
                 currentTokenCount = newTokenCount;
                 // wait for next tick to avoid blocking the event loop
-                await new Promise((resolve) => setTimeout(resolve, 0));
+                await new Promise(resolve => setTimeout(resolve, 0));
                 return buildPromptBody();
             }
             return true;
@@ -494,7 +495,8 @@ export default class ChatGPTClient {
         const orderedMessages = [];
         let currentMessageId = parentMessageId;
         while (currentMessageId) {
-            const message = messages.find((m) => m.id === currentMessageId);
+            // eslint-disable-next-line no-loop-func
+            const message = messages.find(m => m.id === currentMessageId);
             if (!message) {
                 break;
             }

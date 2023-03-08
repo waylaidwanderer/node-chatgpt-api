@@ -26,7 +26,7 @@ const response3 = await chatGptClient.sendMessage('Now write it in French.', {
     parentMessageId: response2.messageId,
     // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
     // You will receive one token at a time, so you will need to concatenate them yourself.
-    onProgress: (token) => process.stdout.write(token),
+    onProgress: token => process.stdout.write(token),
 });
 console.log();
 console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.

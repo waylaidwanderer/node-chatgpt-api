@@ -2,21 +2,16 @@
 import fs from 'fs';
 import { pathToFileURL } from 'url';
 import { KeyvFile } from 'keyv-file';
-import ChatGPTClient from '../src/ChatGPTClient.js';
 import boxen from 'boxen';
 import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
 import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
+import ChatGPTClient from '../src/ChatGPTClient.js';
 import BingAIClient from '../src/BingAIClient.js';
 
-const arg = process.argv.find((arg) => arg.startsWith('--settings'));
-let path;
-if (arg) {
-    path = arg.split('=')[1];
-} else {
-    path = './settings.js';
-}
+const arg = process.argv.find(_arg => _arg.startsWith('--settings'));
+const path = arg?.split('=')[1] ?? './settings.js';
 
 let settings;
 if (fs.existsSync(path)) {
@@ -25,9 +20,9 @@ if (fs.existsSync(path)) {
     settings = (await import(pathToFileURL(fullPath).toString())).default;
 } else {
     if (arg) {
-        console.error(`Error: the file specified by the --settings parameter does not exist.`);
+        console.error('Error: the file specified by the --settings parameter does not exist.');
     } else {
-        console.error(`Error: the settings.js file does not exist.`);
+        console.error('Error: the settings.js file does not exist.');
     }
     process.exit(1);
 }
@@ -95,7 +90,9 @@ switch (clientToUse) {
         break;
 }
 
-console.log(tryBoxen('ChatGPT CLI', { padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true }));
+console.log(tryBoxen('ChatGPT CLI', {
+    padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true,
+}));
 
 await conversation();
 
@@ -116,13 +113,13 @@ async function conversation() {
     prompt.ui.activePrompt.firstRender = false;
     // The below is a hack to allow selecting items from the autocomplete menu while also being able to submit messages.
     // This basically simulates a hybrid between having `suggestOnly: false` and `suggestOnly: true`.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise(resolve => setTimeout(resolve, 0));
     prompt.ui.activePrompt.opt.source = (answers, input) => {
         if (!input) {
             return [];
         }
         prompt.ui.activePrompt.opt.suggestOnly = !input.startsWith('!');
-        return availableCommands.filter((command) => command.value.startsWith(input));
+        return availableCommands.filter(command => command.value.startsWith(input));
     };
     let { message } = await prompt;
     message = message.trim();
@@ -143,6 +140,8 @@ async function conversation() {
                 return deleteAllConversations();
             case '!exit':
                 return true;
+            default:
+                return conversation();
         }
     }
     return onMessage(message);
@@ -172,7 +171,9 @@ async function onMessage(message) {
             ...conversationData,
             onProgress: (token) => {
                 reply += token;
-                const output = tryBoxen(`${reply.trim()}█`, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
+                const output = tryBoxen(`${reply.trim()}█`, {
+                    title: aiLabel, padding: 0.7, margin: 1, dimBorder: true,
+                });
                 spinner.text = `${spinnerPrefix}\n${output}`;
             },
         });
@@ -192,10 +193,10 @@ async function onMessage(message) {
                 conversationData = {
                     parentMessageId: response.messageId,
                     jailbreakConversationId: response.jailbreakConversationId,
-                    //conversationId: response.conversationId,
-                    //conversationSignature: response.conversationSignature,
-                    //clientId: response.clientId,
-                    //invocationId: response.invocationId,
+                    // conversationId: response.conversationId,
+                    // conversationSignature: response.conversationSignature,
+                    // clientId: response.clientId,
+                    // invocationId: response.invocationId,
                 };
                 break;
             default:
@@ -206,7 +207,9 @@ async function onMessage(message) {
                 break;
         }
         await client.conversationsCache.set('lastConversation', conversationData);
-        const output = tryBoxen(responseText, { title: aiLabel, padding: 0.7, margin: 1, dimBorder: true });
+        const output = tryBoxen(responseText, {
+            title: aiLabel, padding: 0.7, margin: 1, dimBorder: true,
+        });
         console.log(output);
     } catch (error) {
         spinner.stop();
@@ -271,7 +274,7 @@ async function copyConversation() {
     // get the last message ID
     const lastMessageId = messages[messages.length - 1].id;
     const orderedMessages = ChatGPTClient.getMessagesForConversation(messages, lastMessageId);
-    const conversationString = orderedMessages.map((message) => `#### ${message.role}:\n${message.message}`).join('\n\n');
+    const conversationString = orderedMessages.map(message => `#### ${message.role}:\n${message.message}`).join('\n\n');
     try {
         await clipboard.write(`${conversationString}\n\n----\nMade with ChatGPT CLI: <https://github.com/waylaidwanderer/node-chatgpt-api>`);
         logSuccess('Copied conversation to clipboard.');
@@ -282,15 +285,21 @@ async function copyConversation() {
 }
 
 function logError(message) {
-    console.log(tryBoxen(message, { title: 'Error', padding: 0.7, margin: 1, borderColor: 'red' }));
+    console.log(tryBoxen(message, {
+        title: 'Error', padding: 0.7, margin: 1, borderColor: 'red',
+    }));
 }
 
 function logSuccess(message) {
-    console.log(tryBoxen(message, { title: 'Success', padding: 0.7, margin: 1, borderColor: 'green' }));
+    console.log(tryBoxen(message, {
+        title: 'Success', padding: 0.7, margin: 1, borderColor: 'green',
+    }));
 }
 
 function logWarning(message) {
-    console.log(tryBoxen(message, { title: 'Warning', padding: 0.7, margin: 1, borderColor: 'yellow' }));
+    console.log(tryBoxen(message, {
+        title: 'Warning', padding: 0.7, margin: 1, borderColor: 'yellow',
+    }));
 }
 
 /**

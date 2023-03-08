@@ -52,7 +52,7 @@ response = await chatGptClient.sendMessage('Now write it in French.', {
     parentMessageId: response.messageId,
     // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
     // You will receive one token at a time, so you will need to concatenate them yourself.
-    onProgress: (token) => process.stdout.write(token),
+    onProgress: token => process.stdout.write(token),
 });
 console.log();
 console.log(response.response); // Doux et élégant, avec des yeux qui brillent,\nLes chats sont des créatures de grâce suprême.\n...
@@ -62,7 +62,7 @@ response = await chatGptClient.sendMessage('Repeat my 2nd message verbatim.', {
     parentMessageId: response.messageId,
     // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
     // You will receive one token at a time, so you will need to concatenate them yourself.
-    onProgress: (token) => process.stdout.write(token),
+    onProgress: token => process.stdout.write(token),
 });
 console.log();
 console.log(response.response); // "Write a short poem about cats."

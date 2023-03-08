@@ -41,7 +41,7 @@ export default class ChatGPTBrowserClient {
             abortController = new AbortController();
         }
 
-        const debug = this.options.debug;
+        const { debug } = this.options;
         const url = this.options.reverseProxyUrl || 'https://chat.openai.com/backend-api/conversation';
         const opts = {
             method: 'POST',
@@ -62,7 +62,7 @@ export default class ChatGPTBrowserClient {
                             content_type: 'text',
                             parts: [message],
                         },
-                    }
+                    },
                 ] : undefined,
                 parent_message_id: parentMessageId,
                 model: this.model,
@@ -81,6 +81,7 @@ export default class ChatGPTBrowserClient {
         }
 
         // data: {"message": {"id": "UUID", "role": "assistant", "user": null, "create_time": null, "update_time": null, "content": {"content_type": "text", "parts": ["That's alright! If you don't have a specific question or topic in mind, I can suggest some general conversation starters or topics to explore. \n\nFor example, we could talk about your interests, hobbies, or goals. Alternatively, we could discuss current events, pop culture, or science and technology. Is there anything in particular that you're curious about or would like to learn more about?"]}, "end_turn": true, "weight": 1.0, "metadata": {"message_type": "next", "model_slug": "text-davinci-002-render-sha", "finish_details": {"type": "stop", "stop": "<|im_end|>"}}, "recipient": "all"}, "conversation_id": "UUID", "error": null}
+        // eslint-disable-next-line no-async-promise-executor
         const response = await new Promise(async (resolve, reject) => {
             let lastEvent = null;
             try {
@@ -88,21 +89,21 @@ export default class ChatGPTBrowserClient {
                 await fetchEventSource(url, {
                     ...opts,
                     signal: abortController.signal,
-                    async onopen(response) {
-                        if (response.status === 200) {
+                    async onopen(openResponse) {
+                        if (openResponse.status === 200) {
                             return;
                         }
                         if (debug) {
-                            console.debug(response);
+                            console.debug(openResponse);
                         }
                         let error;
                         try {
-                            const body = await response.text();
-                            error = new Error(`Failed to send message. HTTP ${response.status} - ${body}`);
-                            error.status = response.status;
+                            const body = await openResponse.text();
+                            error = new Error(`Failed to send message. HTTP ${openResponse.status} - ${body}`);
+                            error.status = openResponse.status;
                             error.json = JSON.parse(body);
                         } catch {
-                            error = error || new Error(`Failed to send message. HTTP ${response.status}`);
+                            error = error || new Error(`Failed to send message. HTTP ${openResponse.status}`);
                         }
                         throw error;
                     },
@@ -127,14 +128,14 @@ export default class ChatGPTBrowserClient {
                         // rethrow to stop the operation
                         throw err;
                     },
-                    onmessage(message) {
+                    onmessage(eventMessage) {
                         if (debug) {
-                            console.debug(message);
+                            console.debug(eventMessage);
                         }
-                        if (!message.data || message.event === 'ping') {
+                        if (!eventMessage.data || eventMessage.event === 'ping') {
                             return;
                         }
-                        if (message.data === '[DONE]') {
+                        if (eventMessage.data === '[DONE]') {
                             onProgress('[DONE]');
                             abortController.abort();
                             resolve(lastEvent);
@@ -142,7 +143,7 @@ export default class ChatGPTBrowserClient {
                             return;
                         }
                         try {
-                            const data = JSON.parse(message.data);
+                            const data = JSON.parse(eventMessage.data);
                             // ignore any messages that are not from the assistant
                             if (data.message?.author?.role !== 'assistant') {
                                 return;
@@ -154,7 +155,7 @@ export default class ChatGPTBrowserClient {
                             lastEvent = data;
                             onProgress(difference);
                         } catch (err) {
-                            console.debug(message.data);
+                            console.debug(eventMessage.data);
                             console.error(err);
                         }
                     },
@@ -179,7 +180,7 @@ export default class ChatGPTBrowserClient {
             this.setOptions(opts.clientOptions);
         }
 
-        let conversationId = opts.conversationId;
+        let { conversationId } = opts;
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
         let conversation;
@@ -240,7 +241,7 @@ export default class ChatGPTBrowserClient {
     }
 
     genTitle(event) {
-        const debug = this.options.debug;
+        const { debug } = this.options;
         if (debug) {
             console.log('Generate title: ', event);
         }
