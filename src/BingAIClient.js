@@ -26,7 +26,7 @@ export default class BingAIClient {
         if (this.options && !this.options.replaceOptions) {
             this.options = {
                 ...this.options,
-                options,
+                ...options,
             };
         } else {
             this.options = {
@@ -34,7 +34,7 @@ export default class BingAIClient {
                 host: options.host || 'https://www.bing.com',
             };
         }
-        this.debug = options.debug;
+        this.debug = this.options.debug;
     }
 
     async createNewConversation() {

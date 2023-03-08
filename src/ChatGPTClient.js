@@ -27,17 +27,18 @@ export default class ChatGPTClient {
         if (this.options && !this.options.replaceOptions) {
             this.options = {
                 ...this.options,
-                options,
+                ...options,
             };
         } else {
             this.options = options;
         }
+        console.log('setOptions', this.options);
 
         if (this.options.openaiApiKey) {
             this.apiKey = this.options.openaiApiKey;
         }
 
-        const modelOptions = options.modelOptions || {};
+        const modelOptions = this.options.modelOptions || {};
         this.modelOptions = {
             ...modelOptions,
             // set some good defaults (check for undefined in some cases because they may be 0)

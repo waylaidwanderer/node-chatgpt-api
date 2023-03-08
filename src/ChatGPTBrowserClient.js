@@ -19,7 +19,7 @@ export default class ChatGPTBrowserClient {
         if (this.options && !this.options.replaceOptions) {
             this.options = {
                 ...this.options,
-                options,
+                ...options,
             };
         } else {
             this.options = options;
