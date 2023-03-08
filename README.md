@@ -303,6 +303,8 @@ Optional parameters are only necessary for conversations that span multiple requ
 | clientOptions.clientToUse | (Optional) The client to use for this message. Possible values: `chatgpt`, `chatgpt-browser`, `bing`.                                                                                                                                                           |
 | clientOptions.*           | (Optional) Any valid options for the client. For example, for `ChatGPTClient`, you can set `clientOptions.openaiApiKey` to set an API key for this message only, or `clientOptions.promptPrefix` to give the AI custom instructions for this message only, etc. |
 
+To configure which options can be changed per message (default: all), see the comments for `perMessageClientOptionsWhitelist` in `settings.example.js`.  
+To allow changing clients, `perMessageClientOptionsWhitelist.validClientsToUse` must be set to a non-empty array as described in the example settings file.
 </details>
 
 #### Usage
