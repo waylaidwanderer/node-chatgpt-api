@@ -242,8 +242,29 @@ module.exports = {
         host: process.env.API_HOST || 'localhost',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
-        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing".
-        // clientToUse: 'bing',
+        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing". (Default: "chatgpt")
+        clientToUse: 'chatgpt',
+        // (Optional) Set this to allow changing the client or client options in POST /conversation.
+        // To disable, set to `null`. 
+        perMessageClientOptionsWhitelist: {
+            // The ability to switch clients using `clientOptions.clientToUse` will be disabled if `validClientsToUse` is not set.
+            // To allow switching clients per message, you must set `validClientsToUse` to a non-empty array.
+            validClientsToUse: ['bing', 'chatgpt', 'chatgpt-browser'], // values from possible `clientToUse` options above
+            // The Object key, e.g. "chatgpt", is a value from `validClientsToUse`.
+            // If not set, ALL options will be ALLOWED to be changed. For example, `bing` is not defined in `perMessageClientOptionsWhitelist` above,
+            // so all options for `bingAiClient` will be allowed to be changed.
+            // If set, ONLY the options listed here will be allowed to be changed.
+            // In this example, each array element is a string representing a property in `chatGptClient` above.
+            chatgpt: [
+                'promptPrefix',
+                'userLabel',
+                'chatGptLabel',
+                // Setting `modelOptions.temperature` here will allow changing ONLY the temperature.
+                // Other options like `modelOptions.model` will not be allowed to be changed.
+                // If you want to allow changing all `modelOptions`, define `modelOptions` here instead of `modelOptions.temperature`.
+                'modelOptions.temperature',
+            ],
+        },
     },
     // Options for the CLI app
     cliOptions: {
@@ -263,12 +284,32 @@ Alternatively, you can install and run the package directly.
     - using `npm start` or `npm run server` (if not using Docker)
     - using `docker-compose up` (requires Docker)
 
+#### Endpoints
+<details>
+<summary><strong>POST /conversation</strong></summary>
+
+Start or continue a conversation.
+Optional parameters are only necessary for conversations that span multiple requests.
+
+| Field                     | Description                                                                                           |
+|---------------------------|-------------------------------------------------------------------------------------------------------|
+| message                   | The message to be displayed to the user.                                                              |
+| conversationId            | (Optional) An ID for the conversation.                                                                |
+| parentMessageId           | (Optional, for `ChatGPTClient` only) The ID of the parent message.                                    |
+| conversationSignature     | (Optional, for `BingAIClient` only) A signature for the conversation.                                 |
+| clientId                  | (Optional, for `BingAIClient` only) The ID of the client.                                             |
+| invocationId              | (Optional, for `BingAIClient` only) The ID of the invocation.                                         |
+| clientOptions             | (Optional) An object containing options for the client.                                               |
+| clientOptions.clientToUse | (Optional) The client to use for this message. Possible values: `chatgpt`, `chatgpt-browser`, `bing`. |
+| clientOptions.*           | (Optional) Any valid options for the client (e.g. `clientOptions.promptPrefix` for `ChatGPTClient`).  |
+
+</details>
+
 #### Usage
 <details>
 <summary><strong>Method 1 (POST)</strong></summary>
 
-To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body in the following format.
-Optional parameters are only necessary for conversations that span multiple requests:
+To start a conversation with ChatGPT, send a POST request to the server's `/conversation` endpoint with a JSON body with parameters per **Endpoints** > **POST /conversation** above.
 ```JSON
 {
     "message": "Hello, how are you today?",
@@ -289,7 +330,7 @@ The server will return a JSON object containing ChatGPT's response:
     "conversationSignature": "your-conversation-signature (for `BingAIClient` only)",
     "clientId": "your-client-id (for `BingAIClient` only)",
     "invocationId": "your-invocation-id (for `BingAIClient` only - pass this new value back into subsequent requests as-is)",
-    "details": "additional details about the AI's response (for `BingAIClient` only)"
+    "details": "an object containing the raw response from the client"
 }
 ```
 
@@ -316,7 +357,7 @@ If there was an error sending the message to ChatGPT:
 You can set `"stream": true` in the request body to receive a stream of tokens as they are generated.
 
 ```js
-import { fetchEventSource } from '@waylaidwanderer/fetch-event-source';
+import { fetchEventSource } from '@waylaidwanderer/fetch-event-source'; // use `@microsoft/fetch-event-source` instead if in a browser environment
 
 const opts = {
     method: 'POST',
@@ -327,7 +368,8 @@ const opts = {
         "message": "Write a poem about cats.",
         "conversationId": "your-conversation-id (optional)",
         "parentMessageId": "your-parent-message-id (optional)",
-        "stream": true
+        "stream": true,
+        // Any other parameters per `Endpoints > POST /conversation` above
     }),
 };
 ```
@@ -346,7 +388,7 @@ Successful output:
 { data: ' you', event: '', id: '', retry: undefined }
 { data: ' today', event: '', id: '', retry: undefined }
 { data: '?', event: '', id: '', retry: undefined }
-{ data: '<result JSON here>', event: 'result', id: '', retry: undefined }
+{ data: '<result JSON here, see Method 1>', event: 'result', id: '', retry: undefined }
 { data: '[DONE]', event: '', id: '', retry: undefined }
 // Hello! How can I help you today?
 ```

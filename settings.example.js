@@ -68,8 +68,29 @@ export default {
         host: process.env.API_HOST || 'localhost',
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
-        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing".
-        // clientToUse: 'bing',
+        // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing". (Default: "chatgpt")
+        clientToUse: 'chatgpt',
+        // (Optional) Set this to allow changing the client or client options in POST /conversation.
+        // To disable, set to `null`.
+        perMessageClientOptionsWhitelist: {
+            // The ability to switch clients using `clientOptions.clientToUse` will be disabled if `validClientsToUse` is not set.
+            // To allow switching clients per message, you must set `validClientsToUse` to a non-empty array.
+            validClientsToUse: ['bing', 'chatgpt', 'chatgpt-browser'], // values from possible `clientToUse` options above
+            // The Object key, e.g. "chatgpt", is a value from `validClientsToUse`.
+            // If not set, ALL options will be ALLOWED to be changed. For example, `bing` is not defined in `perMessageClientOptionsWhitelist` above,
+            // so all options for `bingAiClient` will be allowed to be changed.
+            // If set, ONLY the options listed here will be allowed to be changed.
+            // In this example, each array element is a string representing a property in `chatGptClient` above.
+            chatgpt: [
+                'promptPrefix',
+                'userLabel',
+                'chatGptLabel',
+                // Setting `modelOptions.temperature` here will allow changing ONLY the temperature.
+                // Other options like `modelOptions.model` will not be allowed to be changed.
+                // If you want to allow changing all `modelOptions`, define `modelOptions` here instead of `modelOptions.temperature`.
+                'modelOptions.temperature',
+            ],
+        },
     },
     // Options for the CLI app
     cliOptions: {
