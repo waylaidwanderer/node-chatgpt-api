@@ -45,26 +45,7 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
 }
 
 const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
-
-let client;
-switch (clientToUse) {
-    case 'bing':
-        client = new BingAIClient(settings.bingAiClient);
-        break;
-    case 'chatgpt-browser':
-        client = new ChatGPTBrowserClient(
-            settings.chatGptBrowserClient,
-            settings.cacheOptions,
-        );
-        break;
-    default:
-        client = new ChatGPTClient(
-            settings.openaiApiKey,
-            settings.chatGptClient,
-            settings.cacheOptions,
-        );
-        break;
-}
+const perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || null;
 
 const server = fastify();
 
@@ -109,14 +90,24 @@ server.post('/conversation', async (request, reply) => {
             // noinspection ExceptionCaughtLocallyJS
             throw invalidError;
         }
-        const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
-        result = await client.sendMessage(body.message, {
+
+        let clientToUseForMessage = clientToUse;
+        const clientOptions = filterClientOptions(body.clientOptions, clientToUseForMessage);
+        if (clientOptions && clientOptions.clientToUse) {
+            clientToUseForMessage = clientOptions.clientToUse;
+            delete clientOptions.clientToUse;
+        }
+
+        const messageClient = getClient(clientToUseForMessage);
+
+        result = await messageClient.sendMessage(body.message, {
             jailbreakConversationId: body.jailbreakConversationId ? body.jailbreakConversationId.toString() : undefined,
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
-            parentMessageId,
+            parentMessageId: body.parentMessageId ? body.parentMessageId.toString() : undefined,
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
+            clientOptions,
             onProgress,
             abortController,
         });
@@ -173,3 +164,77 @@ function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
 
+function getClient(clientToUse) {
+    switch (clientToUse) {
+        case 'bing':
+            return new BingAIClient(settings.bingAiClient);
+        case 'chatgpt-browser':
+            return new ChatGPTBrowserClient(
+                settings.chatGptBrowserClient,
+                settings.cacheOptions,
+            );
+        case 'chatgpt':
+            return new ChatGPTClient(
+                settings.openaiApiKey || settings.chatGptClient.openaiApiKey,
+                settings.chatGptClient,
+                settings.cacheOptions,
+            );
+        default:
+            throw new Error(`Invalid clientToUse: ${clientToUse}`);
+    }
+}
+
+/**
+ * Filter objects to only include whitelisted properties set in
+ * `settings.js` > `apiOptions.perMessageClientOptionsWhitelist`.
+ * Returns original object if no whitelist is set.
+ * @param {*} inputOptions
+ * @param clientToUse
+ */
+function filterClientOptions(inputOptions, clientToUse) {
+    if (!inputOptions || !perMessageClientOptionsWhitelist) {
+        return null;
+    }
+
+    // If inputOptions.clientToUse is set and is in the whitelist, use it instead of the default
+    if (
+        perMessageClientOptionsWhitelist.validClientsToUse
+        && inputOptions.clientToUse
+        && perMessageClientOptionsWhitelist.validClientsToUse.includes(inputOptions.clientToUse)
+    ) {
+        clientToUse = inputOptions.clientToUse;
+    } else {
+        inputOptions.clientToUse = clientToUse;
+    }
+
+    const whitelist = perMessageClientOptionsWhitelist[clientToUse];
+    if (!whitelist) {
+        // No whitelist, return all options
+        return inputOptions;
+    }
+
+    const outputOptions = {};
+
+    for (let property in inputOptions) {
+        const allowed = whitelist.includes(property);
+
+        if (!allowed && typeof inputOptions[property] === 'object') {
+            // Check for nested properties
+            for (let nestedProp in inputOptions[property]) {
+                const nestedAllowed = whitelist.includes(`${property}.${nestedProp}`);
+                if (nestedAllowed) {
+                    outputOptions[property] = outputOptions[property] || {};
+                    outputOptions[property][nestedProp] = inputOptions[property][nestedProp];
+                }
+            }
+            continue;
+        }
+
+        // Copy allowed properties to outputOptions
+        if (allowed) {
+            outputOptions[property] = inputOptions[property];
+        }
+    }
+
+    return outputOptions;
+}

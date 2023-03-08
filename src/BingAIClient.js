@@ -12,16 +12,30 @@ import HttpsProxyAgent from 'https-proxy-agent';
 const genRanHex = (size) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 export default class BingAIClient {
-    constructor(opts) {
-        this.opts = {
-            ...opts,
-            host: opts.host || 'https://www.bing.com',
-        };
-        this.debug = opts.debug;
-        const cacheOptions = opts.cache || {};
+    constructor(options) {
+        const cacheOptions = options.cache || {};
         cacheOptions.namespace = cacheOptions.namespace || 'bing';
         this.conversationsCache = new Keyv(cacheOptions);
+
+        this.setOptions(options);
    }
+
+    setOptions(options) {
+        // don't allow overriding cache options for consistency with other clients
+        delete options.cache;
+        if (this.options && !this.options.replaceOptions) {
+            this.options = {
+                ...this.options,
+                ...options,
+            };
+        } else {
+            this.options = {
+                ...options,
+                host: options.host || 'https://www.bing.com',
+            };
+        }
+        this.debug = this.options.debug;
+    }
 
     async createNewConversation() {
         const fetchOptions = {
@@ -43,23 +57,23 @@ export default class BingAIClient {
                 "sec-fetch-site": "same-origin",
                 "x-ms-client-request-id": crypto.randomUUID(),
                 "x-ms-useragent": "azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32",
-                "cookie": this.opts.cookies || `_U=${this.opts.userToken}`,
+                "cookie": this.options.cookies || `_U=${this.options.userToken}`,
                 "Referer": "https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx",
                 "Referrer-Policy": "origin-when-cross-origin"
             },
         };
-        if (this.opts.proxy) {
-            fetchOptions.dispatcher = new ProxyAgent(this.opts.proxy);
+        if (this.options.proxy) {
+            fetchOptions.dispatcher = new ProxyAgent(this.options.proxy);
         }
-        const response = await fetch(`${this.opts.host}/turing/conversation/create`, fetchOptions);
+        const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
         return response.json();
     }
 
     async createWebSocketConnection() {
         return new Promise((resolve) => {
             let agent;
-            if (this.opts.proxy) {
-                agent = new HttpsProxyAgent(this.opts.proxy);
+            if (this.options.proxy) {
+                agent = new HttpsProxyAgent(this.options.proxy);
             }
 
             const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
@@ -121,6 +135,10 @@ export default class BingAIClient {
         message,
         opts = {},
     ) {
+        if (opts.clientOptions && typeof opts.clientOptions === 'object') {
+            this.setOptions(opts.clientOptions);
+        }
+
         let {
             toneStyle = 'balanced', // or creative, precise
             jailbreakConversationId = false, // set to `true` for the first message to enable jailbreak mode

@@ -9,13 +9,24 @@ export default class ChatGPTBrowserClient {
         options = {},
         cacheOptions = {},
     ) {
-        this.options = options;
-        this.accessToken = options.accessToken;
-        this.cookies = options.cookies;
-        this.model = options.model || 'text-davinci-002-render-sha';
+        this.setOptions(options);
 
         cacheOptions.namespace = cacheOptions.namespace || 'chatgpt-browser';
         this.conversationsCache = new Keyv(cacheOptions);
+    }
+
+    setOptions(options) {
+        if (this.options && !this.options.replaceOptions) {
+            this.options = {
+                ...this.options,
+                ...options,
+            };
+        } else {
+            this.options = options;
+        }
+        this.accessToken = this.options.accessToken;
+        this.cookies = this.options.cookies;
+        this.model = this.options.model || 'text-davinci-002-render-sha';
     }
 
     async postConversation(conversation, onProgress, abortController = null) {
@@ -164,6 +175,10 @@ export default class ChatGPTBrowserClient {
         message,
         opts = {},
     ) {
+        if (opts.clientOptions && typeof opts.clientOptions === 'object') {
+            this.setOptions(opts.clientOptions);
+        }
+
         let conversationId = opts.conversationId;
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
@@ -251,19 +266,18 @@ export default class ChatGPTBrowserClient {
             }),
         };
 
-        if (debug) {
-            console.log('gen title fetch opts: ', opts);
-        }
-
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
         }
 
-        fetch(url, opts).then((ret) => {
+        if (debug) {
+            console.debug(url, opts);
+        }
+
+        fetch(url, opts).then(async (ret) => {
             if (debug) {
-                ret.json().then((data) => {
-                    console.log('Gen title response: ', data);
-                }).catch(console.error);
+                const data = await ret.text();
+                console.log('Gen title response: ', data);
             }
         }).catch(console.error);
     }

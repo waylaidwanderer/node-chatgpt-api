@@ -7,6 +7,8 @@ import { Agent, ProxyAgent } from 'undici';
 
 const CHATGPT_MODEL = 'gpt-3.5-turbo';
 
+const tokenizersCache = {};
+
 export default class ChatGPTClient {
     constructor(
         apiKey,
@@ -15,8 +17,27 @@ export default class ChatGPTClient {
     ) {
         this.apiKey = apiKey;
 
-        this.options = options;
-        const modelOptions = options.modelOptions || {};
+        cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
+        this.conversationsCache = new Keyv(cacheOptions);
+
+        this.setOptions(options);
+    }
+
+    setOptions(options) {
+        if (this.options && !this.options.replaceOptions) {
+            this.options = {
+                ...this.options,
+                ...options,
+            };
+        } else {
+            this.options = options;
+        }
+
+        if (this.options.openaiApiKey) {
+            this.apiKey = this.options.openaiApiKey;
+        }
+
+        const modelOptions = this.options.modelOptions || {};
         this.modelOptions = {
             ...modelOptions,
             // set some good defaults (check for undefined in some cases because they may be 0)
@@ -53,11 +74,11 @@ export default class ChatGPTClient {
             // without tripping the stop sequences, so I'm using "||>" instead.
             this.startToken = '||>';
             this.endToken = '';
-            this.gptEncoder = get_encoding('cl100k_base');
+            this.gptEncoder = this.constructor.getTokenizer('cl100k_base');
         } else if (isUnofficialChatGptModel) {
             this.startToken = '<|im_start|>';
             this.endToken = '<|im_end|>';
-            this.gptEncoder = encoding_for_model('text-davinci-003', {
+            this.gptEncoder = this.constructor.getTokenizer('text-davinci-003', true, {
                 '<|im_start|>': 100264,
                 '<|im_end|>': 100265,
             });
@@ -68,9 +89,9 @@ export default class ChatGPTClient {
             this.startToken = '||>';
             this.endToken = '';
             try {
-                this.gptEncoder = encoding_for_model(this.modelOptions.model);
+                this.gptEncoder = this.constructor.getTokenizer(this.modelOptions.model, true);
             } catch {
-                this.gptEncoder = encoding_for_model('text-davinci-003');
+                this.gptEncoder = this.constructor.getTokenizer('text-davinci-003', true);
             }
         }
 
@@ -92,8 +113,21 @@ export default class ChatGPTClient {
             this.completionsUrl = 'https://api.openai.com/v1/completions';
         }
 
-        cacheOptions.namespace = cacheOptions.namespace || 'chatgpt';
-        this.conversationsCache = new Keyv(cacheOptions);
+        return this;
+    }
+
+    static getTokenizer(encoding, isModelName = false, extendSpecialTokens = {}) {
+        if (tokenizersCache[encoding]) {
+            return tokenizersCache[encoding];
+        }
+        let tokenizer;
+        if (isModelName) {
+            tokenizer = encoding_for_model(encoding, extendSpecialTokens);
+        } else {
+            tokenizer = get_encoding(encoding, extendSpecialTokens);
+        }
+        tokenizersCache[encoding] = tokenizer;
+        return tokenizer;
     }
 
     async getCompletion(input, onProgress, abortController = null) {
@@ -224,6 +258,10 @@ export default class ChatGPTClient {
         message,
         opts = {},
     ) {
+        if (opts.clientOptions && typeof opts.clientOptions === 'object') {
+            this.setOptions(opts.clientOptions);
+        }
+
         const conversationId = opts.conversationId || crypto.randomUUID();
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
@@ -334,7 +372,7 @@ export default class ChatGPTClient {
                 'en-us',
                 { year: 'numeric', month: 'long', day: 'numeric' },
             );
-            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
+            promptPrefix = `${this.startToken}Instructions:\nYou are ChatGPT, a large language model trained by OpenAI. Respond conversationally.\nCurrent date: ${currentDateString}${this.endToken}\n\n`
         }
 
         const promptSuffix = `${this.startToken}${this.chatGptLabel}:\n`; // Prompt ChatGPT to respond.

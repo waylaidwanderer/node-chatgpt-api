@@ -88,7 +88,7 @@ switch (clientToUse) {
         break;
     default:
         client = new ChatGPTClient(
-            settings.openaiApiKey,
+            settings.openaiApiKey || settings.chatGptClient.openaiApiKey,
             settings.chatGptClient,
             settings.cacheOptions,
         );
