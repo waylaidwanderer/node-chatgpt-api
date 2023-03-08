@@ -44,7 +44,8 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
-const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+let clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+let perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || {};
 
 let client;
 switch (clientToUse) {
@@ -58,6 +59,7 @@ switch (clientToUse) {
         );
         break;
     default:
+        clientToUse = 'chatgpt';
         client = new ChatGPTClient(
             settings.openaiApiKey,
             settings.chatGptClient,
@@ -117,7 +119,7 @@ server.post('/conversation', async (request, reply) => {
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
-            clientOptions: body.clientOptions, // TODO: configurable whitelist for replaceable options
+            clientOptions: filterClientOptions(body.clientOptions),
             onProgress,
             abortController,
         });
@@ -174,3 +176,45 @@ function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
 
+/**
+ * Filter objects to only include whitelisted properties set in
+ * `settings.js` > `apiOptions.perMessageClientOptionsWhitelist`.
+ * Returns original object if no whitelist is set.
+ * @param {*} inputOptions
+ */
+function filterClientOptions(inputOptions) {
+    if (!inputOptions) {
+        return null;
+    }
+
+    const whitelist = perMessageClientOptionsWhitelist[clientToUse];
+    if (!whitelist) {
+        // No whitelist, return all options
+        return inputOptions;
+    }
+
+    const outputOptions = {};
+
+    for (let property in inputOptions) {
+        const allowed = whitelist.includes(property);
+
+        if (!allowed && typeof inputOptions[property] === 'object') {
+            // Check for nested properties
+            for (let nestedProp in inputOptions[property]) {
+                const nestedAllowed = whitelist.includes(`${property}.${nestedProp}`);
+                if (nestedAllowed) {
+                    outputOptions[property] = outputOptions[property] || {};
+                    outputOptions[property][nestedProp] = inputOptions[property][nestedProp];
+                }
+            }
+            continue;
+        }
+
+        // Copy allowed properties to outputOptions
+        if (allowed) {
+            outputOptions[property] = inputOptions[property];
+        }
+    }
+
+    return outputOptions;
+}
