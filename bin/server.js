@@ -47,8 +47,6 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
 const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
 const perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || null;
 
-const clientsCache = {};
-
 const server = fastify();
 
 await server.register(FastifySSEPlugin);
@@ -99,13 +97,13 @@ server.post('/conversation', async (request, reply) => {
             clientToUseForMessage = clientOptions.clientToUse;
             delete clientOptions.clientToUse;
         }
+
         const messageClient = getClient(clientToUseForMessage);
 
-        const parentMessageId = body.parentMessageId ? body.parentMessageId.toString() : undefined;
         result = await messageClient.sendMessage(body.message, {
             jailbreakConversationId: body.jailbreakConversationId ? body.jailbreakConversationId.toString() : undefined,
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
-            parentMessageId,
+            parentMessageId: body.parentMessageId ? body.parentMessageId.toString() : undefined,
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
@@ -167,33 +165,23 @@ function nextTick() {
 }
 
 function getClient(clientToUse) {
-    if (clientsCache[clientToUse]) {
-        return clientsCache[clientToUse];
-    }
-
-    let client;
     switch (clientToUse) {
         case 'bing':
-            client = new BingAIClient(settings.bingAiClient);
-            break;
+            return new BingAIClient(settings.bingAiClient);
         case 'chatgpt-browser':
-            client = new ChatGPTBrowserClient(
+            return new ChatGPTBrowserClient(
                 settings.chatGptBrowserClient,
                 settings.cacheOptions,
             );
-            break;
         case 'chatgpt':
-            client = new ChatGPTClient(
+            return new ChatGPTClient(
                 settings.openaiApiKey || settings.chatGptClient.openaiApiKey,
                 settings.chatGptClient,
                 settings.cacheOptions,
             );
-            break;
         default:
             throw new Error(`Invalid clientToUse: ${clientToUse}`);
     }
-    clientsCache[clientToUse] = client;
-    return client;
 }
 
 /**

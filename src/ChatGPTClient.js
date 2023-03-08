@@ -32,7 +32,6 @@ export default class ChatGPTClient {
         } else {
             this.options = options;
         }
-        console.log('setOptions', this.options);
 
         if (this.options.openaiApiKey) {
             this.apiKey = this.options.openaiApiKey;
