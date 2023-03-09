@@ -96,7 +96,7 @@ server.post('/conversation', async (request, reply) => {
         const messageClient = getClient(clientToUseForMessage);
 
         result = await messageClient.sendMessage(body.message, {
-            jailbreakConversationId: body.jailbreakConversationId ? body.jailbreakConversationId.toString() : undefined,
+            jailbreakConversationId: body.jailbreakConversationId,
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
             parentMessageId: body.parentMessageId ? body.parentMessageId.toString() : undefined,
             conversationSignature: body.conversationSignature,
