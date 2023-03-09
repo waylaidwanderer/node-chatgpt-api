@@ -163,6 +163,8 @@ function getClient(clientToUseForMessage) {
     switch (clientToUseForMessage) {
         case 'bing':
             return new BingAIClient(settings.bingAiClient);
+        case 'sydney':
+            return new BingAIClient({ ...settings.bingAiClient, cache: settings.cacheOptions });
         case 'chatgpt-browser':
             return new ChatGPTBrowserClient(
                 settings.chatGptBrowserClient,

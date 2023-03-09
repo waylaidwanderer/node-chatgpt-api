@@ -75,7 +75,7 @@ export default {
         perMessageClientOptionsWhitelist: {
             // The ability to switch clients using `clientOptions.clientToUse` will be disabled if `validClientsToUse` is not set.
             // To allow switching clients per message, you must set `validClientsToUse` to a non-empty array.
-            validClientsToUse: ['bing', 'chatgpt', 'chatgpt-browser'], // values from possible `clientToUse` options above
+            validClientsToUse: ['bing', 'sydney', 'chatgpt', 'chatgpt-browser'], // values from possible `clientToUse` options above
             // The Object key, e.g. "chatgpt", is a value from `validClientsToUse`.
             // If not set, ALL options will be ALLOWED to be changed. For example, `bing` is not defined in `perMessageClientOptionsWhitelist` above,
             // so all options for `bingAiClient` will be allowed to be changed.
