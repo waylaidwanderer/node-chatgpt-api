@@ -1,5 +1,6 @@
 // import ChatGPTClient from '@waylaidwanderer/chatgpt-api';
 import { ChatGPTClient } from '../index.js';
+import { KeyvFile } from 'keyv-file';
 
 const clientOptions = {
     // (Optional) Support for a reverse proxy for the completions endpoint (private API server).

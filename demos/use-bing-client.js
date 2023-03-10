@@ -1,4 +1,5 @@
 import { BingAIClient } from '../index.js';
+import { KeyvFile } from 'keyv-file';
 
 const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
