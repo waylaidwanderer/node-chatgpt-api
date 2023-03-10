@@ -389,9 +389,12 @@ export default class BingAIClient {
                         }
                         // The moderation filter triggered, so just return the text we have so far
                         if (
-                            stopTokenFound
-                            || event.item.messages[0].topicChangerText
-                            || event.item.messages[0].offense === 'OffenseTrigger'
+                            jailbreakConversationId
+                            && (
+                                stopTokenFound
+                                || event.item.messages[0].topicChangerText
+                                || event.item.messages[0].offense === 'OffenseTrigger'
+                            )
                         ) {
                             if (!replySoFar) {
                                 replySoFar = '[Error: The moderation filter triggered. Try again with different wording.]';
