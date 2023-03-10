@@ -1,5 +1,6 @@
-import { BingAIClient } from '../index.js';
+// eslint-disable-next-line no-unused-vars
 import { KeyvFile } from 'keyv-file';
+import { BingAIClient } from '../index.js';
 
 const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
