@@ -208,7 +208,9 @@ function filterClientOptions(inputOptions, clientToUseForMessage) {
         return inputOptions;
     }
 
-    const outputOptions = {};
+    const outputOptions = {
+        clientToUse: clientToUseForMessage,
+    };
 
     for (const property of Object.keys(inputOptions)) {
         const allowed = whitelist.includes(property);
