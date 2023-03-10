@@ -388,9 +388,18 @@ export default class BingAIClient {
                             return;
                         }
                         // The moderation filter triggered, so just return the text we have so far
-                        if (stopTokenFound || event.item.messages[0].topicChangerText) {
+                        if (
+                            stopTokenFound
+                            || event.item.messages[0].topicChangerText
+                            || event.item.messages[0].offense === 'OffenseTrigger'
+                        ) {
+                            if (!replySoFar) {
+                                replySoFar = '[Error: The moderation filter triggered. Try again with different wording.]';
+                            }
                             eventMessage.adaptiveCards[0].body[0].text = replySoFar;
                             eventMessage.text = replySoFar;
+                            // delete useless suggestions from moderation filter
+                            delete eventMessage.suggestedResponses;
                         }
                         resolve({
                             message: eventMessage,
