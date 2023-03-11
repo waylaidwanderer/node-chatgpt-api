@@ -15,7 +15,6 @@ const options = {
     debug: false,
 };
 
-
 /*
 Activate jailbreak mode by setting `jailbreakConversationId` to `true`.
 This will return a `jailbreakConversationId` that you can use to continue the conversation.
