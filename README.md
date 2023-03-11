@@ -483,14 +483,13 @@ Instructions are provided below.
 
 ## Projects
 🚀 A list of awesome projects using `@waylaidwanderer/chatgpt-api`:
-- [ChatGPT Web Client](https://github.com/waylaidwanderer/chatgpt-web-client): this is my web client using this project's API server, built using Nuxt 3. Also usable with other compatible API server implementations.
+- [PandoraAI](https://github.com/waylaidwanderer/PandoraAI): my web chat client powered by node-chatgpt-api, allowing users to easily chat with multiple AI systems while also offering support for custom presets. With its seamless and convenient design, PandoraAI provides an engaging conversational AI experience.
 - [ChatGPT Clone](https://github.com/danny-avila/chatgpt-clone): a clone of ChatGPT, uses official model, reverse-engineered UI, with AI model switching, message search, and prompt templates.
 
 Add yours to the list by [editing this README](https://github.com/waylaidwanderer/node-chatgpt-api/edit/main/README.md) and creating a pull request!
 
 ## Web Client
-A web client is available for this project's API server is also available at [waylaidwanderer/chatgpt-web-client](https://github.com/waylaidwanderer/chatgpt-web-client).
-Or use one of the many projects listed above!
+A web client for this project is also available at [waylaidwanderer/PandoraAI](https://github.com/waylaidwanderer/PandoraAI).
 
 ## Caveats
 ### Regarding `ChatGPTClient`
