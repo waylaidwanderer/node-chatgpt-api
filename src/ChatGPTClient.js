@@ -25,6 +25,13 @@ export default class ChatGPTClient {
 
     setOptions(options) {
         if (this.options && !this.options.replaceOptions) {
+            // nested options aren't spread properly, so we need to do this manually
+            this.options.modelOptions = {
+                ...this.options.modelOptions,
+                ...options.modelOptions,
+            };
+            delete options.modelOptions;
+            // now we can merge options
             this.options = {
                 ...this.options,
                 ...options,
