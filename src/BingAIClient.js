@@ -446,17 +446,23 @@ export default class BingAIClient {
             await this.conversationsCache.set(conversationKey, conversation);
         }
 
-        return {
-            jailbreakConversationId,
+        const returnData = {
             conversationId,
             conversationSignature,
             clientId,
             invocationId: invocationId + 1,
-            messageId: replyMessage.id,
             conversationExpiryTime,
             response: reply.text,
             details: reply,
         };
+
+        if (jailbreakConversationId) {
+            returnData.jailbreakConversationId = jailbreakConversationId;
+            returnData.parentMessageId = replyMessage.parentMessageId;
+            returnData.messageId = replyMessage.id;
+        }
+
+        return returnData;
     }
 
     /**

@@ -57,11 +57,11 @@ export default class ChatGPTBrowserClient {
                 action,
                 messages: message ? [
                     {
-                        id: crypto.randomUUID(),
+                        id: message.id,
                         role: 'user',
                         content: {
                             content_type: 'text',
-                            parts: [message],
+                            parts: [message.message],
                         },
                     },
                 ] : undefined,
@@ -208,7 +208,7 @@ export default class ChatGPTBrowserClient {
             {
                 conversationId,
                 parentMessageId,
-                message,
+                message: userMessage,
             },
             opts.onProgress || (() => {}),
             opts.abortController || new AbortController(),
@@ -236,6 +236,7 @@ export default class ChatGPTBrowserClient {
         return {
             response: replyMessage.message,
             conversationId,
+            parentMessageId: replyMessage.parentMessageId,
             messageId: replyMessage.id,
             details: result,
         };

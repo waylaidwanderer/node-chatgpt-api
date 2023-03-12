@@ -359,6 +359,7 @@ export default class ChatGPTClient {
         return {
             response: replyMessage.message,
             conversationId,
+            parentMessageId: replyMessage.parentMessageId,
             messageId: replyMessage.id,
             details: result || {},
         };
