@@ -284,7 +284,7 @@ ${botMessage.message}
         const result = await titleGenClient.getCompletion([instructionsPayload], null);
         // remove any non-alphanumeric characters, replace multiple spaces with 1, and then trim
         return result.choices[0].message.content
-            .replace(/[^a-zA-Z0-9 ]/g, '')
+            .replace(/[^a-zA-Z0-9' ]/g, '')
             .replace(/\s+/g, ' ')
             .trim();
     }
