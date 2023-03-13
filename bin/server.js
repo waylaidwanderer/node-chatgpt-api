@@ -102,6 +102,7 @@ server.post('/conversation', async (request, reply) => {
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
+            shouldGenerateTitle: settings.apiOptions?.generateTitles || false, // only used for ChatGPTClient
             clientOptions,
             onProgress,
             abortController,

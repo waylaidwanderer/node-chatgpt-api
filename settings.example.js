@@ -70,6 +70,9 @@ export default {
         debug: false,
         // (Optional) Possible options: "chatgpt", "chatgpt-browser", "bing". (Default: "chatgpt")
         clientToUse: 'chatgpt',
+        // (Optional) Generate titles for each conversation for clients that support it (only ChatGPTClient for now).
+        // This will be returned as a `title` property in the first response of the conversation.
+        generateTitles: false,
         // (Optional) Set this to allow changing the client or client options in POST /conversation.
         // To disable, set to `null`.
         perMessageClientOptionsWhitelist: {
