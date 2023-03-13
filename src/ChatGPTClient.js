@@ -160,7 +160,6 @@ export default class ChatGPTClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.apiKey}`,
             },
             body: JSON.stringify(modelOptions),
             dispatcher: new Agent({
@@ -168,6 +167,9 @@ export default class ChatGPTClient {
                 headersTimeout: 0,
             }),
         };
+        if (this.apiKey) {
+            opts.headers.Authorization = `Bearer ${this.apiKey}`;
+        }
 
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
