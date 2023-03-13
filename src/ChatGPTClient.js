@@ -301,12 +301,16 @@ ${botMessage.message}
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
         let conversation = await this.conversationsCache.get(conversationId);
+        let isNewConversation = false;
         if (!conversation) {
             conversation = {
                 messages: [],
                 createdAt: Date.now(),
             };
+            isNewConversation = true;
         }
+
+        const shouldGenerateTitle = opts.shouldGenerateTitle && isNewConversation;
 
         const userMessage = {
             id: crypto.randomUUID(),
@@ -381,15 +385,22 @@ ${botMessage.message}
         };
         conversation.messages.push(replyMessage);
 
-        await this.conversationsCache.set(conversationId, conversation);
-
-        return {
+        const returnData = {
             response: replyMessage.message,
             conversationId,
             parentMessageId: replyMessage.parentMessageId,
             messageId: replyMessage.id,
             details: result || {},
         };
+
+        if (shouldGenerateTitle) {
+            conversation.title = await this.generateTitle(userMessage, replyMessage);
+            returnData.title = conversation.title;
+        }
+
+        await this.conversationsCache.set(conversationId, conversation);
+
+        return returnData;
     }
 
     async buildPrompt(messages, parentMessageId, isChatGptModel = false) {
