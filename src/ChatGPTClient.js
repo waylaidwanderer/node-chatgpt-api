@@ -55,7 +55,7 @@ export default class ChatGPTClient {
             stop: modelOptions.stop,
         };
 
-        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
+        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-');
         const { isChatGptModel } = this;
         this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
         const { isUnofficialChatGptModel } = this;
