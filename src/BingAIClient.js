@@ -142,8 +142,6 @@ export default class BingAIClient {
         let {
             jailbreakConversationId = false, // set to `true` for the first message to enable jailbreak mode
             conversationId,
-            systemMessage,
-            aiName = "Sydney",
             conversationSignature,
             clientId,
             onProgress,
@@ -152,6 +150,8 @@ export default class BingAIClient {
         const {
             toneStyle = 'balanced', // or creative, precise
             invocationId = 0,
+            systemMessage,
+            aiName = 'Sydney',
             parentMessageId = jailbreakConversationId === true ? crypto.randomUUID() : null,
             abortController = new AbortController(),
         } = opts;
