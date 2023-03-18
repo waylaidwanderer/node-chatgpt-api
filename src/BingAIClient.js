@@ -235,7 +235,6 @@ export default class BingAIClient {
                 }
                 return `AI:\n${previousMessage.text}`;
             }).join('\n\n');
-
         }
 
         const userMessage = {
