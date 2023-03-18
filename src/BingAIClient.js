@@ -166,9 +166,6 @@ export default class BingAIClient {
             if (this.debug) {
                 console.debug(createNewConversationResponse);
             }
-            if (createNewConversationResponse.result?.value === 'UnauthorizedRequest') {
-                throw new Error(`UnauthorizedRequest: ${createNewConversationResponse.result.message}`);
-            }
             if (
                 !createNewConversationResponse.conversationSignature
                 || !createNewConversationResponse.conversationId
@@ -176,7 +173,9 @@ export default class BingAIClient {
             ) {
                 const resultValue = createNewConversationResponse.result?.value;
                 if (resultValue) {
-                    throw new Error(`${resultValue}: ${createNewConversationResponse.result.message}`);
+                    const e = new Error(createNewConversationResponse.result.message); // default e.name is 'Error'
+                    e.name = resultValue; // such as "UnauthorizedRequest"
+                    throw e;
                 }
                 throw new Error(`Unexpected response:\n${JSON.stringify(createNewConversationResponse, null, 2)}`);
             }
