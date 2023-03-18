@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\demos",
+    "\\src"
   ],
-  "SelectedNode": "\\D:\\github\\node-chatgpt-api",
+  "SelectedNode": "\\src\\BingAIClient.js",
   "PreviewInSolutionExplorer": false
 }
