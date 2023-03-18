@@ -78,8 +78,6 @@ export default class BingAIClient {
 
             const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
 
-            ws.on('error', console.error);
-
             ws.on('open', () => {
                 if (this.debug) {
                     console.debug('performing handshake');
@@ -240,6 +238,10 @@ export default class BingAIClient {
         }
 
         const ws = await this.createWebSocketConnection();
+
+        ws.on('error', (error) => {
+            throw error;
+        });
 
         let toneOption;
         if (toneStyle === 'creative') {
