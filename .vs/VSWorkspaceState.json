@@ -1,9 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\bin",
     "\\demos",
     "\\src"
   ],
-  "SelectedNode": "\\src\\BingAIClient.js",
+  "SelectedNode": "\\src\\ChatGPTClient.js",
   "PreviewInSolutionExplorer": false
 }
