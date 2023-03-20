@@ -58,7 +58,7 @@ export default class BingAIClient {
                 'x-ms-client-request-id': crypto.randomUUID(),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
                 cookie: this.options.cookies || `_U=${this.options.userToken}`,
-                Referer: 'https://www.bing.com/search?toWww=1&redig=0E86B6ECDAC74CC594B7A0E3BEC58D15&q=Bing+AI&showconv=1',
+                Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
                 'Referrer-Policy': 'origin-when-cross-origin',
             },
         };
