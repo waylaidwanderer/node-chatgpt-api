@@ -255,8 +255,7 @@ export default class BingAIClient {
             toneOption = 'h3imaginative';
         } else if (toneStyle === 'precise') {
             toneOption = 'h3precise';
-        } 
-        else if (toneStyle === 'fast') {
+        } else if (toneStyle === 'fast') {
             // new "Balanced" mode, allegedly GPT-3.5 turbo
             toneOption = 'galileo';
         } else {
@@ -318,9 +317,9 @@ export default class BingAIClient {
             obj.arguments[0].previousMessages.push({
                 author: 'user',
                 description: context,
-                contextType: "WebPage",
-                messageType: "Context",
-                messageId: "discover-web--page-ping-mriduna-----"
+                contextType: 'WebPage',
+                messageType: 'Context',
+                messageId: 'discover-web--page-ping-mriduna-----',
             });
         }
 

@@ -1,12 +1,13 @@
 // eslint-disable-next-line no-unused-vars
-import { BingAIClient } from '../index.js';
-
 import { KeyvFile } from 'keyv-file';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import fs from 'fs';
+import { BingAIClient } from '../index.js';
 
+// eslint-disable-next-line no-underscore-dangle
 const __filename = fileURLToPath(import.meta.url);
+// eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(__filename);
 
 const options = {
@@ -43,7 +44,6 @@ response = await bingAIClient.sendMessage('Now write it in French', {
     },
 });
 console.log(JSON.stringify(response, null, 2)); // {"jailbreakConversationId":false,"conversationId":"...","conversationSignature":"...","clientId":"...","invocationId":2,"messageId":"...","conversationExpiryTime":"2023-03-08T03:20:23.463914Z","response":"Here is the same poem in French: ...","details":{ /* raw response... */ }}
-
 
 /*
 Sending context data
