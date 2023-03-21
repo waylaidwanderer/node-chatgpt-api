@@ -151,15 +151,16 @@ export default class BingAIClient {
         } = opts;
 
         const {
-            toneStyle = 'balanced', // or creative, precise
+            toneStyle = 'balanced', // or creative, precise, fast
             invocationId = 0,
             systemMessage,
+            context,
             parentMessageId = jailbreakConversationId === true ? crypto.randomUUID() : null,
             abortController = new AbortController(),
         } = opts;
 
         if (typeof onProgress !== 'function') {
-            onProgress = () => {};
+            onProgress = () => { };
         }
 
         if (jailbreakConversationId || !conversationSignature || !conversationId || !clientId) {
@@ -238,6 +239,7 @@ export default class BingAIClient {
             role: 'User',
             message,
         };
+
         if (jailbreakConversationId) {
             conversation.messages.push(userMessage);
         }
@@ -253,7 +255,11 @@ export default class BingAIClient {
             toneOption = 'h3imaginative';
         } else if (toneStyle === 'precise') {
             toneOption = 'h3precise';
+        } else if (toneStyle === 'fast') {
+            // new "Balanced" mode, allegedly GPT-3.5 turbo
+            toneOption = 'galileo';
         } else {
+            // old "Balanced" mode
             toneOption = 'harmonyv3';
         }
 
@@ -290,19 +296,35 @@ export default class BingAIClient {
                         id: clientId,
                     },
                     conversationId,
+                    previousMessages: [],
                 },
             ],
             invocationId: invocationId.toString(),
             target: 'chat',
             type: 4,
         };
+
         if (previousMessagesFormatted) {
-            obj.arguments[0].previousMessages = [
-                {
-                    text: previousMessagesFormatted,
-                    author: 'bot',
-                },
-            ];
+            obj.arguments[0].previousMessages.push({
+                text: previousMessagesFormatted,
+                author: 'bot',
+            });
+        }
+
+        // simulates document summary function on Edge's Bing sidebar
+        // unknown character limit, at least up to 7k
+        if (context) {
+            obj.arguments[0].previousMessages.push({
+                author: 'user',
+                description: context,
+                contextType: 'WebPage',
+                messageType: 'Context',
+                messageId: 'discover-web--page-ping-mriduna-----',
+            });
+        }
+
+        if (obj.arguments[0].previousMessages.length === 0) {
+            delete obj.arguments[0].previousMessages;
         }
 
         const messagePromise = new Promise((resolve, reject) => {
