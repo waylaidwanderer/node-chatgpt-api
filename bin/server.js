@@ -95,6 +95,11 @@ server.post('/conversation', async (request, reply) => {
             delete clientOptions.clientToUse;
         }
 
+        let { shouldGenerateTitle } = body;
+        if (typeof shouldGenerateTitle !== 'boolean') {
+            shouldGenerateTitle = settings.apiOptions?.generateTitles || false;
+        }
+
         const messageClient = getClient(clientToUseForMessage);
 
         result = await messageClient.sendMessage(body.message, {
@@ -104,7 +109,7 @@ server.post('/conversation', async (request, reply) => {
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
-            shouldGenerateTitle: settings.apiOptions?.generateTitles || false, // only used for ChatGPTClient
+            shouldGenerateTitle, // only used for ChatGPTClient
             toneStyle: body.toneStyle,
             clientOptions,
             onProgress,
