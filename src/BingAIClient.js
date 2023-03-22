@@ -269,7 +269,8 @@ export default class BingAIClient {
         const ws = await this.createWebSocketConnection();
 
         ws.on('error', (error) => {
-            throw error;
+            console.error(error);
+            abortController.abort();
         });
 
         let toneOption;
