@@ -106,6 +106,7 @@ server.post('/conversation', async (request, reply) => {
             invocationId: body.invocationId,
             shouldGenerateTitle: settings.apiOptions?.generateTitles || false, // only used for ChatGPTClient
             toneStyle: body.toneStyle,
+            systemMessage: body.systemMessage,
             clientOptions,
             onProgress,
             abortController,
