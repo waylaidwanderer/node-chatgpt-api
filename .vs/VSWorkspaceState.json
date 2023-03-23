@@ -1,10 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\bin",
-    "\\demos",
-    "\\src"
+    ""
   ],
-  "SelectedNode": "\\src\\ChatGPTClient.js",
+  "SelectedNode": "\\D:\\github\\node-chatgpt-api",
   "PreviewInSolutionExplorer": false
 }
