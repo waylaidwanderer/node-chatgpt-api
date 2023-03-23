@@ -218,10 +218,6 @@ export default class BingAIClient {
                     author: 'system',
                 },
                 ...previousCachedMessages,
-                {
-                    text: message,
-                    author: 'user',
-                },
             ] : undefined;
 
             // prepare messages for prompt injection
@@ -311,7 +307,7 @@ export default class BingAIClient {
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
-                        text: jailbreakConversationId ? '\n\nAI:\n' : message,
+                        text: message,
                         messageType: 'SearchQuery',
                     },
                     conversationSignature,
