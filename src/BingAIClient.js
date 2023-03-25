@@ -85,7 +85,7 @@ export default class BingAIClient {
 
             const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
 
-            ws.on('error', err => reject(err);
+            ws.on('error', err => reject(err));
 
             ws.on('open', () => {
                 if (this.debug) {
