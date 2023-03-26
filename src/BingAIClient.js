@@ -68,6 +68,12 @@ export default class BingAIClient {
             fetchOptions.dispatcher = new ProxyAgent(this.options.proxy);
         }
         const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
+
+        const { status, headers } = response;
+        if (status === 200 && +headers.get('content-length') < 5) {
+            throw new Error('/turing/conversation/create: Your IP is blocked by BingAI.');
+        }
+
         const body = await response.text();
         try {
             return JSON.parse(body);
