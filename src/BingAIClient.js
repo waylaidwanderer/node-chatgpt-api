@@ -83,13 +83,15 @@ export default class BingAIClient {
     }
 
     async createWebSocketConnection() {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             let agent;
             if (this.options.proxy) {
                 agent = new HttpsProxyAgent(this.options.proxy);
             }
 
             const ws = new WebSocket('wss://sydney.bing.com/sydney/ChatHub', { agent });
+
+            ws.on('error', err => reject(err));
 
             ws.on('open', () => {
                 if (this.debug) {
