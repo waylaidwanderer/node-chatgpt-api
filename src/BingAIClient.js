@@ -425,7 +425,7 @@ export default class BingAIClient {
                                 console.debug(event.item.result.error);
                                 console.debug(event.item.result.exception);
                             }
-                            if (replySoFar) {
+                            if (replySoFar && eventMessage) {
                                 eventMessage.adaptiveCards[0].body[0].text = replySoFar;
                                 eventMessage.text = replySoFar;
                                 resolve({
