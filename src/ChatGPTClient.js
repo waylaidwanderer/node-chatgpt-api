@@ -437,7 +437,6 @@ ${botMessage.message}
 
         const messagePayload = {
             role: 'system',
-            name: 'user',
             content: promptSuffix,
         };
 
