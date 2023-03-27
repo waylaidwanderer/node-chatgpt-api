@@ -490,6 +490,7 @@ Instructions are provided below.
 - [ChatGPT Clone](https://github.com/danny-avila/chatgpt-clone): a clone of ChatGPT, uses official model, reverse-engineered UI, with AI model switching, message search, and prompt templates.
 - [ChatGPT WebApp](https://github.com/frontend-engineering/chatgpt-webapp-fullstack): a fullstack chat webapp with mobile compatble UI interface, and node-chatgpt-api works as backend. Anyone can deploy your own chat service.
 - [halbot](https://github.com/Leask/halbot): Just another ChatGPT/Bing Chat Telegram bot, which is simple design, easy to use, extendable and fun.
+- [ChatGPTBox](https://github.com/josStorer/chatGPTBox): Integrating ChatGPT into your browser deeply, everything you need is here
 
 Add yours to the list by [editing this README](https://github.com/waylaidwanderer/node-chatgpt-api/edit/main/README.md) and creating a pull request!
 
