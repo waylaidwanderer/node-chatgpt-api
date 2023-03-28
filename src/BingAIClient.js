@@ -234,6 +234,13 @@ export default class BingAIClient {
                 },
             ] : undefined;
 
+            if (context) {
+                previousMessages.push({
+                    text: context,
+                    author: 'context',
+                });
+            }
+
             // prepare messages for prompt injection
             previousMessagesFormatted = previousMessages?.map((previousMessage) => {
                 switch (previousMessage.author) {
@@ -244,6 +251,8 @@ export default class BingAIClient {
                     case 'system': {
                         return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
                     }
+                    case 'context':
+                        return `[user](#context)\n${previousMessage.text}`;
                     default:
                         throw new Error(`Unknown message author: ${previousMessage.author}`);
                 }
@@ -334,7 +343,7 @@ export default class BingAIClient {
 
         // simulates document summary function on Edge's Bing sidebar
         // unknown character limit, at least up to 7k
-        if (context) {
+        if (!jailbreakConversationId && context) {
             obj.arguments[0].previousMessages.push({
                 author: 'user',
                 description: context,
