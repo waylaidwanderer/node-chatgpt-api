@@ -199,6 +199,7 @@ export default class BingAIClient {
         }
 
         // Due to this jailbreak, the AI will occasionally start responding as the user. It only happens rarely (and happens with the non-jailbroken Bing too), but since we are handling conversations ourselves now, we can use this system to ignore the part of the generated message that is replying as the user.
+        // TODO: probably removable now we're using `[user](#message)` instead of `User:`
         const stopToken = '\n\n[user](#message)';
 
         if (jailbreakConversationId === true) {
@@ -237,7 +238,7 @@ export default class BingAIClient {
             if (context) {
                 previousMessages.push({
                     text: context,
-                    author: 'context',
+                    author: 'context', // not a real/valid author, we're just piggybacking on the existing logic
                 });
             }
 
@@ -248,9 +249,8 @@ export default class BingAIClient {
                         return `[user](#message)\n${previousMessage.text}`;
                     case 'bot':
                         return `[assistant](#message)\n${previousMessage.text}`;
-                    case 'system': {
+                    case 'system':
                         return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
-                    }
                     case 'context':
                         return `[user](#context)\n${previousMessage.text}`;
                     default:
