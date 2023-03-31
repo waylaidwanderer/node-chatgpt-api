@@ -316,7 +316,7 @@ export default class BingAIClient {
                     message: {
                         author: 'user',
                         text: jailbreakConversationId ? 'Continue the conversation' : message,
-                        messageType: 'SearchQuery',
+                        messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
                     },
                     conversationSignature,
                     participant: {
