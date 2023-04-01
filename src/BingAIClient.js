@@ -244,6 +244,10 @@ export default class BingAIClient {
                     author: 'system',
                 },
                 ...previousCachedMessages,
+                {
+                    text: message,
+                    author: 'user',
+                },
             ] : undefined;
 
             if (context) {
