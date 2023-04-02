@@ -4,7 +4,7 @@ import { ChatGPTBrowserClient } from '../index.js';
 const clientOptions = {
     // (Optional) Support for a reverse proxy for the completions endpoint (private API server).
     // Warning: This will expose your access token to a third party. Consider the risks before using this.
-    reverseProxyUrl: 'https://chatgpt.duti.tech/api/conversation',
+    reverseProxyUrl: 'https://bypass.churchless.tech/api/conversation',
     // Access token from https://chat.openai.com/api/auth/session
     accessToken: '',
     // Cookies from chat.openai.com (likely not required if using reverse proxy server).
