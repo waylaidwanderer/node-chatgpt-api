@@ -61,24 +61,22 @@ console.log(response.response); // Doux et élégant, avec des yeux qui brillent
 
 
 
-    //If you want to output faster (or avoid maximum message length) in some applications that cannot stream responses, you can do this. 
-  let receivedChars = "";
-  const onProgress = (token, done) => {
-    receivedChars += token;
-    if (
-      (receivedChars.length >= 150 && token == "\n") ||
-      receivedChars.length >= 500
-    ) {
-      console.log(receivedChars);
-      receivedChars = "";
-    } else if (done === true) {
-      console.log(receivedChars);
-    } 
-  };
-response = await chatGptClient.sendMessage('Repeat my 2nd message verbatim.', {
-    conversationId: response.conversationId,
-    parentMessageId: response.messageId,
-    onProgress
+//If you want to output faster (or avoid maximum message length) in some applications that cannot stream responses, you can do this.
+
+let receivedChars = "";
+const onProgress = (token, done) => {
+  receivedChars += token;
+  if (receivedChars.length >= 10) {
+    console.log(receivedChars);
+    receivedChars = "";
+  } else if (done === true) {
+    console.log(receivedChars);
+  }
+};
+response = await chatGptClient.sendMessage("Write a short poem about cats.", {
+  conversationId: response.conversationId,
+  parentMessageId: response.messageId,
+  onProgress,
 });
 console.log();
 console.log(response.response); // "Write a short poem about cats."
