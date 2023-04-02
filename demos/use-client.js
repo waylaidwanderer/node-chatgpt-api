@@ -62,6 +62,7 @@ console.log(response.response); // Doux et élégant, avec des yeux qui brillent
 
 
     //If you want to output faster (or avoid maximum message length) in some applications that cannot stream responses, you can do this. 
+  let receivedChars = "";
   const onProgress = (token, done) => {
     receivedChars += token;
     if (
