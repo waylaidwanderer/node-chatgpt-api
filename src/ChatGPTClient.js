@@ -352,6 +352,7 @@ ${botMessage.message}
                         console.debug(token);
                     }
                     if (token === this.endToken) {
+                        opts.onProgress('',true);
                         return;
                     }
                     opts.onProgress(token);
