@@ -59,8 +59,6 @@ response = await chatGptClient.sendMessage('Now write it in French.', {
 console.log();
 console.log(response.response); // Doux et élégant, avec des yeux qui brillent,\nLes chats sont des créatures de grâce suprême.\n...
 
-
-
 //If you want to output faster (or avoid maximum message length) in some applications that cannot stream responses, you can do this.
 
 let receivedChars = "";
