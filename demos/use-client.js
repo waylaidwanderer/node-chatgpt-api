@@ -79,4 +79,4 @@ response = await chatGptClient.sendMessage("Write a short poem about cats.", {
   onProgress,
 });
 console.log();
-console.log(response.response); // "Write a short poem about cats."
+console.log(response.response); 
