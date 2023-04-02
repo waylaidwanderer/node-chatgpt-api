@@ -59,12 +59,25 @@ response = await chatGptClient.sendMessage('Now write it in French.', {
 console.log();
 console.log(response.response); // Doux et élégant, avec des yeux qui brillent,\nLes chats sont des créatures de grâce suprême.\n...
 
+
+
+    //If you want to output faster (or avoid maximum message length) in some applications that cannot stream responses, you can do this. 
+  const onProgress = (token, done) => {
+    receivedChars += token;
+    if (
+      (receivedChars.length >= 150 && token == "\n") ||
+      receivedChars.length >= 500
+    ) {
+      console.log(receivedChars);
+      receivedChars = "";
+    } else if (done === true) {
+      console.log(receivedChars);
+    } 
+  };
 response = await chatGptClient.sendMessage('Repeat my 2nd message verbatim.', {
     conversationId: response.conversationId,
     parentMessageId: response.messageId,
-    // If you want streamed responses, you can set the `onProgress` callback to receive the response as it's generated.
-    // You will receive one token at a time, so you will need to concatenate them yourself.
-    onProgress: token => process.stdout.write(token),
+    onProgress
 });
 console.log();
 console.log(response.response); // "Write a short poem about cats."
