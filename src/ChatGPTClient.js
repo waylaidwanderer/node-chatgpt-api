@@ -341,6 +341,7 @@ ${botMessage.message}
                 payload,
                 (progressMessage) => {
                     if (progressMessage === '[DONE]') {
+                        opts.onProgress('',true);
                         return;
                     }
                     const token = this.isChatGptModel ? progressMessage.choices[0].delta.content : progressMessage.choices[0].text;
@@ -352,7 +353,6 @@ ${botMessage.message}
                         console.debug(token);
                     }
                     if (token === this.endToken) {
-                        opts.onProgress('',true);
                         return;
                     }
                     opts.onProgress(token);
