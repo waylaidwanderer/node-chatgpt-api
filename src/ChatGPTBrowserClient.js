@@ -167,7 +167,7 @@ export default class ChatGPTBrowserClient {
         });
 
         if (!conversationId) {
-            this.genTitle(response);
+            response.title = this.genTitle(response);
         }
 
         return response;
@@ -242,7 +242,7 @@ export default class ChatGPTBrowserClient {
         };
     }
 
-    genTitle(event) {
+    async genTitle(event) {
         const { debug } = this.options;
         if (debug) {
             console.log('Generate title: ', event);
@@ -278,11 +278,15 @@ export default class ChatGPTBrowserClient {
             console.debug(url, opts);
         }
 
-        fetch(url, opts).then(async (ret) => {
+        try {
+            const ret = await fetch(url, opts);
+            const data = await ret.text();
             if (debug) {
-                const data = await ret.text();
                 console.log('Gen title response: ', data);
             }
-        }).catch(console.error);
+            return JSON.parse(data).title;
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
