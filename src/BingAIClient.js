@@ -11,21 +11,6 @@ import HttpsProxyAgent from 'https-proxy-agent';
  */
 const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
-const insertRandomSeparator = (str) => {
-    // Split the string into an array of individual characters
-    const chars = str.split('');
-    // Use the map function to join each character together and randomly insert a separator or not
-    return chars.map((char, index) => {
-        // If not the first character, randomly decide whether to insert a separator based on a random number
-        if (index !== 0 && Math.random() >= 0.5) {
-            // Generate a random number and use a "-" as the separator if it is greater than or equal to 0.5, otherwise use "_"
-            const separator = Math.random() >= 0.5 ? '-' : '_';
-            return separator + char;
-        }
-        return char;
-    }).join('');
-};
-
 export default class BingAIClient {
     constructor(options) {
         const cacheOptions = options.cache || {};
@@ -330,7 +315,7 @@ export default class BingAIClient {
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
-                        text: jailbreakConversationId ? insertRandomSeparator(message) : message,
+                        text: jailbreakConversationId ? '' : message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
                     },
                     conversationSignature,
