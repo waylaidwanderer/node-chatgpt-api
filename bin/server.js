@@ -246,4 +246,4 @@ function filterClientOptions(inputOptions, clientToUseForMessage) {
     return outputOptions;
 }
 
-export default  server;
+export default server;
