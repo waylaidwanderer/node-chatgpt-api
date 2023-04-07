@@ -1,4 +1,4 @@
-import {server} from '../bin/server.js'
+import server from '../bin/server.js';
 
 export default async (req, res) => {
     await server.ready();
