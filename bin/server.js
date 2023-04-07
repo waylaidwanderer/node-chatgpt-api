@@ -10,7 +10,8 @@ import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
 
 const arg = process.argv.find(_arg => _arg.startsWith('--settings'));
-const path = arg?.split('=')[1] ?? './settings.js';
+const currentDirectory = process.cwd();
+const path = arg?.split('=')[1] ?? `${currentDirectory}/settings.js`;
 
 let settings;
 if (fs.existsSync(path)) {
@@ -244,3 +245,5 @@ function filterClientOptions(inputOptions, clientToUseForMessage) {
 
     return outputOptions;
 }
+
+export default  server;
