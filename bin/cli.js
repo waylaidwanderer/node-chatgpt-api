@@ -71,7 +71,7 @@ const availableCommands = [
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
-const clientToUse = settings.cliOptions?.clientToUse || settings.clientToUse || 'chatgpt';
+const clientToUse = settings.cliOptions?.clientToUse || settings.clientToUse || 'bing';
 
 let client;
 switch (clientToUse) {

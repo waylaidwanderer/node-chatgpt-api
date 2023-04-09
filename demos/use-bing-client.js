@@ -14,7 +14,7 @@ const options = {
     // Necessary for some people in different countries, e.g. China (https://cn.bing.com)
     host: '',
     // "_U" cookie from bing.com
-    userToken: '',
+    userToken: '1f7EG0CfioEZX9ay0NkAGpwufhpzeluptB7H3h_ViNLHgVKNwwQZdXBENpKmwIimTQvPLmuubcjopn4u_D1hZ4xI7R66rba0IP9wESmosQCctiiDM5xOYyyvViokB7XZE2qVq2RZX25tOVSxq52vbMExL2wIs3tebCH5MRVRPfaod2xUkcwligFWEKbJG3-EaOg37PWvICrQorKmSnJhcGDBKHzrKIYjYqKLg_zJ3ymQ',
     // If the above doesn't work, provide all your cookies as a string instead
     cookies: '',
     // A proxy string like "http://<ip>:<port>"
