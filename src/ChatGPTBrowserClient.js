@@ -29,7 +29,7 @@ export default class ChatGPTBrowserClient {
         this.model = this.options.model || 'text-davinci-002-render-sha';
     }
 
-    async postConversation(conversation, onProgress, abortController = null) {
+    async postConversation(conversation, onProgress, abortController, onEventMessage = null) {
         const {
             action = 'next',
             conversationId,
@@ -133,6 +133,11 @@ export default class ChatGPTBrowserClient {
                         if (debug) {
                             console.debug(eventMessage);
                         }
+
+                        if (onEventMessage) {
+                            onEventMessage(eventMessage);
+                        }
+
                         if (!eventMessage.data || eventMessage.event === 'ping') {
                             return;
                         }
@@ -212,6 +217,7 @@ export default class ChatGPTBrowserClient {
             },
             opts.onProgress || (() => {}),
             opts.abortController || new AbortController(),
+            opts?.onEventMessage,
         );
 
         if (this.options.debug) {
