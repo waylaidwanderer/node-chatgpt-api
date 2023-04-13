@@ -29,7 +29,7 @@ export default class ChatGPTBrowserClient {
         this.model = this.options.model || 'text-davinci-002-render-sha';
     }
 
-    async postConversation(conversation, onProgress, abortController = null) {
+    async postConversation(conversation, onProgress, abortController, onEventMessage = null) {
         const {
             action = 'next',
             conversationId,
@@ -133,6 +133,11 @@ export default class ChatGPTBrowserClient {
                         if (debug) {
                             console.debug(eventMessage);
                         }
+
+                        if (onEventMessage) {
+                            onEventMessage(eventMessage);
+                        }
+
                         if (!eventMessage.data || eventMessage.event === 'ping') {
                             return;
                         }
@@ -167,7 +172,7 @@ export default class ChatGPTBrowserClient {
         });
 
         if (!conversationId) {
-            this.genTitle(response);
+            response.title = this.genTitle(response);
         }
 
         return response;
@@ -212,6 +217,7 @@ export default class ChatGPTBrowserClient {
             },
             opts.onProgress || (() => {}),
             opts.abortController || new AbortController(),
+            opts?.onEventMessage,
         );
 
         if (this.options.debug) {
@@ -242,13 +248,13 @@ export default class ChatGPTBrowserClient {
         };
     }
 
-    genTitle(event) {
+    async genTitle(event) {
         const { debug } = this.options;
         if (debug) {
             console.log('Generate title: ', event);
         }
         if (!event || !event.conversation_id || !event.message || !event.message.id) {
-            return;
+            return null;
         }
 
         const conversationId = event.conversation_id;
@@ -278,11 +284,16 @@ export default class ChatGPTBrowserClient {
             console.debug(url, opts);
         }
 
-        fetch(url, opts).then(async (ret) => {
+        try {
+            const ret = await fetch(url, opts);
+            const data = await ret.text();
             if (debug) {
-                const data = await ret.text();
                 console.log('Gen title response: ', data);
             }
-        }).catch(console.error);
+            return JSON.parse(data).title;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     }
 }

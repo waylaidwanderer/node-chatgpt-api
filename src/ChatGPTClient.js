@@ -55,7 +55,7 @@ export default class ChatGPTClient {
             stop: modelOptions.stop,
         };
 
-        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-3.5-turbo');
+        this.isChatGptModel = this.modelOptions.model.startsWith('gpt-');
         const { isChatGptModel } = this;
         this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
         const { isUnofficialChatGptModel } = this;
@@ -108,6 +108,7 @@ export default class ChatGPTClient {
                 stopTokens.push(this.endToken);
             }
             stopTokens.push(`\n${this.userLabel}:`);
+            stopTokens.push('<|diff_marker|>');
             // I chose not to do one for `chatGptLabel` because I've never seen it happen
             this.modelOptions.stop = stopTokens;
         }
@@ -142,7 +143,9 @@ export default class ChatGPTClient {
             abortController = new AbortController();
         }
         const modelOptions = { ...this.modelOptions };
-        modelOptions.stream = typeof onProgress === 'function';
+        if (typeof onProgress === 'function') {
+            modelOptions.stream = true;
+        }
         if (this.isChatGptModel) {
             modelOptions.messages = input;
         } else {
@@ -160,7 +163,6 @@ export default class ChatGPTClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.apiKey}`,
             },
             body: JSON.stringify(modelOptions),
             dispatcher: new Agent({
@@ -168,6 +170,9 @@ export default class ChatGPTClient {
                 headersTimeout: 0,
             }),
         };
+        if (this.apiKey) {
+            opts.headers.Authorization = `Bearer ${this.apiKey}`;
+        }
 
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
@@ -432,7 +437,6 @@ ${botMessage.message}
 
         const messagePayload = {
             role: 'system',
-            name: 'user',
             content: promptSuffix,
         };
 
