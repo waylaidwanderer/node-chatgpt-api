@@ -305,6 +305,10 @@ ${botMessage.message}
         const conversationId = opts.conversationId || crypto.randomUUID();
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
+        if (typeof opts.conversation === 'object') {
+            await this.conversationsCache.set(conversationId, opts.conversation);
+        }
+
         let conversation = await this.conversationsCache.get(conversationId);
         let isNewConversation = false;
         if (!conversation) {
@@ -325,14 +329,9 @@ ${botMessage.message}
         };
         conversation.messages.push(userMessage);
 
-        let payload;
-        if (this.isChatGptModel) {
-            // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
-            // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
-            payload = await this.buildPrompt(conversation.messages, userMessage.id, true);
-        } else {
-            payload = await this.buildPrompt(conversation.messages, userMessage.id);
-        }
+        // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
+        // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
+        const payload = await this.buildPrompt(conversation.messages, userMessage.id, this.isChatGptModel, conversationId);
 
         let reply = '';
         let result = null;
@@ -405,10 +404,14 @@ ${botMessage.message}
 
         await this.conversationsCache.set(conversationId, conversation);
 
+        if (this.options.returnConversation) {
+            returnData.conversation = conversation;
+        }
+
         return returnData;
     }
 
-    async buildPrompt(messages, parentMessageId, isChatGptModel = false) {
+    async buildPrompt(messages, parentMessageId, isChatGptModel = false, conversationId = null) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
         let promptPrefix;
@@ -449,6 +452,8 @@ ${botMessage.message}
         let promptBody = '';
         const maxTokenCount = this.maxPromptTokens;
 
+        const necessaryMessages = [];
+
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         // Do this within a recursive async function so that it doesn't block the event loop for too long.
         const buildPromptBody = async () => {
@@ -467,6 +472,8 @@ ${botMessage.message}
                     newPromptBody = `${promptPrefix}${messageString}${promptBody}`;
                 }
 
+                necessaryMessages.unshift(message);
+
                 const tokenCountForMessage = this.getTokenCount(messageString);
                 const newTokenCount = currentTokenCount + tokenCountForMessage;
                 if (newTokenCount > maxTokenCount) {
@@ -480,13 +487,21 @@ ${botMessage.message}
                 promptBody = newPromptBody;
                 currentTokenCount = newTokenCount;
                 // wait for next tick to avoid blocking the event loop
-                await new Promise(resolve => setTimeout(resolve, 0));
+                await new Promise(resolve => setImmediate(resolve));
                 return buildPromptBody();
             }
             return true;
         };
 
         await buildPromptBody();
+
+        if (this.options.keepNecessaryMessagesOnly && conversationId) {
+            const { createdAt } = await this.conversationsCache.get(conversationId);
+            await this.conversationsCache.set(conversationId, {
+                messages: necessaryMessages,
+                createdAt,
+            });
+        }
 
         const prompt = `${promptBody}${promptSuffix}`;
         if (isChatGptModel) {
