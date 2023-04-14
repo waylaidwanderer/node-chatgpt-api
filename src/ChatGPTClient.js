@@ -330,7 +330,13 @@ ${botMessage.message}
 
         // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
         // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
-        const { prompt: payload, context } = await this.buildPrompt(conversation.messages, userMessage.id, this.isChatGptModel);
+        const { prompt: payload, context } = await this.buildPrompt(
+            conversation.messages, userMessage.id,
+            {
+                isChatGptModel: this.isChatGptModel,
+                promptPrefix: opts.promptPrefix,
+            }
+        );
 
         if (this.options.keepNecessaryMessagesOnly) {
             conversation.messages = context;
@@ -414,12 +420,11 @@ ${botMessage.message}
         return returnData;
     }
 
-    async buildPrompt(messages, parentMessageId, isChatGptModel = false) {
+    async buildPrompt(messages, parentMessageId, { isChatGptModel = false, promptPrefix = null }) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
-        let promptPrefix;
-        if (this.options.promptPrefix) {
-            promptPrefix = this.options.promptPrefix.trim();
+        promptPrefix = (promptPrefix || this.options.promptPrefix || '').trim();
+        if (promptPrefix) {
             // If the prompt prefix doesn't end with the end token, add it.
             if (!promptPrefix.endsWith(`${this.endToken}`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.endToken}\n\n`;
