@@ -496,10 +496,12 @@ ${botMessage.message}
         await buildPromptBody();
 
         if (this.options.keepNecessaryMessagesOnly && conversationId) {
-            const { createdAt } = await this.conversationsCache.get(conversationId);
+            const createdAt = (await this.conversationsCache.get(
+                conversationId
+            ))?.createdAt || Date.now();
             await this.conversationsCache.set(conversationId, {
                 messages: necessaryMessages,
-                createdAt: createdAt || Date.now(),
+                createdAt,
             });
         }
 
