@@ -336,7 +336,7 @@ ${botMessage.message}
             {
                 isChatGptModel: this.isChatGptModel,
                 promptPrefix: opts.promptPrefix,
-            }
+            },
         );
 
         if (this.options.keepNecessaryMessagesOnly) {
