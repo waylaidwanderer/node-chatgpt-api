@@ -499,7 +499,7 @@ ${botMessage.message}
             const { createdAt } = await this.conversationsCache.get(conversationId);
             await this.conversationsCache.set(conversationId, {
                 messages: necessaryMessages,
-                createdAt,
+                createdAt: createdAt || Date.now(),
             });
         }
 
