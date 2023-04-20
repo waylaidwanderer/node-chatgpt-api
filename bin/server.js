@@ -106,6 +106,8 @@ server.post('/conversation', async (request, reply) => {
             jailbreakConversationId: body.jailbreakConversationId,
             conversationId: body.conversationId ? body.conversationId.toString() : undefined,
             parentMessageId: body.parentMessageId ? body.parentMessageId.toString() : undefined,
+            systemMessage: body.systemMessage,
+            context: body.context,
             conversationSignature: body.conversationSignature,
             clientId: body.clientId,
             invocationId: body.invocationId,
