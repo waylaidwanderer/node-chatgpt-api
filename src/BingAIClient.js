@@ -15,13 +15,13 @@ export default class BingAIClient {
     constructor(options) {
         if (options.keyv) {
             if (!options.keyv.namespace) {
-                console.warn("The given Keyv object has no namespace. This is a bad idea if you share a database.");
+                console.warn('The given Keyv object has no namespace. This is a bad idea if you share a database.');
             }
             this.conversationsCache = options.keyv;
         } else {
             const cacheOptions = options.cache || {};
             cacheOptions.namespace = cacheOptions.namespace || 'bing';
-            this.conversationsCache = new Keyv(cacheOptions);   
+            this.conversationsCache = new Keyv(cacheOptions);
         }
 
         this.setOptions(options);
