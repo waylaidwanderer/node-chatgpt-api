@@ -4,8 +4,6 @@ WORKDIR /app
 COPY . .
 
 RUN npm install
+EXPOSE 3000
 
-ENV API_HOST=0.0.0.0
-EXPOSE 3000 24678
-
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
