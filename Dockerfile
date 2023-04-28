@@ -1,15 +1,11 @@
-FROM alpine:latest
+FROM node:16-alpine
 
-RUN apk add nodejs
-RUN apk add npm
+WORKDIR /app
+COPY . .
 
-COPY ./ /var/chatgpt-api
-
-WORKDIR /var/chatgpt-api
-RUN npm ci --no-color --quiet
+RUN npm install
 
 ENV API_HOST=0.0.0.0
+EXPOSE 3000 24678
 
-EXPOSE 3000
-
-ENTRYPOINT npm start
+CMD ["npm", "run", "dev"]
