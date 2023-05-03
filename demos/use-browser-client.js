@@ -30,3 +30,4 @@ const response3 = await chatGptClient.sendMessage('Now write it in French.', {
 });
 console.log();
 console.log(response3.response); // Les chats sont les meilleurs animaux de compagnie du monde.
+await chatGptClient.deleteConversation(response3.conversationId);

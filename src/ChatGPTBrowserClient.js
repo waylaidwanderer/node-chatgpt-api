@@ -178,6 +178,70 @@ export default class ChatGPTBrowserClient {
         return response;
     }
 
+    async deleteConversation(conversationID) {
+        const url = this.options.reverseProxyUrl || 'https://chat.openai.com/backend-api/conversation';
+        const opts = {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.accessToken}`,
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                Cookie: this.cookies || undefined,
+            },
+
+            body: JSON.stringify({
+                is_visible: false,
+            }),
+        };
+        const { debug } = this.options;
+        const response = await new Promise(async (resolve, reject) => {
+            let lastEvent = null;
+            try {
+                let done = false;
+                await fetchEventSource(url+"/"+conversationID, {
+                    ...opts,
+                    async onopen(openResponse) {
+                        if (openResponse.status === 200) {
+                            return;
+                        }
+                        if (debug) {
+                            console.debug(openResponse);
+                        }
+                        let error;
+                        try {
+                            const body = await openResponse.text();
+                            error = new Error(`Failed to send message. HTTP ${openResponse.status} - ${body}`);
+                            error.status = openResponse.status;
+                            error.json = JSON.parse(body);
+                        } catch {
+                            error = error || new Error(`Failed to send message. HTTP ${openResponse.status}`);
+                        }
+                        throw error;
+                    },
+                    onclose() {
+                        if (debug) {
+                            console.debug('Coversation Was Deleted Successfully. Returning...');
+                        }
+                        if (!done) {
+                            done = true;
+                            resolve(lastEvent);
+                            return;
+                        }
+                    },
+                    onerror(err) {
+                        if (debug) {
+                            console.debug(err);
+                        }
+                        // rethrow to stop the operation
+                        throw err;
+                    },
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     async sendMessage(
         message,
         opts = {},
