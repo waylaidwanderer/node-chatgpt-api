@@ -194,11 +194,12 @@ export default class ChatGPTBrowserClient {
             }),
         };
         const { debug } = this.options;
+
+        // eslint-disable-next-line no-async-promise-executor
         const response = await new Promise(async (resolve, reject) => {
-            let lastEvent = null;
             try {
                 let done = false;
-                await fetchEventSource(url+"/"+conversationID, {
+                await fetchEventSource(`${url}/${conversationID}`, {
                     ...opts,
                     async onopen(openResponse) {
                         if (openResponse.status === 200) {
@@ -224,8 +225,6 @@ export default class ChatGPTBrowserClient {
                         }
                         if (!done) {
                             done = true;
-                            resolve(lastEvent);
-                            return;
                         }
                     },
                     onerror(err) {
@@ -240,6 +239,8 @@ export default class ChatGPTBrowserClient {
                 reject(err);
             }
         });
+
+        return response;
     }
 
     async sendMessage(
