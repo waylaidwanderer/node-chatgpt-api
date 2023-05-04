@@ -178,69 +178,26 @@ export default class ChatGPTBrowserClient {
         return response;
     }
 
-    async deleteConversation(conversationID) {
+    async deleteConversation(conversationId) {
         const url = this.options.reverseProxyUrl || 'https://chat.openai.com/backend-api/conversation';
-        const opts = {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.accessToken}`,
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-                Cookie: this.cookies || undefined,
-            },
-
-            body: JSON.stringify({
-                is_visible: false,
-            }),
-        };
-        const { debug } = this.options;
 
         // eslint-disable-next-line no-async-promise-executor
-        const response = await new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             try {
-                let done = false;
-                await fetchEventSource(`${url}/${conversationID}`, {
-                    ...opts,
-                    async onopen(openResponse) {
-                        if (openResponse.status === 200) {
-                            return;
-                        }
-                        if (debug) {
-                            console.debug(openResponse);
-                        }
-                        let error;
-                        try {
-                            const body = await openResponse.text();
-                            error = new Error(`Failed to send message. HTTP ${openResponse.status} - ${body}`);
-                            error.status = openResponse.status;
-                            error.json = JSON.parse(body);
-                        } catch {
-                            error = error || new Error(`Failed to send message. HTTP ${openResponse.status}`);
-                        }
-                        throw error;
+                await fetch(`${url}/${conversationId}`, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${this.accessToken}`,
+                        Cookie: this.cookies || undefined,
                     },
-                    onclose() {
-                        if (debug) {
-                            console.debug('Coversation Was Deleted Successfully. Returning...');
-                        }
-                        if (!done) {
-                            done = true;
-                        }
-                    },
-                    onerror(err) {
-                        if (debug) {
-                            console.debug(err);
-                        }
-                        // rethrow to stop the operation
-                        throw err;
-                    },
+                    body: '{"is_visible":false}',
+                    method: 'PATCH',
                 });
             } catch (err) {
                 reject(err);
             }
         });
-
-        return response;
     }
 
     async sendMessage(
