@@ -238,13 +238,6 @@ export default class BingAIClient {
                 ...previousCachedMessages,
             ] : undefined;
 
-            if (context) {
-                previousMessages.push({
-                    text: context,
-                    author: 'context', // not a real/valid author, we're just piggybacking on the existing logic
-                });
-            }
-
             // prepare messages for prompt injection
             previousMessagesFormatted = previousMessages?.map((previousMessage) => {
                 switch (previousMessage.author) {
@@ -254,12 +247,14 @@ export default class BingAIClient {
                         return `[assistant](#message)\n${previousMessage.text}`;
                     case 'system':
                         return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
-                    case 'context':
-                        return `[system](#context)\nWeb page context:\n\`\`\`\n${previousMessage.text}\n\`\`\``;
                     default:
                         throw new Error(`Unknown message author: ${previousMessage.author}`);
                 }
             }).join('\n\n');
+
+            if (context) {
+                previousMessagesFormatted = context + previousMessagesFormatted;
+            }
         }
 
         const userMessage = {
