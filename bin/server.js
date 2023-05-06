@@ -159,12 +159,18 @@ server.post('/conversation', async (request, reply) => {
 server.listen({
     port: settings.apiOptions?.port || settings.port || 3000,
     host: settings.apiOptions?.host || 'localhost',
-}, (error) => {
+}, (error, address) => {
     if (error) {
         console.error(error);
         process.exit(1);
     }
+    else {
+        console.log(`Server is now listening on ${address}`);
+    }
 });
+
+// wait for the server to start
+await new Promise(resolve => server.ready(resolve));
 
 function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
