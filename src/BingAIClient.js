@@ -246,14 +246,14 @@ export default class BingAIClient {
                     case 'bot':
                         return `[assistant](#message)\n${previousMessage.text}`;
                     case 'system':
-                        return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
+                        return `[system](#additional_instructions)\n${previousMessage.text}`;
                     default:
                         throw new Error(`Unknown message author: ${previousMessage.author}`);
                 }
             }).join('\n\n');
 
             if (context) {
-                previousMessagesFormatted = context + previousMessagesFormatted;
+                previousMessagesFormatted = `${context}\n\n${previousMessagesFormatted}`;
             }
         }
 
