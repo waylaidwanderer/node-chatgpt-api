@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { FastifySSEPlugin } from '@waylaidwanderer/fastify-sse-v2';
+import {FastifySSEPlugin} from '@waylaidwanderer/fastify-sse-v2';
 import fs from 'fs';
-import { pathToFileURL } from 'url';
-import { KeyvFile } from 'keyv-file';
+import {pathToFileURL} from 'url';
+import {KeyvFile} from 'keyv-file';
 import ChatGPTClient from '../src/ChatGPTClient.js';
 import ChatGPTBrowserClient from '../src/ChatGPTBrowserClient.js';
 import BingAIClient from '../src/BingAIClient.js';
@@ -30,13 +30,13 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     // make the directory and file if they don't exist
     const dir = settings.storageFilePath.split('/').slice(0, -1).join('/');
     if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+        fs.mkdirSync(dir, {recursive: true});
     }
     if (!fs.existsSync(settings.storageFilePath)) {
         fs.writeFileSync(settings.storageFilePath, '');
     }
 
-    settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
+    settings.cacheOptions.store = new KeyvFile({filename: settings.storageFilePath});
 }
 
 const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
@@ -68,7 +68,7 @@ server.post('/conversation', async (request, reply) => {
                 console.debug(token);
             }
             if (token !== '[DONE]') {
-                reply.sse({ id: '', data: JSON.stringify(token) });
+                reply.sse({id: '', data: JSON.stringify(token)});
             }
         };
     } else {
@@ -95,7 +95,7 @@ server.post('/conversation', async (request, reply) => {
             delete clientOptions.clientToUse;
         }
 
-        let { shouldGenerateTitle } = body;
+        let {shouldGenerateTitle} = body;
         if (typeof shouldGenerateTitle !== 'boolean') {
             shouldGenerateTitle = settings.apiOptions?.generateTitles || false;
         }
@@ -126,8 +126,8 @@ server.post('/conversation', async (request, reply) => {
             console.debug(result);
         }
         if (body.stream === true) {
-            reply.sse({ event: 'result', id: '', data: JSON.stringify(result) });
-            reply.sse({ id: '', data: '[DONE]' });
+            reply.sse({event: 'result', id: '', data: JSON.stringify(result)});
+            reply.sse({id: '', data: '[DONE]'});
             await nextTick();
             return reply.raw.end();
         }
@@ -153,7 +153,7 @@ server.post('/conversation', async (request, reply) => {
         await nextTick();
         return reply.raw.end();
     }
-    return reply.code(code).send({ error: message });
+    return reply.code(code).send({error: message});
 });
 
 server.listen({
@@ -163,10 +163,10 @@ server.listen({
     if (error) {
         console.error(error);
         process.exit(1);
-    }
-    else {
+    } else {
         console.log(`Server is now listening on ${address}`);
-    }});
+    }
+});
 
 // wait for the server to start
 await new Promise(resolve => server.ready(resolve));
@@ -178,7 +178,7 @@ function nextTick() {
 function getClient(clientToUseForMessage) {
     switch (clientToUseForMessage) {
         case 'bing':
-            return new BingAIClient({ ...settings.bingAiClient, cache: settings.cacheOptions });
+            return new BingAIClient({...settings.bingAiClient, cache: settings.cacheOptions});
         case 'chatgpt-browser':
             return new ChatGPTBrowserClient(
                 settings.chatGptBrowserClient,
