@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import WebSocket from 'ws';
 import Keyv from 'keyv';
 import { ProxyAgent } from 'undici';
-import HttpsProxyAgent from 'https-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 /**
  * https://stackoverflow.com/a/58326357
