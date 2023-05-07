@@ -166,8 +166,7 @@ server.listen({
     }
     else {
         console.log(`Server is now listening on ${address}`);
-    }
-});
+    }});
 
 // wait for the server to start
 await new Promise(resolve => server.ready(resolve));
