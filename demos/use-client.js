@@ -8,6 +8,9 @@ const clientOptions = {
     // Warning: This will expose your `openaiApiKey` to a third party. Consider the risks before using this.
     // reverseProxyUrl: 'https://chatgpt.hato.ai/completions',
     // (Optional) Parameters as described in https://platform.openai.com/docs/api-reference/completions
+    // (Optional) to use Azure OpenAI API, set `azure` to true and `reverseProxyUrl` to your completion endpoint:
+    // azure: true,
+    // reverseProxyUrl: 'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/chat/completions?api-version={api-version}',
     modelOptions: {
         // You can override the model name and any other parameters here, like so:
         model: 'gpt-3.5-turbo',
