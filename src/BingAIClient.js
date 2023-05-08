@@ -180,7 +180,7 @@ export default class BingAIClient {
             onProgress = () => { };
         }
 
-        if (jailbreakConversationId || !conversationSignature || !conversationId || !clientId) {
+        if (!conversationSignature || !conversationId || !clientId) {
             const createNewConversationResponse = await this.createNewConversation();
             if (this.debug) {
                 console.debug(createNewConversationResponse);
@@ -322,7 +322,7 @@ export default class BingAIClient {
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
-                        text: jailbreakConversationId ? '' : message,
+                        text: (jailbreakConversationId && invocationId === 0) ? '' : message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
                     },
                     conversationSignature,
