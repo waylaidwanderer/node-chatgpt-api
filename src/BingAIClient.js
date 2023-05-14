@@ -236,6 +236,11 @@ export default class BingAIClient {
                     author: 'system',
                 },
                 ...previousCachedMessages,
+                // We still need this to avoid repeating introduction in some cases
+                {
+                    text: message,
+                    author: 'user',
+                },
             ] : undefined;
 
             // prepare messages for prompt injection
