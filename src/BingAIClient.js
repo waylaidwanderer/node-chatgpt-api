@@ -236,18 +236,12 @@ export default class BingAIClient {
                     author: 'system',
                 },
                 ...previousCachedMessages,
+                // We still need this to avoid repeating introduction in some cases
                 {
                     text: message,
                     author: 'user',
                 },
             ] : undefined;
-
-            if (context) {
-                previousMessages.push({
-                    text: context,
-                    author: 'context', // not a real/valid author, we're just piggybacking on the existing logic
-                });
-            }
 
             // prepare messages for prompt injection
             previousMessagesFormatted = previousMessages?.map((previousMessage) => {
@@ -257,13 +251,15 @@ export default class BingAIClient {
                     case 'bot':
                         return `[assistant](#message)\n${previousMessage.text}`;
                     case 'system':
-                        return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
-                    case 'context':
-                        return `[user](#context)\n${previousMessage.text}`;
+                        return `[system](#additional_instructions)\n${previousMessage.text}`;
                     default:
                         throw new Error(`Unknown message author: ${previousMessage.author}`);
                 }
             }).join('\n\n');
+
+            if (context) {
+                previousMessagesFormatted = `${context}\n\n${previousMessagesFormatted}`;
+            }
         }
 
         const userMessage = {
@@ -312,6 +308,7 @@ export default class BingAIClient {
                         'cricinfo',
                         'cricinfov2',
                         'dv3sugg',
+                        'nojbfedge',
                     ],
                     sliceIds: [
                         '222dtappid',
@@ -322,7 +319,7 @@ export default class BingAIClient {
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
-                        text: jailbreakConversationId ? '' : message,
+                        text: message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
                     },
                     conversationSignature,
