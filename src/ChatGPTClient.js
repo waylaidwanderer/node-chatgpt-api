@@ -170,7 +170,10 @@ export default class ChatGPTClient {
                 headersTimeout: 0,
             }),
         };
-        if (this.apiKey) {
+
+        if (this.apiKey && this.options.azure && this.options.reverseProxyUrl) {
+            opts.headers['api-key'] = this.apiKey;
+        } else if (this.apiKey) {
             opts.headers.Authorization = `Bearer ${this.apiKey}`;
         }
 

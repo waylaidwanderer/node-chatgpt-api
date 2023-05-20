@@ -236,18 +236,12 @@ export default class BingAIClient {
                     author: 'system',
                 },
                 ...previousCachedMessages,
+                // We still need this to avoid repeating introduction in some cases
                 {
                     text: message,
                     author: 'user',
                 },
             ] : undefined;
-
-            if (context) {
-                previousMessages.push({
-                    text: context,
-                    author: 'context', // not a real/valid author, we're just piggybacking on the existing logic
-                });
-            }
 
             // prepare messages for prompt injection
             previousMessagesFormatted = previousMessages?.map((previousMessage) => {
@@ -257,13 +251,15 @@ export default class BingAIClient {
                     case 'bot':
                         return `[assistant](#message)\n${previousMessage.text}`;
                     case 'system':
-                        return `N/A\n\n[system](#additional_instructions)\n- ${previousMessage.text}`;
-                    case 'context':
-                        return `[user](#context)\n${previousMessage.text}`;
+                        return `[system](#additional_instructions)\n${previousMessage.text}`;
                     default:
                         throw new Error(`Unknown message author: ${previousMessage.author}`);
                 }
             }).join('\n\n');
+
+            if (context) {
+                previousMessagesFormatted = `${context}\n\n${previousMessagesFormatted}`;
+            }
         }
 
         const userMessage = {
@@ -312,6 +308,7 @@ export default class BingAIClient {
                         'cricinfo',
                         'cricinfov2',
                         'dv3sugg',
+                        'nojbfedge',
                     ],
                     sliceIds: [
                         '222dtappid',
@@ -371,7 +368,7 @@ export default class BingAIClient {
             const messageTimeout = setTimeout(() => {
                 this.constructor.cleanupWebSocketConnection(ws);
                 reject(new Error('Timed out waiting for response. Try enabling debug mode to see more information.'));
-            }, 120 * 1000);
+            }, 180 * 1000);
 
             // abort the request if the abort controller is aborted
             abortController.signal.addEventListener('abort', () => {
@@ -460,6 +457,7 @@ export default class BingAIClient {
                                 stopTokenFound
                                 || event.item.messages[0].topicChangerText
                                 || event.item.messages[0].offense === 'OffenseTrigger'
+                                || (event.item.messages.length > 1 && event.item.messages[1].contentOrigin === 'Apology')
                             )
                         ) {
                             if (!replySoFar) {

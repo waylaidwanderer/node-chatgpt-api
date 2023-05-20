@@ -178,6 +178,28 @@ export default class ChatGPTBrowserClient {
         return response;
     }
 
+    async deleteConversation(conversationId) {
+        const url = this.options.reverseProxyUrl || 'https://chat.openai.com/backend-api/conversation';
+
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            try {
+                await fetch(`${url}/${conversationId}`, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${this.accessToken}`,
+                        Cookie: this.cookies || undefined,
+                    },
+                    body: '{"is_visible":false}',
+                    method: 'PATCH',
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     async sendMessage(
         message,
         opts = {},
