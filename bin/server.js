@@ -159,17 +159,20 @@ server.post('/conversation', async (request, reply) => {
 server.listen({
     port: settings.apiOptions?.port || settings.port || 3000,
     host: settings.apiOptions?.host || 'localhost',
-}, (error, address) => {
+    }, (error, address) => {
     if (error) {
         console.error(error);
         process.exit(1);
-    } else {
-        console.log(`Server is now listening on ${address}`);
     }
+    console.log(`Server is listening on ${address}`)
 });
 
-// wait for the server to start
-await new Promise(resolve => server.ready(resolve));
+// // wait for the server to start
+// await new Promise(resolve => server.ready(resolve));
+
+// fastify.on('listening', (address) => {
+//     console.log(`Server listening on ${address}`);
+// });
 
 function nextTick() {
     return new Promise(resolve => setTimeout(resolve, 0));
