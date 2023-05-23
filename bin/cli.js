@@ -40,6 +40,10 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
+// Disable the image generation in cli mode always.
+settings.bingAiClient.features = settings.bingAiClient.features || {};
+settings.bingAiClient.features.genImage = false;
+
 let conversationData = {};
 
 const availableCommands = [
