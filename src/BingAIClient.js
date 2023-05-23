@@ -64,7 +64,7 @@ export default class BingAIClient {
                 'sec-fetch-site': 'same-origin',
                 'x-ms-client-request-id': crypto.randomUUID(),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
-                cookie: this.options.cookies || `_U=${this.options.userToken}`,
+                cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
                 'Referrer-Policy': 'origin-when-cross-origin',
                 // Workaround for request being blocked due to geolocation
