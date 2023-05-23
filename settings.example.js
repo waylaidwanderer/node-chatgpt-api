@@ -46,6 +46,13 @@ export default {
         cookies: '',
         // A proxy string like "http://<ip>:<port>"
         proxy: '',
+        // (Optional) Set 'x-forwarded-for' for the request. You can use a fixed IPv4 address or specify a range using CIDR notation,
+        // and the program will randomly select an address within that range. The 'x-forwarded-for' is not used by default now.
+        // xForwardedFor: '13.104.0.0/14',
+        // (Optional) Set 'genImage' to true to enable bing to create images for you. It's disabled by default.
+        // features: {
+        //     genImage: true,
+        // },
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },
