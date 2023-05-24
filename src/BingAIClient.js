@@ -512,14 +512,15 @@ export default class BingAIClient {
                             eventMessage.text = replySoFar;
                             // delete useless suggestions from moderation filter
                             delete eventMessage.suggestedResponses;
-                        } else {
+                        }                      
+                        if (bicIframe) {
+                            // the last messages will be a image creation event if bicIframe is present.
                             let i = messages.length - 1;
                             while (eventMessage?.contentType === 'IMAGE' && i > 0) {
                                 eventMessage = messages[i -= 1];
                             }
-                        }
-                        if (bicIframe) {
-                            // if bicIframe is presented, wait for it to be completed.
+
+                            // wait for bicIframe to be completed.
                             bicIframe.then(async (result) => {
                                 // The frame can be large, only put it into adaptiveCards.
                                 eventMessage.adaptiveCards[0].body[0].text += result;
