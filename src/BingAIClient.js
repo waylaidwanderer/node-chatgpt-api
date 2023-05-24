@@ -512,7 +512,7 @@ export default class BingAIClient {
                             eventMessage.text = replySoFar;
                             // delete useless suggestions from moderation filter
                             delete eventMessage.suggestedResponses;
-                        }                      
+                        }
                         if (bicIframe) {
                             // the last messages will be a image creation event if bicIframe is present.
                             let i = messages.length - 1;
