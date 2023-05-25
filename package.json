@@ -49,7 +49,7 @@
     "dotenv": "^16.0.3",
     "fastify": "^4.11.0",
     "fetch-undici": "^3.0.1",
-    "https-proxy-agent": "^6.0.0",
+    "https-proxy-agent": "^7.0.0",
     "inquirer": "^9.1.4",
     "inquirer-autocomplete-prompt": "^3.0.0",
     "keyv": "^4.5.2",
