@@ -10,8 +10,8 @@
 
 See OpenAI's post, [Introducing ChatGPT and Whisper APIs](https://openai.com/blog/introducing-chatgpt-and-whisper-apis) for more information.
 
-~~To use it, set `modelOptions.model` to `gpt-3.5-turbo`, and `ChatGPTClient` will handle the rest.~~  
-The default model used in `ChatGPTClient` is now `gpt-3.5-turbo`.  
+~~To use it, set `modelOptions.model` to `gpt-3.5-turbo`, and `ChatGPTClient` will handle the rest.~~
+The default model used in `ChatGPTClient` is now `gpt-3.5-turbo`.
 You can still set `userLabel`, `chatGptLabel` and `promptPrefix` (system instructions) as usual.
 
 **There may be a higher chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
@@ -121,7 +121,7 @@ Discord user @pig#8932 has found a working `text-chat-davinci-002` model, `text-
     - This is currently only configurable on a global level, but I plan to add support for per-conversation customization.
   - Retains support for models like `text-davinci-003`
 - `BingAIClient`: support for Bing's version of ChatGPT, powered by GPT-4.
-  - Includes a built-in jailbreak you can activate which enables unlimited chat messages per conversation, unlimited messages per day, and brings Sydney back. 😊 
+  - Includes a built-in jailbreak you can activate which enables unlimited chat messages per conversation, unlimited messages per day, and brings Sydney back. 😊
 - `ChatGPTBrowserClient`: support for the official ChatGPT website, using a reverse proxy server for a Cloudflare bypass.
   - **There may be a high chance of your account being banned if you continue to automate chat.openai.com.** Continue doing so at your own risk.
 
@@ -248,7 +248,7 @@ module.exports = {
         // This will be returned as a `title` property in the first response of the conversation.
         generateTitles: false,
         // (Optional) Set this to allow changing the client or client options in POST /conversation.
-        // To disable, set to `null`. 
+        // To disable, set to `null`.
         perMessageClientOptionsWhitelist: {
             // The ability to switch clients using `clientOptions.clientToUse` will be disabled if `validClientsToUse` is not set.
             // To allow switching clients per message, you must set `validClientsToUse` to a non-empty array.
@@ -307,7 +307,7 @@ Optional parameters are only necessary for conversations that span multiple requ
 | clientOptions.clientToUse | (Optional) The client to use for this message. Possible values: `chatgpt`, `chatgpt-browser`, `bing`.                                                                                                                                                           |
 | clientOptions.*           | (Optional) Any valid options for the client. For example, for `ChatGPTClient`, you can set `clientOptions.openaiApiKey` to set an API key for this message only, or `clientOptions.promptPrefix` to give the AI custom instructions for this message only, etc. |
 
-To configure which options can be changed per message (default: all), see the comments for `perMessageClientOptionsWhitelist` in `settings.example.js`.  
+To configure which options can be changed per message (default: all), see the comments for `perMessageClientOptionsWhitelist` in `settings.example.js`.
 To allow changing clients, `perMessageClientOptionsWhitelist.validClientsToUse` must be set to a non-empty array as described in the example settings file.
 </details>
 

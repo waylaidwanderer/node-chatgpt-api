@@ -312,7 +312,10 @@ ${botMessage.message}
         const conversationId = opts.conversationId || crypto.randomUUID();
         const parentMessageId = opts.parentMessageId || crypto.randomUUID();
 
-        let conversation = await this.conversationsCache.get(conversationId);
+        let conversation = typeof opts.conversation === 'object'
+            ? opts.conversation
+            : await this.conversationsCache.get(conversationId);
+
         let isNewConversation = false;
         if (!conversation) {
             conversation = {
@@ -332,13 +335,19 @@ ${botMessage.message}
         };
         conversation.messages.push(userMessage);
 
-        let payload;
-        if (this.isChatGptModel) {
-            // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
-            // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
-            payload = await this.buildPrompt(conversation.messages, userMessage.id, true);
-        } else {
-            payload = await this.buildPrompt(conversation.messages, userMessage.id);
+        // Doing it this way instead of having each message be a separate element in the array seems to be more reliable,
+        // especially when it comes to keeping the AI in character. It also seems to improve coherency and context retention.
+        const { prompt: payload, context } = await this.buildPrompt(
+            conversation.messages,
+            userMessage.id,
+            {
+                isChatGptModel: this.isChatGptModel,
+                promptPrefix: opts.promptPrefix,
+            },
+        );
+
+        if (this.options.keepNecessaryMessagesOnly) {
+            conversation.messages = context;
         }
 
         let reply = '';
@@ -412,15 +421,18 @@ ${botMessage.message}
 
         await this.conversationsCache.set(conversationId, conversation);
 
+        if (this.options.returnConversation) {
+            returnData.conversation = conversation;
+        }
+
         return returnData;
     }
 
-    async buildPrompt(messages, parentMessageId, isChatGptModel = false) {
+    async buildPrompt(messages, parentMessageId, { isChatGptModel = false, promptPrefix = null }) {
         const orderedMessages = this.constructor.getMessagesForConversation(messages, parentMessageId);
 
-        let promptPrefix;
-        if (this.options.promptPrefix) {
-            promptPrefix = this.options.promptPrefix.trim();
+        promptPrefix = (promptPrefix || this.options.promptPrefix || '').trim();
+        if (promptPrefix) {
             // If the prompt prefix doesn't end with the end token, add it.
             if (!promptPrefix.endsWith(`${this.endToken}`)) {
                 promptPrefix = `${promptPrefix.trim()}${this.endToken}\n\n`;
@@ -456,6 +468,8 @@ ${botMessage.message}
         let promptBody = '';
         const maxTokenCount = this.maxPromptTokens;
 
+        const context = [];
+
         // Iterate backwards through the messages, adding them to the prompt until we reach the max token count.
         // Do this within a recursive async function so that it doesn't block the event loop for too long.
         const buildPromptBody = async () => {
@@ -474,6 +488,8 @@ ${botMessage.message}
                     newPromptBody = `${promptPrefix}${messageString}${promptBody}`;
                 }
 
+                context.unshift(message);
+
                 const tokenCountForMessage = this.getTokenCount(messageString);
                 const newTokenCount = currentTokenCount + tokenCountForMessage;
                 if (newTokenCount > maxTokenCount) {
@@ -487,7 +503,7 @@ ${botMessage.message}
                 promptBody = newPromptBody;
                 currentTokenCount = newTokenCount;
                 // wait for next tick to avoid blocking the event loop
-                await new Promise(resolve => setTimeout(resolve, 0));
+                await new Promise(resolve => setImmediate(resolve));
                 return buildPromptBody();
             }
             return true;
@@ -506,12 +522,9 @@ ${botMessage.message}
         this.modelOptions.max_tokens = Math.min(this.maxContextTokens - currentTokenCount, this.maxResponseTokens);
 
         if (isChatGptModel) {
-            return [
-                instructionsPayload,
-                messagePayload,
-            ];
+            return { prompt: [instructionsPayload, messagePayload], context };
         }
-        return prompt;
+        return { prompt, context };
     }
 
     getTokenCount(text) {
