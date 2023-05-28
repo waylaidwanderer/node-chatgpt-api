@@ -102,7 +102,6 @@ export default class BingAIClient {
                 cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1',
                 'Referrer-Policy': 'origin-when-cross-origin',
-                cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 // Workaround for request being blocked due to geolocation
                 // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
                 ...(this.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
