@@ -521,7 +521,7 @@ export default class BingAIClient {
                             while (eventMessage?.contentType === 'IMAGE' && i > 0) {
                                 eventMessage = messages[i -= 1];
                             }
-                            
+
                             // wait for bicIframe to be completed.
                             bicIframe.then((result) => {
                                 // The frame can be large, only put it into adaptiveCards.
