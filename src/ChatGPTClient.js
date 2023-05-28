@@ -177,6 +177,10 @@ export default class ChatGPTClient {
             opts.headers.Authorization = `Bearer ${this.apiKey}`;
         }
 
+        if (this.options.headers) {
+            opts.headers = { ...opts.headers, ...this.options.headers };
+        }
+
         if (this.options.proxy) {
             opts.dispatcher = new ProxyAgent(this.options.proxy);
         }
