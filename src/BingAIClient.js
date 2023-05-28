@@ -97,12 +97,12 @@ export default class BingAIClient {
                 'x-ms-client-request-id': crypto.randomUUID(),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.50',
-                cookie: this.options.cookies || `_U=${this.options.userToken}`,
+                cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
                 'Referrer-Policy': 'origin-when-cross-origin',
                 // Workaround for request being blocked due to geolocation
                 // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
-                ...(this.xForwardedFor ? { 'x-forwarded-for': this.xForwardedFor } : {}),
+                ...(this.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
             },
         };
         if (this.options.proxy) {
@@ -519,9 +519,9 @@ export default class BingAIClient {
                             while (eventMessage?.contentType === 'IMAGE' && i > 0) {
                                 eventMessage = messages[i -= 1];
                             }
-
+                            
                             // wait for bicIframe to be completed.
-                            bicIframe.then(async (result) => {
+                            bicIframe.then((result) => {
                                 // The frame can be large, only put it into adaptiveCards.
                                 eventMessage.adaptiveCards[0].body[0].text += result;
                                 resolve({
