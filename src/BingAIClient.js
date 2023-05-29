@@ -104,7 +104,7 @@ export default class BingAIClient {
                 'Referrer-Policy': 'origin-when-cross-origin',
                 // Workaround for request being blocked due to geolocation
                 // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
-                ...(this.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
+                ...(this.options.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
             },
         };
         if (this.options.proxy) {
@@ -415,7 +415,7 @@ export default class BingAIClient {
             });
 
             let bicIframe;
-            ws.on('message', (data) => {
+            ws.on('message', async (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
                     try {
@@ -523,20 +523,16 @@ export default class BingAIClient {
                             }
 
                             // wait for bicIframe to be completed.
-                            bicIframe.then((result) => {
-                                // The frame can be large, only put it into adaptiveCards.
-                                eventMessage.adaptiveCards[0].body[0].text += result;
-                                resolve({
-                                    message: eventMessage,
-                                    conversationExpiryTime: event?.item?.conversationExpiryTime,
-                                });
-                            }).catch((error) => {
+                            try {
+                                const imgIframe = await bicIframe;
+                                eventMessage.adaptiveCards[0].body[0].text += imgIframe;
+                            } catch (error) {
                                 eventMessage.text += `<br>${error}`;
                                 eventMessage.adaptiveCards[0].body[0].text = eventMessage.text;
-                                resolve({
-                                    message: eventMessage,
-                                    conversationExpiryTime: event?.item?.conversationExpiryTime,
-                                });
+                            }
+                            resolve({
+                                message: eventMessage,
+                                conversationExpiryTime: event?.item?.conversationExpiryTime,
                             });
                         } else {
                             // if there is no bicIframe, we resolve it normally.
