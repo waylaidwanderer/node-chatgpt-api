@@ -530,17 +530,11 @@ export default class BingAIClient {
                                 eventMessage.text += `<br>${error}`;
                                 eventMessage.adaptiveCards[0].body[0].text = eventMessage.text;
                             }
-                            resolve({
-                                message: eventMessage,
-                                conversationExpiryTime: event?.item?.conversationExpiryTime,
-                            });
-                        } else {
-                            // if there is no bicIframe, we resolve it normally.
-                            resolve({
-                                message: eventMessage,
-                                conversationExpiryTime: event?.item?.conversationExpiryTime,
-                            });
                         }
+                        resolve({
+                            message: eventMessage,
+                            conversationExpiryTime: event?.item?.conversationExpiryTime,
+                        });
                         // eslint-disable-next-line no-useless-return
                         return;
                     }
