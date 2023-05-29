@@ -443,7 +443,11 @@ export default class BingAIClient {
                                 messages[0].text,
                                 messages[0].messageId,
                                 progress => (progress?.contentIframe ? onProgress(progress?.contentIframe) : null),
-                            );
+                            ).catch((error) => {
+                                onProgress(error.message);
+                                bicIframe.isError = true;
+                                return error.message;
+                            });
                             return;
                         }
                         const updatedText = messages[0].text;
@@ -523,11 +527,12 @@ export default class BingAIClient {
                             }
 
                             // wait for bicIframe to be completed.
-                            try {
-                                const imgIframe = await bicIframe;
+                            // since we added a catch, we do not need to wrap this with a try catch block.
+                            const imgIframe = await bicIframe;
+                            if (!imgIframe?.isError) {
                                 eventMessage.adaptiveCards[0].body[0].text += imgIframe;
-                            } catch (error) {
-                                eventMessage.text += `<br>${error}`;
+                            } else {
+                                eventMessage.text += `<br>${imgIframe}`;
                                 eventMessage.adaptiveCards[0].body[0].text = eventMessage.text;
                             }
                         }
