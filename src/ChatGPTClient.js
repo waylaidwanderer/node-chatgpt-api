@@ -540,18 +540,28 @@ ${botMessage.message}
      * @param {*} message
      */
     getTokenCountForMessage(message) {
+        let tokensPerMessage;
+        let nameAdjustment;
+        if (this.modelOptions.model.startsWith('gpt-4')) {
+            tokensPerMessage = 3;
+            nameAdjustment = 1;
+        } else {
+            tokensPerMessage = 4;
+            nameAdjustment = -1;
+        }
+
         // Map each property of the message to the number of tokens it contains
         const propertyTokenCounts = Object.entries(message).map(([key, value]) => {
             // Count the number of tokens in the property value
             const numTokens = this.getTokenCount(value);
 
-            // Subtract 1 token if the property key is 'name'
-            const adjustment = (key === 'name') ? 1 : 0;
-            return numTokens - adjustment;
+            // Adjust by `nameAdjustment` tokens if the property key is 'name'
+            const adjustment = (key === 'name') ? nameAdjustment : 0;
+            return numTokens + adjustment;
         });
 
-        // Sum the number of tokens in all properties and add 4 for metadata
-        return propertyTokenCounts.reduce((a, b) => a + b, 4);
+        // Sum the number of tokens in all properties and add `tokensPerMessage` for metadata
+        return propertyTokenCounts.reduce((a, b) => a + b, tokensPerMessage);
     }
 
     /**
