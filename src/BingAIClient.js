@@ -4,6 +4,7 @@ import WebSocket from 'ws';
 import Keyv from 'keyv';
 import { ProxyAgent } from 'undici';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { BingImageCreator } from '@timefox/bic-sydney';
 
 /**
  * https://stackoverflow.com/a/58326357
@@ -39,9 +40,40 @@ export default class BingAIClient {
             this.options = {
                 ...options,
                 host: options.host || 'https://www.bing.com',
+                xForwardedFor: this.constructor.getValidIPv4(options.xForwardedFor),
+                features: {
+                    genImage: options?.features?.genImage || false,
+                },
             };
         }
         this.debug = this.options.debug;
+        if (this.options.features.genImage) {
+            this.bic = new BingImageCreator(this.options);
+        }
+    }
+
+    static getValidIPv4(ip) {
+        const match = !ip
+            || ip.match(/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\/([0-9]|[1-2][0-9]|3[0-2]))?$/);
+        if (match) {
+            if (match[5]) {
+                const mask = parseInt(match[5], 10);
+                let [a, b, c, d] = ip.split('.').map(x => parseInt(x, 10));
+                // eslint-disable-next-line no-bitwise
+                const max = (1 << (32 - mask)) - 1;
+                const rand = Math.floor(Math.random() * max);
+                d += rand;
+                c += Math.floor(d / 256);
+                d %= 256;
+                b += Math.floor(c / 256);
+                c %= 256;
+                a += Math.floor(b / 256);
+                b %= 256;
+                return `${a}.${b}.${c}.${d}`;
+            }
+            return ip;
+        }
+        return undefined;
     }
 
     async createNewConversation() {
@@ -49,11 +81,12 @@ export default class BingAIClient {
             headers: {
                 accept: 'application/json',
                 'accept-language': 'en-US,en;q=0.9',
-                'sec-ch-ua': '"Not/A)Brand";v="99", "Microsoft Edge";v="115", "Chromium";v="115"',
+                'content-type': 'application/json',
+                'sec-ch-ua': '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
                 'sec-ch-ua-arch': '"x86"',
                 'sec-ch-ua-bitness': '"64"',
-                'sec-ch-ua-full-version': '"115.0.1866.1"',
-                'sec-ch-ua-full-version-list': '"Not/A)Brand";v="99.0.0.0", "Microsoft Edge";v="115.0.1866.1", "Chromium";v="115.0.5767.0"',
+                'sec-ch-ua-full-version': '"113.0.1774.50"',
+                'sec-ch-ua-full-version-list': '"Microsoft Edge";v="113.0.1774.50", "Chromium";v="113.0.5672.127", "Not-A.Brand";v="24.0.0.0"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-model': '""',
                 'sec-ch-ua-platform': '"Windows"',
@@ -65,11 +98,13 @@ export default class BingAIClient {
                 'sec-ms-gec-version': '1-115.0.1866.1',
                 'x-ms-client-request-id': crypto.randomUUID(),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.50',
+                cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1',
                 'Referrer-Policy': 'origin-when-cross-origin',
-                cookie: this.options.cookies || (this.options.userToken ? `_U=${this.options.userToken}` : undefined),
                 // Workaround for request being blocked due to geolocation
-                'x-forwarded-for': '1.1.1.1',
+                // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
+                ...(this.options.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
             },
         };
         if (this.options.proxy) {
@@ -310,6 +345,7 @@ export default class BingAIClient {
                         'cricinfov2',
                         'dv3sugg',
                         'nojbfedge',
+                        ...((toneStyle === 'creative' && this.options.features.genImage) ? ['gencontentv3'] : []),
                     ],
                     sliceIds: [
                         '222dtappid',
@@ -378,7 +414,8 @@ export default class BingAIClient {
                 reject(new Error('Request aborted'));
             });
 
-            ws.on('message', (data) => {
+            let bicIframe;
+            ws.on('message', async (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
                     try {
@@ -398,6 +435,19 @@ export default class BingAIClient {
                         }
                         const messages = event?.arguments?.[0]?.messages;
                         if (!messages?.length || messages[0].author !== 'bot') {
+                            return;
+                        }
+                        if (messages[0]?.contentType === 'IMAGE') {
+                            // You will never get a message of this type without 'gencontentv3' being on.
+                            bicIframe = this.bic.genImageIframeSsr(
+                                messages[0].text,
+                                messages[0].messageId,
+                                progress => (progress?.contentIframe ? onProgress(progress?.contentIframe) : null),
+                            ).catch((error) => {
+                                onProgress(error.message);
+                                bicIframe.isError = true;
+                                return error.message;
+                            });
                             return;
                         }
                         const updatedText = messages[0].text;
@@ -424,7 +474,7 @@ export default class BingAIClient {
                             return;
                         }
                         const messages = event.item?.messages || [];
-                        const eventMessage = messages.length ? messages[messages.length - 1] : null;
+                        let eventMessage = messages.length ? messages[messages.length - 1] : null;
                         if (event.item?.result?.error) {
                             if (this.debug) {
                                 console.debug(event.item.result.value, event.item.result.message);
@@ -469,6 +519,23 @@ export default class BingAIClient {
                             // delete useless suggestions from moderation filter
                             delete eventMessage.suggestedResponses;
                         }
+                        if (bicIframe) {
+                            // the last messages will be a image creation event if bicIframe is present.
+                            let i = messages.length - 1;
+                            while (eventMessage?.contentType === 'IMAGE' && i > 0) {
+                                eventMessage = messages[i -= 1];
+                            }
+
+                            // wait for bicIframe to be completed.
+                            // since we added a catch, we do not need to wrap this with a try catch block.
+                            const imgIframe = await bicIframe;
+                            if (!imgIframe?.isError) {
+                                eventMessage.adaptiveCards[0].body[0].text += imgIframe;
+                            } else {
+                                eventMessage.text += `<br>${imgIframe}`;
+                                eventMessage.adaptiveCards[0].body[0].text = eventMessage.text;
+                            }
+                        }
                         resolve({
                             message: eventMessage,
                             conversationExpiryTime: event?.item?.conversationExpiryTime,
@@ -485,6 +552,11 @@ export default class BingAIClient {
                         return;
                     }
                     default:
+                        if (event?.error) {
+                            clearTimeout(messageTimeout);
+                            this.constructor.cleanupWebSocketConnection(ws);
+                            reject(new Error(`Event Type('${event.type}'): ${event.error}`));
+                        }
                         // eslint-disable-next-line no-useless-return
                         return;
                 }
