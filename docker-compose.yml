@@ -1,12 +1,14 @@
 version: '3'
 services:
   app:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    image: ghcr.io/waylaidwanderer/node-chatgpt-api:latest
+    restart: unless-stopped
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - ./settings.js:/var/chatgpt-api/settings.js:cached
+      - ./settings.js:/app/settings.js:cached
     ports:
       - '${APP_PORT:-3000}:3000'
