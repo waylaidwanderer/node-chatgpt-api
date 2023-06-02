@@ -49,10 +49,32 @@ export default {
         // (Optional) Set 'x-forwarded-for' for the request. You can use a fixed IPv4 address or specify a range using CIDR notation,
         // and the program will randomly select an address within that range. The 'x-forwarded-for' is not used by default now.
         // xForwardedFor: '13.104.0.0/14',
-        // (Optional) Set 'genImage' to true to enable bing to create images for you. It's disabled by default.
-        // features: {
-        //     genImage: true,
-        // },
+        // (Optional) Set the tone style, possible options: "creative", "precise", "fast", "balanced"(default)
+        // Note: To enable BIC function, it must be set to "creative"
+        // toneStyle: 'creative',
+        // (Optional) The optional features options, these features are all disabled by default
+        features: {
+            // (Optional | Deprecated) Set 'genImage' to true to enable BIC. (Default: "false")
+            // Note: It's deprecated by the new option style. It is only retained for compatibility purposes.
+            // genImage: true,
+            // (Optional) Options for genImage
+            genImage: {
+                // (Optional) Options for server mode
+                server: {
+                    // (Optional) Set 'enable' to true to enable BIC
+                    // enable: true,
+                    // (Optional) Possible options: "iframe"(default), "url_list", "markdown_list"
+                    type: 'iframe',
+                },
+                // (Optional) Options for cli mode
+                cli: {
+                    // (Optional) Set 'enable' to true to enable BIC
+                    // enable: true,
+                    // (Optional) Possible options: "url_list", "markdown_list"(default).
+                    type: 'markdown_list',
+                },
+            },
+        },
         // (Optional) Set to true to enable `console.debug()` logging
         debug: false,
     },

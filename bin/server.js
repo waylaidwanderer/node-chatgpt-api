@@ -39,6 +39,18 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
+// Kick bing's the image generation options for server.
+const enableBicImage = {
+    enable: settings.bingAiClient?.features?.genImage?.server?.enable
+    || (settings.bingAiClient?.features ? false : (settings.bingAiClient.features = {}, false))
+    || (typeof settings.bingAiClient.features?.genImage === 'boolean' ? settings.bingAiClient.features.genImage : false),
+    type: settings.bingAiClient?.features?.genImage?.server?.type || 'iframe',
+};
+if (!BingAIClient.isValidBicType(enableBicImage.type)) {
+    enableBicImage.type = 'markdown_list';
+}
+settings.bingAiClient.features.genImage = enableBicImage;
+
 const clientToUse = settings.apiOptions?.clientToUse || settings.clientToUse || 'chatgpt';
 const perMessageClientOptionsWhitelist = settings.apiOptions?.perMessageClientOptionsWhitelist || null;
 

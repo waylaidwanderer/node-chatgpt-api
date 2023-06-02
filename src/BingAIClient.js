@@ -40,6 +40,7 @@ export default class BingAIClient {
             this.options = {
                 ...options,
                 host: options.host || 'https://www.bing.com',
+                toneStyle: options.toneStyle || 'balanced', // or creative, precise, fast,
                 xForwardedFor: this.constructor.getValidIPv4(options.xForwardedFor),
                 features: {
                     genImage: options?.features?.genImage || false,
@@ -47,8 +48,13 @@ export default class BingAIClient {
             };
         }
         this.debug = this.options.debug;
-        if (this.options.features.genImage) {
-            this.bic = new BingImageCreator(this.options);
+        if (this.options.features?.genImage?.enable) {
+            this.bic = this.bic ?? {
+                api: new BingImageCreator(this.options),
+                type: this.options?.features?.genImage?.type || 'iframe',
+            };
+        } else {
+            this.bic = undefined;
         }
     }
 
@@ -76,6 +82,10 @@ export default class BingAIClient {
         return undefined;
     }
 
+    static isValidBicType(bicType) {
+        return (bicType === 'iframe' || bicType === 'url_list' || bicType === 'markdown_list');
+    }
+
     async createNewConversation() {
         const fetchOptions = {
             headers: {
@@ -95,7 +105,7 @@ export default class BingAIClient {
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
                 'sec-ms-gec': genRanHex(64).toUpperCase(),
-                'sec-ms-gec-version': '1-115.0.1866.1',
+                'sec-ms-gec-version': '1-113.0.1774.57',
                 'x-ms-client-request-id': crypto.randomUUID(),
                 'x-ms-useragent': 'azsdk-js-api-client-factory/1.0.0-beta.1 core-rest-pipeline/1.10.0 OS/Win32',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.50',
@@ -103,7 +113,6 @@ export default class BingAIClient {
                 Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1',
                 'Referrer-Policy': 'origin-when-cross-origin',
                 // Workaround for request being blocked due to geolocation
-                // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
                 ...(this.options.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
             },
         };
@@ -113,7 +122,7 @@ export default class BingAIClient {
         const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
 
         const { status, headers } = response;
-        if (status === 200 && +headers.get('content-length') < 5) {
+        if (status === 200 && headers.get('content-length') < 5) {
             throw new Error('/turing/conversation/create: Your IP is blocked by BingAI.');
         }
 
@@ -204,7 +213,7 @@ export default class BingAIClient {
         } = opts;
 
         const {
-            toneStyle = 'balanced', // or creative, precise, fast
+            toneStyle = this.options.toneStyle,
             invocationId = 0,
             systemMessage,
             context,
@@ -345,7 +354,7 @@ export default class BingAIClient {
                         'cricinfov2',
                         'dv3sugg',
                         'nojbfedge',
-                        ...((toneStyle === 'creative' && this.options.features.genImage) ? ['gencontentv3'] : []),
+                        ...((toneStyle === 'creative' && this?.bic) ? ['gencontentv3'] : []),
                     ],
                     sliceIds: [
                         '222dtappid',
@@ -414,7 +423,7 @@ export default class BingAIClient {
                 reject(new Error('Request aborted'));
             });
 
-            let bicIframe;
+            let bicContent;
             ws.on('message', async (data) => {
                 const objects = data.toString().split('');
                 const events = objects.map((object) => {
@@ -439,15 +448,32 @@ export default class BingAIClient {
                         }
                         if (messages[0]?.contentType === 'IMAGE') {
                             // You will never get a message of this type without 'gencontentv3' being on.
-                            bicIframe = this.bic.genImageIframeSsr(
-                                messages[0].text,
-                                messages[0].messageId,
-                                progress => (progress?.contentIframe ? onProgress(progress?.contentIframe) : null),
-                            ).catch((error) => {
-                                onProgress(error.message);
-                                bicIframe.isError = true;
-                                return error.message;
-                            });
+                            if (this.bic.type === 'iframe') {
+                                bicContent = this.bic.api.genImageIframeSsr(
+                                    messages[0].text,
+                                    messages[0].messageId,
+                                    progress => (progress?.contentIframe ? onProgress(progress?.contentIframe) : null),
+                                ).catch((error) => {
+                                    onProgress(error.message);
+                                    bicContent.isError = true;
+                                    return error.message;
+                                });
+                            } else {
+                                bicContent = this.bic.api.genImageList(
+                                    messages[0].text,
+                                    messages[0].messageId,
+                                    false,
+                                    () => onProgress('.'),
+                                ).catch((error) => {
+                                    onProgress(error.message);
+                                    bicContent.isError = true;
+                                    delete bicContent.isList;
+                                    return error.message;
+                                });
+                                bicContent.isList = true;
+                                bicContent.useMarkdown = this.bic.type === 'markdown_list';
+                            }
+                            bicContent.prompt = messages[0].text;
                             return;
                         }
                         const updatedText = messages[0].text;
@@ -519,22 +545,33 @@ export default class BingAIClient {
                             // delete useless suggestions from moderation filter
                             delete eventMessage.suggestedResponses;
                         }
-                        if (bicIframe) {
-                            // the last messages will be a image creation event if bicIframe is present.
+                        if (bicContent) {
+                            // the last messages will be a image creation event if bicContent is present.
                             let i = messages.length - 1;
                             while (eventMessage?.contentType === 'IMAGE' && i > 0) {
                                 eventMessage = messages[i -= 1];
                             }
 
-                            // wait for bicIframe to be completed.
+                            // wait for bicContent to be completed.
                             // since we added a catch, we do not need to wrap this with a try catch block.
-                            const imgIframe = await bicIframe;
-                            if (!imgIframe?.isError) {
-                                eventMessage.adaptiveCards[0].body[0].text += imgIframe;
-                            } else {
-                                eventMessage.text += `<br>${imgIframe}`;
-                                eventMessage.adaptiveCards[0].body[0].text = eventMessage.text;
+                            let bicResult = await bicContent;
+                            let images;
+                            if (bicContent?.isList) {
+                                images = bicResult;
+                                if (bicContent.useMarkdown) {
+                                    bicResult = `${bicResult.map((s, idx) => `![${idx + 1}.${bicContent.prompt}](${s})`).join('\n')}`;
+                                } else {
+                                    bicResult = `${bicResult.map((s, idx) => `${idx + 1}.${s}`).join('\n')}`;
+                                }
+                            } else if (bicResult?.isError) {
+                                eventMessage.text += `\n${bicResult}`;
                             }
+                            eventMessage.adaptiveCards[0].body[0].text += `\n${bicResult}`;
+                            eventMessage.bic = {
+                                type: this.bic.type,
+                                prompt: bicContent.prompt,
+                                ...(images ? { images } : {}),
+                            };
                         }
                         resolve({
                             message: eventMessage,
