@@ -111,7 +111,7 @@ export default class ChatGPTClient {
             this.endToken = '';
         }
     }
-    
+
     setupTokenizer() {
         this.encoding = 'text-davinci-003';
         if (this.isChatGptModel) {
@@ -131,7 +131,6 @@ export default class ChatGPTClient {
             }
         }
     }
-    
 
     static getTokenizer(encoding, isModelName = false, extendSpecialTokens = {}) {
         if (tokenizersCache[encoding]) {
@@ -428,6 +427,11 @@ ${botMessage.message}
             returnData.title = conversation.title;
         }
 
+        // if stream is true, we should add the prompt tokens to return data
+        if (typeof opts.onProgress === 'function') {
+            returnData.promptTokens = this.promptTokens;
+        }
+
         await this.conversationsCache.set(conversationId, conversation);
 
         if (this.options.returnConversation) {
@@ -529,6 +533,7 @@ ${botMessage.message}
 
         // Use up to `this.maxContextTokens` tokens (prompt + response), but try to leave `this.maxTokens` tokens for the response.
         this.modelOptions.max_tokens = Math.min(this.maxContextTokens - currentTokenCount, this.maxResponseTokens);
+        this.promptTokens = currentTokenCount;
 
         if (isChatGptModel) {
             return { prompt: [instructionsPayload, messagePayload], context };
