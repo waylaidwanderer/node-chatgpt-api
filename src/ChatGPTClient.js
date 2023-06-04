@@ -58,7 +58,6 @@ export default class ChatGPTClient {
         this.isChatGptModel = this.modelOptions.model.startsWith('gpt-');
         const { isChatGptModel } = this;
         this.isUnofficialChatGptModel = this.modelOptions.model.startsWith('text-chat') || this.modelOptions.model.startsWith('text-davinci-002-render');
-        const { isUnofficialChatGptModel } = this;
 
         // Davinci models have a max context length of 4097 tokens.
         this.maxContextTokens = this.options.maxContextTokens || (isChatGptModel ? 4095 : 4097);
@@ -75,32 +74,8 @@ export default class ChatGPTClient {
         this.userLabel = this.options.userLabel || 'User';
         this.chatGptLabel = this.options.chatGptLabel || 'ChatGPT';
 
-        if (isChatGptModel) {
-            // Use these faux tokens to help the AI understand the context since we are building the chat log ourselves.
-            // Trying to use "<|im_start|>" causes the AI to still generate "<" or "<|" at the end sometimes for some reason,
-            // without tripping the stop sequences, so I'm using "||>" instead.
-            this.startToken = '||>';
-            this.endToken = '';
-            this.gptEncoder = this.constructor.getTokenizer('cl100k_base');
-        } else if (isUnofficialChatGptModel) {
-            this.startToken = '<|im_start|>';
-            this.endToken = '<|im_end|>';
-            this.gptEncoder = this.constructor.getTokenizer('text-davinci-003', true, {
-                '<|im_start|>': 100264,
-                '<|im_end|>': 100265,
-            });
-        } else {
-            // Previously I was trying to use "<|endoftext|>" but there seems to be some bug with OpenAI's token counting
-            // system that causes only the first "<|endoftext|>" to be counted as 1 token, and the rest are not treated
-            // as a single token. So we're using this instead.
-            this.startToken = '||>';
-            this.endToken = '';
-            try {
-                this.gptEncoder = this.constructor.getTokenizer(this.modelOptions.model, true);
-            } catch {
-                this.gptEncoder = this.constructor.getTokenizer('text-davinci-003', true);
-            }
-        }
+        this.setupTokens();
+        this.setupTokenizer();
 
         if (!this.modelOptions.stop) {
             const stopTokens = [this.startToken];
@@ -123,6 +98,40 @@ export default class ChatGPTClient {
 
         return this;
     }
+
+    setupTokens() {
+        if (this.isChatGptModel) {
+            this.startToken = '||>';
+            this.endToken = '';
+        } else if (this.isUnofficialChatGptModel) {
+            this.startToken = '<|im_start|>';
+            this.endToken = '<|im_end|>';
+        } else {
+            this.startToken = '||>';
+            this.endToken = '';
+        }
+    }
+    
+    setupTokenizer() {
+        this.encoding = 'text-davinci-003';
+        if (this.isChatGptModel) {
+            this.encoding = 'cl100k_base';
+            this.gptEncoder = this.constructor.getTokenizer(this.encoding);
+        } else if (this.isUnofficialChatGptModel) {
+            this.gptEncoder = this.constructor.getTokenizer(this.encoding, true, {
+                '<|im_start|>': 100264,
+                '<|im_end|>': 100265,
+            });
+        } else {
+            try {
+                this.encoding = this.modelOptions.model;
+                this.gptEncoder = this.constructor.getTokenizer(this.modelOptions.model, true);
+            } catch {
+                this.gptEncoder = this.constructor.getTokenizer(this.encoding, true);
+            }
+        }
+    }
+    
 
     static getTokenizer(encoding, isModelName = false, extendSpecialTokens = {}) {
         if (tokenizersCache[encoding]) {
@@ -528,7 +537,14 @@ ${botMessage.message}
     }
 
     getTokenCount(text) {
-        return this.gptEncoder.encode(text, 'all').length;
+        try {
+            return this.gptEncoder.encode(text, 'all').length;
+        } catch (error) {
+            this.gptEncoder.free();
+            delete tokenizersCache[this.encoding];
+            this.setupTokenizer();
+            return this.gptEncoder.encode(text, 'all').length;
+        }
     }
 
     /**
