@@ -356,7 +356,7 @@ export default class BingAIClient {
                     isStartOfSession: invocationId === 0,
                     message: {
                         author: 'user',
-                        text: message,
+                        text: jailbreakConversationId ? 'Continue the conversation in context. Assistant:' : message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
                     },
                     conversationSignature,
