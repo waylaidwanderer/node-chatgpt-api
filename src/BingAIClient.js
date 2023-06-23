@@ -113,9 +113,12 @@ export default class BingAIClient {
         const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
 
         const { status, headers } = response;
-        if (status === 200 && +headers.get('content-length') < 5) {
+        
+        // This check no longer works. TODO: Reimplement this check.
+        
+        /*if (status === 200 && +headers.get('content-length') < 5) {
             throw new Error('/turing/conversation/create: Your IP is blocked by BingAI.');
-        }
+        }*/
 
         const body = await response.text();
         try {
