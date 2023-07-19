@@ -105,6 +105,9 @@ export default class BingAIClient {
             // 'x-forwarded-for': '1.1.1.1', // 1.1.1.1 seems to no longer work.
             ...(this.options.xForwardedFor ? { 'x-forwarded-for': this.options.xForwardedFor } : {}),
         };
+        // filter undefined values
+        this.headers = Object.fromEntries(Object.entries(this.headers).filter(([, value]) => value !== undefined));
+
         const fetchOptions = {
             headers: this.headers,
         };
