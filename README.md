@@ -492,6 +492,7 @@ Instructions are provided below.
 - [halbot](https://github.com/Leask/halbot): Just another ChatGPT/Bing Chat Telegram bot, which is simple design, easy to use, extendable and fun.
 - [ChatGPTBox](https://github.com/josStorer/chatGPTBox): Integrating ChatGPT into your browser deeply, everything you need is here
 - [llm-bot](https://github.com/Erisfiregamer1/llm-bot): A Discord bot for LLM nonsense. Comes with a custom reverse proxy for GPT-4 allowing it to be accessed for free (Thank you "generic")!
+- [WhatsAppSydney](https://github.com/veigamann/sydney-whatsapp-chatbot): Bing-powered personal assistant for WhatsApp. Simplify your day-to-day with ease.
 
 Add yours to the list by [editing this README](https://github.com/waylaidwanderer/node-chatgpt-api/edit/main/README.md) and creating a pull request!
 

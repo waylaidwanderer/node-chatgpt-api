@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "1.37.0",
+  "version": "1.37.2",
   "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
   "main": "index.js",
   "bin": {
@@ -64,6 +64,6 @@
     "eslint": "^8.35.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1"
   }
 }
