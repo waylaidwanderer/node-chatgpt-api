@@ -330,25 +330,55 @@ export default class BingAIClient {
         const obj = {
             arguments: [
                 {
-                    source: 'cib',
                     optionsSets: [
                         'nlu_direct_response_filter',
                         'deepleo',
                         'disable_emoji_spoken_text',
                         'responsible_ai_policy_235',
                         'enablemm',
-                        toneOption,
-                        'dtappid',
-                        'cricinfo',
-                        'cricinfov2',
                         'dv3sugg',
-                        'nojbfedge',
+                        // 'autosave', // Saves conversations to vanilla bing conversation history
+                        'iyxapbing',
+                        'iycapbing',
+                        toneOption,
+                        'clgalileo',
                         ...((toneStyle === 'creative' && this.options.features.genImage) ? ['gencontentv3'] : []),
+                        'fluxsrtrunc',
+                        'fluxtrunc',
+                        'fluxv1',
+                        'rai278',
+                        'replaceurl',
+                        // 'savemem', // Saves conversations to vanilla bing conversation history
+                        // 'savememfilter', // Saves conversations to vanilla bing conversation history
+                        'eredirecturl',
+                        'nojbfedge', // Not included in standard message, but won't work without.
+                    ],
+                    allowedMessageTypes: [
+                        'ActionRequest',
+                        'Chat',
+                        'Context',
+                        'InternalSearchQuery',
+                        'InternalSearchResult',
+                        // 'Disengage', unwanted
+                        'InternalLoaderMessage',
+                        'Progress',
+                        'RenderCardRequest',
+                        // 'AdsQuery', unwanted
+                        // 'SemanticSerp',// usually not encountered, related to semantic web search
+                        'GenerateContentQuery',
+                        'SearchQuery',
                     ],
                     sliceIds: [
-                        '222dtappid',
-                        '225cricinfo',
-                        '224locals0',
+                        'abv2',
+                        'srdicton',
+                        'convcssclick',
+                        'stylewv2',
+                        'contctxp2tf',
+                        '802fluxv1pc_a',
+                        '806log2sphs0',
+                        '727savemem',
+                        '277teditgnds0',
+                        '207hlthgrds0',
                     ],
                     traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,
@@ -446,6 +476,13 @@ export default class BingAIClient {
                                 bicIframe.isError = true;
                                 return error.message;
                             });
+                            return;
+                        }
+                        // Usable later when displaying internal processes, but should be discarded for now.
+                        if (messages[0]?.messageType === 'InternalLoaderMessage'
+                            || messages[0]?.messageType === 'InternalSearchQuery'
+                            || messages[0]?.messageType === 'InternalSearchResult'
+                            || messages[0]?.messageType === 'GenerateContentQuery') {
                             return;
                         }
                         const updatedText = messages[0].text;
