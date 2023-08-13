@@ -123,6 +123,83 @@ export default class BingAIClient {
         }
     }
 
+    /**
+     * Method to obtain base64 string of the image from the supplied URL.
+     * To be used when uploading an image for image recognition.
+     * @param {String} imageUrl URL of the image to convert to base64 string.
+     * @returns {String || undefined} Base64 string of the image of the supplied URL.
+     */
+    static async getBase64FromImageUrl(imageUrl) {
+        let base64String;
+        try {
+            const response = await fetch(imageUrl, { method: 'GET' });
+            if (response.ok) {
+                const imageBlob = await response.blob();
+                const arrayBuffer = await imageBlob.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                base64String = buffer.toString('base64');
+            } else {
+                throw new Error(`HTTP error! Error: ${response.statusText}, Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        return base64String;
+    }
+
+    /**
+     * Method to upload image to blob storage to later be used for image recognition.
+     * The returned "blobId" is used in the imageUrl like this:
+     * imageUrl:    'https://www.bing.com/images/blob?bcid=RN4.o2iFDe0FQHyYKZKmmOyc4Fs-.....-A'
+     * The returned "processBlobId" is used in the originalImageUrl like this:
+     * originalImageUrl:            'https://www.bing.com/images/blob?bcid=RH8TZGRI5-0FQHyYKZKmmOyc4Fs-.....zQ'
+     * @param {String} imageBase64 The base64 string of the image to upload to blob storage.
+     * @returns {Object || undefined}  An object containing the "blobId" and "processBlobId" for the image.
+     */
+    async uploadImage(imageBase64) {
+        let data;
+        try {
+            const knowledgeRequestBody = {
+                imageInfo: {},
+                knowledgeRequest: {
+                    invokedSkills: ['ImageById'],
+                    subscriptionId: 'Bing.Chat.Multimodal',
+                    invokedSkillsRequestData: { enableFaceBlur: true }, // enableFaceBlur has to be enabled, or you won't get a processedBlobId
+                    convoData: { convoid: '', convotone: 'Creative' }, // convoId seems to be irrelevant
+                },
+            };
+
+            const body = '------WebKitFormBoundary\r\n'
+                + 'Content-Disposition: form-data; name="knowledgeRequest"\r\n\r\n'
+                + `${JSON.stringify(knowledgeRequestBody)}\r\n`
+                + '------WebKitFormBoundary\r\n'
+                + 'Content-Disposition: form-data; name="imageBase64"\r\n\r\n'
+                + `${imageBase64}\r\n`
+                + '------WebKitFormBoundary--\r\n';
+
+            const response = await fetch('https://www.bing.com/images/kblob', {
+                headers: {
+                    accept: '*/*',
+                    'content-type': 'multipart/form-data; boundary=----WebKitFormBoundary',
+                    cookie: this.options.cookies || `_U=${this.options.userToken}`,
+                    Referer: 'https://www.bing.com/search?q=Bing+AI&showconv=1&FORM=hpcodx',
+                    'Referrer-Policy': 'origin-when-cross-origin',
+                },
+                body,
+                method: 'POST',
+            });
+            if (response.ok) {
+                data = await response.json();
+            } else {
+                throw new Error(`HTTP error! Error: ${response.statusText}, Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+
+        return data;
+    }
+
     async createWebSocketConnection() {
         return new Promise((resolve, reject) => {
             let agent;
@@ -327,6 +404,11 @@ export default class BingAIClient {
             toneOption = 'harmonyv3';
         }
 
+        const imageURL = opts?.imageURL;
+        const imageBase64 = imageURL ? BingAIClient.getBase64FromImageUrl(imageURL) : opts?.imageBase64;
+        const imageUploadResult = imageBase64 ? await this.uploadImage(imageBase64) : undefined;
+        const imageBaseURL = 'https://www.bing.com/images/blob?bcid=';
+
         const obj = {
             arguments: [
                 {
@@ -353,6 +435,8 @@ export default class BingAIClient {
                     traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,
                     message: {
+                        ...imageUploadResult && { imageUrl: imageBaseURL + imageUploadResult.blobId },
+                        ...imageUploadResult && { originalImageUrl: imageBaseURL + imageUploadResult.processBlobId },
                         author: 'user',
                         text: jailbreakConversationId ? 'Continue the conversation in context. Assistant:' : message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',

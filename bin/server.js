@@ -114,6 +114,8 @@ server.post('/conversation', async (request, reply) => {
             shouldGenerateTitle, // only used for ChatGPTClient
             toneStyle: body.toneStyle,
             clientOptions,
+            imageURL: body?.imageURL,
+            imageBase64: body?.imageBase64,
             onProgress,
             abortController,
         });
