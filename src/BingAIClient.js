@@ -435,6 +435,9 @@ export default class BingAIClient {
                         if (!messages?.length || messages[0].author !== 'bot') {
                             return;
                         }
+                        if (messages[0].contentOrigin === 'Apology') {
+                            return;
+                        }
                         if (messages[0]?.contentType === 'IMAGE') {
                             // You will never get a message of this type without 'gencontentv3' being on.
                             bicIframe = this.bic.genImageIframeSsr(
