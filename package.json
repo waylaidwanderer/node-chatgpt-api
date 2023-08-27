@@ -1,6 +1,6 @@
 {
   "name": "@waylaidwanderer/chatgpt-api",
-  "version": "1.37.2",
+  "version": "1.37.3",
   "description": "A ChatGPT implementation using the official ChatGPT model via OpenAI's API.",
   "main": "index.js",
   "bin": {
@@ -55,7 +55,7 @@
     "inquirer-autocomplete-prompt": "^3.0.0",
     "keyv": "^4.5.2",
     "keyv-file": "^0.2.0",
-    "ora": "^6.1.2",
+    "ora": "^7.0.1",
     "undici": "^5.20.0",
     "ws": "^8.12.0"
   },
