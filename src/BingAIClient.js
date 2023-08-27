@@ -2,7 +2,7 @@ import './fetch-polyfill.js';
 import crypto from 'crypto';
 import WebSocket from 'ws';
 import Keyv from 'keyv';
-import { ProxyAgent } from 'undici';
+import { Agent, ProxyAgent } from 'undici';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { BingImageCreator } from '@timefox/bic-sydney';
 
@@ -113,6 +113,8 @@ export default class BingAIClient {
         };
         if (this.options.proxy) {
             fetchOptions.dispatcher = new ProxyAgent(this.options.proxy);
+        } else {
+            fetchOptions.dispatcher = new Agent({ connect: { timeout: 20_000 } });
         }
         const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
         const body = await response.text();
@@ -463,6 +465,9 @@ export default class BingAIClient {
                         }
                         const messages = event?.arguments?.[0]?.messages;
                         if (!messages?.length || messages[0].author !== 'bot') {
+                            return;
+                        }
+                        if (messages[0].contentOrigin === 'Apology') {
                             return;
                         }
                         if (messages[0]?.contentType === 'IMAGE') {
