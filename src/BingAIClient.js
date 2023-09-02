@@ -407,7 +407,7 @@ export default class BingAIClient {
         }
 
         const imageURL = opts?.imageURL;
-        const imageBase64 = imageURL ? BingAIClient.getBase64FromImageUrl(imageURL) : opts?.imageBase64;
+        const imageBase64 = imageURL ? await BingAIClient.getBase64FromImageUrl(imageURL) : opts?.imageBase64;
         const imageUploadResult = imageBase64 ? await this.uploadImage(imageBase64) : undefined;
         const imageBaseURL = 'https://www.bing.com/images/blob?bcid=';
 
@@ -422,6 +422,8 @@ export default class BingAIClient {
                         'responsible_ai_policy_235',
                         'enablemm',
                         toneOption,
+                        'iyxapbing',
+                        'iycapbing',
                         'dtappid',
                         'cricinfo',
                         'cricinfov2',
