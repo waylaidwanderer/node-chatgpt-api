@@ -129,7 +129,7 @@ export default class BingAIClient {
      * Method to obtain base64 string of the image from the supplied URL.
      * To be used when uploading an image for image recognition.
      * @param {String} imageUrl URL of the image to convert to base64 string.
-     * @returns {String || undefined} Base64 string of the image of the supplied URL.
+     * @returns {Promise<String> || undefined} Base64 string of the image of the supplied URL.
      */
     static async getBase64FromImageUrl(imageUrl) {
         let base64String;
@@ -152,11 +152,11 @@ export default class BingAIClient {
     /**
      * Method to upload image to blob storage to later be used for image recognition.
      * The returned "blobId" is used in the imageUrl like this:
-     * imageUrl:    'https://www.bing.com/images/blob?bcid=RN4.o2iFDe0FQHyYKZKmmOyc4Fs-.....-A'
+     * imageUrl:        'https://www.bing.com/images/blob?bcid=RN4.o2iFDe0FQHyYKZKmmOyc4Fs-.....-A'
      * The returned "processBlobId" is used in the originalImageUrl like this:
-     * originalImageUrl:            'https://www.bing.com/images/blob?bcid=RH8TZGRI5-0FQHyYKZKmmOyc4Fs-.....zQ'
+     * originalImageUrl:'https://www.bing.com/images/blob?bcid=RH8TZGRI5-0FQHyYKZKmmOyc4Fs-.....zQ'
      * @param {String} imageBase64 The base64 string of the image to upload to blob storage.
-     * @returns {Object || undefined}  An object containing the "blobId" and "processBlobId" for the image.
+     * @returns {Promise<Object> || undefined}  An object containing the "blobId" and "processBlobId" for the image.
      */
     async uploadImage(imageBase64) {
         let data;
@@ -166,7 +166,7 @@ export default class BingAIClient {
                 knowledgeRequest: {
                     invokedSkills: ['ImageById'],
                     subscriptionId: 'Bing.Chat.Multimodal',
-                    invokedSkillsRequestData: { enableFaceBlur: true }, // enableFaceBlur has to be enabled, or you won't get a processedBlobId
+                    invokedSkillsRequestData: { enableFaceBlur: true }, // enableFaceBlur has to be enabled, or you won't get a processBlobId
                     convoData: { convoid: '', convotone: 'Creative' }, // convoId seems to be irrelevant
                 },
             };
@@ -439,8 +439,8 @@ export default class BingAIClient {
                     traceId: genRanHex(32),
                     isStartOfSession: invocationId === 0,
                     message: {
-                        ...imageUploadResult && { imageUrl: imageBaseURL + imageUploadResult.blobId },
-                        ...imageUploadResult && { originalImageUrl: imageBaseURL + imageUploadResult.processBlobId },
+                        ...imageUploadResult && { imageUrl: `${imageBaseURL}${imageUploadResult.blobId}` },
+                        ...imageUploadResult && { originalImageUrl: `${imageBaseURL}${imageUploadResult.processBlobId}` },
                         author: 'user',
                         text: jailbreakConversationId ? 'Continue the conversation in context. Assistant:' : message,
                         messageType: jailbreakConversationId ? 'SearchQuery' : 'Chat',
