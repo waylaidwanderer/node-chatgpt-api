@@ -116,7 +116,7 @@ export default class BingAIClient {
         } else {
             fetchOptions.dispatcher = new Agent({ connect: { timeout: 20_000 } });
         }
-        const response = await fetch(`${this.options.host}/turing/conversation/create`, fetchOptions);
+        const response = await fetch(`${this.options.host}/turing/conversation/create?bundleVersion=1.864.15`, fetchOptions);
         const body = await response.text();
         try {
             let res = JSON.parse(body);
