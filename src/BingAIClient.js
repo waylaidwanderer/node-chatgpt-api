@@ -119,7 +119,7 @@ export default class BingAIClient {
         const response = await fetch(`${this.options.host}/turing/conversation/create?bundleVersion=1.864.15`, fetchOptions);
         const body = await response.text();
         try {
-            let res = JSON.parse(body);
+            const res = JSON.parse(body);
             res.encryptedConversationSignature = response.headers.get('x-sydney-encryptedconversationsignature') ?? null;
             return res;
         } catch (err) {
