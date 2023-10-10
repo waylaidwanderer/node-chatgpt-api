@@ -359,7 +359,7 @@ ${botMessage.message}
                     if (progressMessage === '[DONE]') {
                         return;
                     }
-                    const token = this.isChatGptModel ? progressMessage.choices[0].delta.content : progressMessage.choices[0].text;
+                    const token = this.isChatGptModel ? progressMessage.choices[0]?.delta.content : progressMessage.choices[0]?.text;
                     // first event's delta content is always undefined
                     if (!token) {
                         return;
