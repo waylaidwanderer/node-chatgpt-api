@@ -59,6 +59,31 @@ response = await bingAIClient.sendMessage('Could you provide short and precise t
 console.log(JSON.stringify(response, null, 2)); // {"jailbreakConversationId":false,"conversationId":"...","conversationSignature":"...","clientId":"...","invocationId":2,"messageId":"...","conversationExpiryTime":"2023-03-08T03:20:23.463914Z","response":"Some possible takeaways from the document are... Some early users of ChatGPT and Whisper APIs include Snap Inc., Quizlet, Instacart, Shopify and Speak.","details":{ /* raw response... */ }}
 
 /*
+Let bing draw a picture for us with bing image creator.
+This will return a `bic` object that you can use to obtain an image url array if bing draws them.
+
+Note: this requires creative tone style.
+ */
+bingAIClient = new BingAIClient(options);
+
+response = await bingAIClient.sendMessage('Tell me a story of a cool little fox and a group of github friends, and draw some images for it', {
+    // (Required) Set a conversation style to 'creative'
+    toneStyle: 'creative',
+    clientOptions: {
+        features: {
+            genImage: {
+                enable: true,
+                type: 'markdown_list',
+            },
+        },
+    },
+    onProgress: (token) => {
+        process.stdout.write(token);
+    },
+});
+console.log(JSON.stringify(response, null, 2)); // {..., "details":{ ..., "bic": {"type": "markdown_list", "prompt": "Octocat", "images": [...]}}}
+
+/*
 Activate jailbreak mode by setting `jailbreakConversationId` to `true`.
 This will return a `jailbreakConversationId` that you can use to continue the conversation.
 

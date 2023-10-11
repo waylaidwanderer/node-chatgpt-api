@@ -40,9 +40,16 @@ if (settings.storageFilePath && !settings.cacheOptions.store) {
     settings.cacheOptions.store = new KeyvFile({ filename: settings.storageFilePath });
 }
 
-// Disable the image generation in cli mode always.
-settings.bingAiClient.features = settings.bingAiClient.features || {};
-settings.bingAiClient.features.genImage = false;
+// Kick bing's the image generation options for cli.
+const enableBicImage = {
+    enable: settings.bingAiClient?.features?.genImage?.cli?.enable
+    || (settings.bingAiClient?.features ? false : (settings.bingAiClient.features = {}, false)),
+    type: settings.bingAiClient?.features?.genImage?.cli?.type || 'markdown_list',
+};
+if (enableBicImage.type === 'iframe' || !BingAIClient.isValidBicType(enableBicImage.type)) {
+    enableBicImage.type = 'markdown_list';
+}
+settings.bingAiClient.features.genImage = enableBicImage;
 
 let conversationData = {};
 
