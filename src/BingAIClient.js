@@ -466,8 +466,9 @@ export default class BingAIClient {
                             replySoFar = updatedText.replace(stopToken, '').trim();
                             return;
                         }
-                        if(!messages[0].messageType)
+                        if (!messages[0].messageType) {
                             replySoFar = updatedText;
+                        }
                         return;
                     }
                     case 2: {
