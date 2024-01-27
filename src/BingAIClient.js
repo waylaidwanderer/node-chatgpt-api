@@ -458,15 +458,16 @@ export default class BingAIClient {
                             return;
                         }
                         // get the difference between the current text and the previous text
-                        const difference = updatedText.substring(replySoFar.length);
-                        onProgress(difference);
+                        const difference = messages[0].messageType ? updatedText : updatedText.substring(replySoFar.length);
+                        onProgress(difference, messages[0].messageType);
                         if (updatedText.trim().endsWith(stopToken)) {
                             stopTokenFound = true;
                             // remove stop token from updated text
                             replySoFar = updatedText.replace(stopToken, '').trim();
                             return;
                         }
-                        replySoFar = updatedText;
+                        if(!messages[0].messageType)
+                            replySoFar = updatedText;
                         return;
                     }
                     case 2: {
